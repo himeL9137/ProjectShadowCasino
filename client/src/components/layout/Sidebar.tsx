@@ -11,33 +11,14 @@ import { ThemeSelector } from "@/components/common/ThemeSelector";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useLanguage } from "@/providers/LanguageProvider";
+import { useTranslation } from "@/providers/LanguageProvider";
 const projectShadowLogo = "/assets/new-logo.png";
 
 export function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
   const { state, open, toggleSidebar } = useSidebar();
-  const { language } = useLanguage();
-
-  // Translation function for navigation items
-  const getNavText = (key: string) => {
-    const translations: { [key: string]: { [lang: string]: string } } = {
-      home: { en: 'Home', bn: 'হোম', es: 'Inicio', fr: 'Accueil', de: 'Startseite', zh: '首页', ja: 'ホーム', ko: '홈', ar: 'الرئيسية', hi: 'होम', ru: 'Главная', pt: 'Início' },
-      games: { en: 'Games', bn: 'গেমস', es: 'Juegos', fr: 'Jeux', de: 'Spiele', zh: '游戏', ja: 'ゲーム', ko: '게임', ar: 'الألعاب', hi: 'गेम्स', ru: 'Игры', pt: 'Jogos' },
-      leaderboard: { en: 'Leaderboard', bn: 'লিডারবোর্ড', es: 'Clasificación', fr: 'Classement', de: 'Bestenliste', zh: '排行榜', ja: 'リーダーボード', ko: '리더보드', ar: 'لوحة المتصدرين', hi: 'लीडरबोर्ड', ru: 'Таблица лидеров', pt: 'Classificação' },
-      chat: { en: 'Chat', bn: 'চ্যাট', es: 'Chat', fr: 'Chat', de: 'Chat', zh: '聊天', ja: 'チャット', ko: '채팅', ar: 'الدردشة', hi: 'चैट', ru: 'Чат', pt: 'Chat' },
-      currency: { en: 'Currency', bn: 'মুদ্রা', es: 'Moneda', fr: 'Devise', de: 'Währung', zh: '货币', ja: '通貨', ko: '통화', ar: 'العملة', hi: 'मुद्रा', ru: 'Валюта', pt: 'Moeda' },
-      profile: { en: 'Profile', bn: 'প্রোফাইল', es: 'Perfil', fr: 'Profil', de: 'Profil', zh: '个人资料', ja: 'プロフィール', ko: '프로필', ar: 'الملف الشخصي', hi: 'प्रोफाइल', ru: 'Профиль', pt: 'Perfil' },
-      wallet: { en: 'Wallet', bn: 'ওয়ালেট', es: 'Billetera', fr: 'Portefeuille', de: 'Geldbörse', zh: '钱包', ja: 'ウォレット', ko: '지갑', ar: 'المحفظة', hi: 'वॉलेट', ru: 'Кошелек', pt: 'Carteira' },
-      transactions: { en: 'Transactions', bn: 'লেনদেন', es: 'Transacciones', fr: 'Transactions', de: 'Transaktionen', zh: '交易记录', ja: '取引履歴', ko: '거래내역', ar: 'المعاملات', hi: 'लेनदेन', ru: 'Транзакции', pt: 'Transações' },
-      referrals: { en: 'Referrals', bn: 'রেফারেল', es: 'Referencias', fr: 'Parrainages', de: 'Empfehlungen', zh: '推荐', ja: '紹介', ko: '추천', ar: 'الإحالات', hi: 'रेफरल', ru: 'Рефералы', pt: 'Indicações' },
-      admin: { en: 'Admin', bn: 'অ্যাডমিন', es: 'Admin', fr: 'Admin', de: 'Admin', zh: '管理', ja: '管理', ko: '관리', ar: 'المدير', hi: 'एडमिन', ru: 'Админ', pt: 'Admin' },
-      settings: { en: 'Settings', bn: 'সেটিংস', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', zh: '设置', ja: '設定', ko: '설정', ar: 'الإعدادات', hi: 'সেটিং্স', ru: 'Настройки', pt: 'Configurações' },
-      themes: { en: 'Themes', bn: 'থিম', es: 'Temas', fr: 'Thèmes', de: 'Themen', zh: '主题', ja: 'テーマ', ko: '테마', ar: 'المواضيع', hi: 'थीम', ru: 'Темы', pt: 'Temas' }
-    };
-    return translations[key]?.[language] || translations[key]?.['en'] || key;
-  };
+  const { t } = useTranslation();
   
   // Only allow specific admin users access to admin panel
   const isAdmin = user?.role === UserRole.ADMIN;
@@ -105,13 +86,13 @@ export function Sidebar() {
                     : "text-gray-300 hover:bg-background-light hover:text-primary"
                 } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
                   <Gamepad2 className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{getNavText('home')}</span>}
+                  {!isCollapsed && <span>{t('nav.home')}</span>}
                 </div>
               </Link>
             </TooltipTrigger>
             {isCollapsed && (
               <TooltipContent side="right">
-                <p>{getNavText('home')}</p>
+                <p>{t('nav.home')}</p>
               </TooltipContent>
             )}
           </Tooltip>
@@ -125,13 +106,13 @@ export function Sidebar() {
                     : "text-gray-300 hover:bg-background-light hover:text-primary"
                 } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
                   <Activity className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{getNavText('games')}</span>}
+                  {!isCollapsed && <span>{t('nav.games')}</span>}
                 </div>
               </Link>
             </TooltipTrigger>
             {isCollapsed && (
               <TooltipContent side="right">
-                <p>{getNavText('games')}</p>
+                <p>{t('nav.games')}</p>
               </TooltipContent>
             )}
           </Tooltip>
@@ -185,13 +166,13 @@ export function Sidebar() {
                   : "text-gray-300 hover:bg-background-light hover:text-primary"
               } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
                 <TrendingUp className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                {!isCollapsed && <span>{getNavText('leaderboard')}</span>}
+                {!isCollapsed && <span>{t('nav.leaderboard')}</span>}
               </div>
             </Link>
           </TooltipTrigger>
           {isCollapsed && (
             <TooltipContent side="right">
-              <p>{getNavText('leaderboard')}</p>
+              <p>{t('nav.leaderboard')}</p>
             </TooltipContent>
           )}
         </Tooltip>
@@ -205,19 +186,19 @@ export function Sidebar() {
                   : "text-gray-300 hover:bg-background-light hover:text-primary"
               } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
                 <MessageSquare className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                {!isCollapsed && <span>{getNavText('chat')}</span>}
+                {!isCollapsed && <span>{t('nav.chat')}</span>}
               </div>
             </Link>
           </TooltipTrigger>
           {isCollapsed && (
             <TooltipContent side="right">
-              <p>{getNavText('chat')}</p>
+              <p>{t('nav.chat')}</p>
             </TooltipContent>
           )}
         </Tooltip>
         
         <div className="border-t border-gray-800 pt-4 mb-6">
-          {!isCollapsed && <p className="text-xs text-gray-400 mb-2 px-2">{getNavText('currency').toUpperCase()}</p>}
+          {!isCollapsed && <p className="text-xs text-gray-400 mb-2 px-2">{t('nav.currency').toUpperCase()}</p>}
           <Tooltip>
             <TooltipTrigger asChild>
               <Link href="/currency">
@@ -227,7 +208,7 @@ export function Sidebar() {
                     : "text-gray-300 hover:bg-background-light hover:text-primary"
                 } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
                   <DollarSign className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{getNavText('currency')}</span>}
+                  {!isCollapsed && <span>{t('nav.currency')}</span>}
                 </div>
               </Link>
             </TooltipTrigger>
@@ -361,7 +342,7 @@ export function Sidebar() {
                     : "text-gray-300 hover:bg-background-light hover:text-primary"
                 } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
                   <Palette className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{getNavText('themes')}</span>}
+                  {!isCollapsed && <span>{t('nav.themes')}</span>}
                 </div>
               </Link>
             </TooltipTrigger>

@@ -3,8 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { AuthLanguageSelector } from "@/components/ui/language-selector";
-import { useLanguage } from "@/providers/LanguageProvider";
-import { t } from "@/lib/i18n";
+import { useTranslation } from "@/providers/LanguageProvider";
 
 const projectShadowLogo = "/assets/new-logo.png";
 
@@ -42,12 +41,7 @@ export default function NewAuthPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login, register, isLoading, error, user } = useAuth();
   const [, navigate] = useLocation();
-  const { language } = useLanguage();
-
-  // Add effect to log language changes for debugging
-  useEffect(() => {
-    console.log('Current language in NewAuthPage:', language);
-  }, [language]);
+  const { t } = useTranslation();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -191,31 +185,7 @@ export default function NewAuthPage() {
             className="login-section bg-black/70 p-8 rounded-xl w-2/5 max-md:w-full max-md:mb-8 flex flex-col items-center justify-center"
           >
             <h2 className="text-white text-2xl mb-6 text-center w-full">
-              {formType === "login" ? 
-                (language === 'bn' ? 'লগইন' : 
-                 language === 'es' ? 'Iniciar Sesión' : 
-                 language === 'fr' ? 'Connexion' : 
-                 language === 'de' ? 'Anmelden' : 
-                 language === 'zh' ? '登录' : 
-                 language === 'ja' ? 'ログイン' : 
-                 language === 'ko' ? '로그인' : 
-                 language === 'ar' ? 'تسجيل الدخول' : 
-                 language === 'hi' ? 'लॉगिन' : 
-                 language === 'ru' ? 'Вход' : 
-                 language === 'pt' ? 'Entrar' : 'Login')
-                : 
-                (language === 'bn' ? 'নিবন্ধন' : 
-                 language === 'es' ? 'Registrarse' : 
-                 language === 'fr' ? 'S\'inscrire' : 
-                 language === 'de' ? 'Registrieren' : 
-                 language === 'zh' ? '注册' : 
-                 language === 'ja' ? '登録' : 
-                 language === 'ko' ? '회원가입' : 
-                 language === 'ar' ? 'التسجيل' : 
-                 language === 'hi' ? 'पंजीकरण' : 
-                 language === 'ru' ? 'Регистрация' : 
-                 language === 'pt' ? 'Registrar' : 'Register')
-              }
+              {formType === "login" ? t('auth.login') : t('auth.register')}
             </h2>
             
             <div className="w-4/5">
@@ -223,32 +193,12 @@ export default function NewAuthPage() {
                 <form onSubmit={handleLogin} className="space-y-4 w-full flex flex-col items-center">
                   <div className="w-full">
                     <label className="text-white block mb-1 text-left">
-                      {language === 'bn' ? 'ব্যবহারকারীর নাম' : 
-                       language === 'es' ? 'Nombre de Usuario' : 
-                       language === 'fr' ? 'Nom d\'utilisateur' : 
-                       language === 'de' ? 'Benutzername' : 
-                       language === 'zh' ? '用户名' : 
-                       language === 'ja' ? 'ユーザー名' : 
-                       language === 'ko' ? '사용자명' : 
-                       language === 'ar' ? 'اسم المستخدم' : 
-                       language === 'hi' ? 'उपयोगकर्ता नाम' : 
-                       language === 'ru' ? 'Имя пользователя' : 
-                       language === 'pt' ? 'Nome de usuário' : 'Username'}
+                      {t('auth.username')}
                     </label>
                     <input 
                       type="text"
                       className="auth-input w-full p-2 rounded"
-                      placeholder={language === 'bn' ? 'ব্যবহারকারীর নাম' : 
-                                  language === 'es' ? 'Nombre de Usuario' : 
-                                  language === 'fr' ? 'Nom d\'utilisateur' : 
-                                  language === 'de' ? 'Benutzername' : 
-                                  language === 'zh' ? '用户名' : 
-                                  language === 'ja' ? 'ユーザー名' : 
-                                  language === 'ko' ? '사용자명' : 
-                                  language === 'ar' ? 'اسم المستخدم' : 
-                                  language === 'hi' ? 'उपयोगकर्ता नाम' : 
-                                  language === 'ru' ? 'Имя пользователя' : 
-                                  language === 'pt' ? 'Nome de usuário' : 'Username'}
+                      placeholder={t('auth.username')}
                       value={loginData.username}
                       onChange={(e) => setLoginData({...loginData, username: e.target.value})}
                       required
@@ -256,189 +206,131 @@ export default function NewAuthPage() {
                   </div>
                   <div className="w-full">
                     <label className="text-white block mb-1 text-left">
-                      {language === 'bn' ? 'পাসওয়ার্ড' : 
-                       language === 'es' ? 'Contraseña' : 
-                       language === 'fr' ? 'Mot de passe' : 
-                       language === 'de' ? 'Passwort' : 
-                       language === 'zh' ? '密码' : 
-                       language === 'ja' ? 'パスワード' : 
-                       language === 'ko' ? '비밀번호' : 
-                       language === 'ar' ? 'كلمة المرور' : 
-                       language === 'hi' ? 'पासवर्ड' : 
-                       language === 'ru' ? 'Пароль' : 
-                       language === 'pt' ? 'Senha' : 'Password'}
+                      {t('auth.password')}
                     </label>
                     <input 
                       type="password"
                       className="auth-input w-full p-2 rounded"
-                      placeholder={language === 'bn' ? 'পাসওয়ার্ড' : 
-                                  language === 'es' ? 'Contraseña' : 
-                                  language === 'fr' ? 'Mot de passe' : 
-                                  language === 'de' ? 'Passwort' : 
-                                  language === 'zh' ? '密码' : 
-                                  language === 'ja' ? 'パスワード' : 
-                                  language === 'ko' ? '비밀번호' : 
-                                  language === 'ar' ? 'كلمة المرور' : 
-                                  language === 'hi' ? 'पासवर्ड' : 
-                                  language === 'ru' ? 'Пароль' : 
-                                  language === 'pt' ? 'Senha' : 'Password'}
+                      placeholder={t('auth.password')}
                       value={loginData.password}
                       onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                       required
                     />
                   </div>
                   <button 
-                    type="submit"
-                    className="auth-button w-full p-3 border-none rounded text-white text-base cursor-pointer"
+                    type="submit" 
+                    className="auth-button text-white px-6 py-2 rounded w-2/3"
                     disabled={isLoading}
                   >
-                    {isLoading ? 
-                      (language === 'bn' ? 'সাইন ইন করা হচ্ছে...' : 
-                       language === 'es' ? 'Iniciando sesión...' : 
-                       language === 'fr' ? 'Connexion...' : 
-                       language === 'de' ? 'Anmelden...' : 
-                       language === 'zh' ? '登录中...' : 
-                       language === 'ja' ? 'ログイン中...' : 
-                       language === 'ko' ? '로그인 중...' : 
-                       language === 'ar' ? 'جاري تسجيل الدخول...' : 
-                       language === 'hi' ? 'साइन इन हो रहा है...' : 
-                       language === 'ru' ? 'Вход...' : 
-                       language === 'pt' ? 'Entrando...' : 'Signing in...')
-                      : 
-                      (language === 'bn' ? 'সাইন ইন' : 
-                       language === 'es' ? 'Iniciar Sesión' : 
-                       language === 'fr' ? 'Se connecter' : 
-                       language === 'de' ? 'Anmelden' : 
-                       language === 'zh' ? '登录' : 
-                       language === 'ja' ? 'ログイン' : 
-                       language === 'ko' ? '로그인' : 
-                       language === 'ar' ? 'تسجيل الدخول' : 
-                       language === 'hi' ? 'साइन इन' : 
-                       language === 'ru' ? 'Войти' : 
-                       language === 'pt' ? 'Entrar' : 'Sign In')
-                    }
+                    {isLoading ? t('ui.loading') : t('auth.signin')}
                   </button>
-                  {errorMessage && (
-                    <p className="text-red-500 text-sm text-center">
-                      {errorMessage}
-                    </p>
-                  )}
                 </form>
               ) : (
                 <form onSubmit={handleRegister} className="space-y-4 w-full flex flex-col items-center">
                   <div className="w-full">
-                    <label className="text-white block mb-1 text-left">{t('auth.username', language)}</label>
+                    <label className="text-white block mb-1 text-left">
+                      {t('auth.username')}
+                    </label>
                     <input 
                       type="text"
                       className="auth-input w-full p-2 rounded"
-                      placeholder={t('auth.username', language)}
+                      placeholder={t('auth.username')}
                       value={registerData.username}
                       onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
                       required
                     />
                   </div>
                   <div className="w-full">
-                    <label className="text-white block mb-1 text-left">{t('auth.email', language)}</label>
+                    <label className="text-white block mb-1 text-left">
+                      {t('auth.email')}
+                    </label>
                     <input 
                       type="email"
                       className="auth-input w-full p-2 rounded"
-                      placeholder={t('auth.email', language)}
+                      placeholder={t('auth.email')}
                       value={registerData.email}
                       onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
                       required
                     />
                   </div>
                   <div className="w-full">
-                    <label className="text-white block mb-1 text-left">{t('auth.phone', language)}</label>
-                    <input 
-                      type="tel"
-                      className="auth-input w-full p-2 rounded"
-                      placeholder={t('auth.phone', language)}
-                      value={registerData.phone}
-                      onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="w-full">
-                    <label className="text-white block mb-1 text-left">{t('auth.password', language)}</label>
+                    <label className="text-white block mb-1 text-left">
+                      {t('auth.password')}
+                    </label>
                     <input 
                       type="password"
                       className="auth-input w-full p-2 rounded"
-                      placeholder={t('auth.password', language)}
+                      placeholder={t('auth.password')}
                       value={registerData.password}
                       onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
                       required
                     />
                   </div>
+                  <div className="w-full">
+                    <label className="text-white block mb-1 text-left">
+                      {t('auth.phone')}
+                    </label>
+                    <input 
+                      type="tel"
+                      className="auth-input w-full p-2 rounded"
+                      placeholder={t('auth.phone')}
+                      value={registerData.phone}
+                      onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
+                      required
+                    />
+                  </div>
                   <button 
-                    type="submit"
-                    className="auth-button w-full p-3 border-none rounded text-white text-base cursor-pointer"
+                    type="submit" 
+                    className="auth-button text-white px-6 py-2 rounded w-2/3"
                     disabled={isLoading}
                   >
-                    {isLoading ? `${t('auth.signup', language)}...` : t('auth.signup', language)}
+                    {isLoading ? t('ui.loading') : t('auth.signup')}
                   </button>
-                  {errorMessage && (
-                    <p className="text-red-500 text-sm text-center">
-                      {errorMessage}
-                    </p>
-                  )}
                 </form>
               )}
               
-              <div className="flex justify-between mt-4 text-xs">
-                <button 
-                  className="text-[#6b48ff] hover:text-[#8a6aff] transition-colors cursor-pointer bg-transparent border-none"
-                  onClick={() => {/* Handle forgot password */}}
-                >
-                  Forgot Password?
-                </button>
-                <button
-                  className="text-[#6b48ff] hover:text-[#8a6aff] transition-colors cursor-pointer bg-transparent border-none"
-                  onClick={() => setFormType(formType === "login" ? "register" : "login")}
-                >
-                  {formType === "login" ? t('auth.switchToRegister', language) : t('auth.switchToLogin', language)}
-                </button>
-                <button 
-                  className="text-[#6b48ff] hover:text-[#8a6aff] transition-colors cursor-pointer bg-transparent border-none"
-                  onClick={() => {/* Handle help center */}}
-                >
-                  Help Center
-                </button>
-              </div>
+              {errorMessage && (
+                <div className="text-red-500 text-center mt-4">
+                  {errorMessage}
+                </div>
+              )}
+              
+              <p className="text-white/70 text-sm text-center mt-6">
+                {formType === "login" ? (
+                  <>
+                    {t('auth.switchToRegister')}{' '}
+                    <button
+                      type="button"
+                      onClick={() => setFormType("register")}
+                      className="text-white underline hover:no-underline"
+                    >
+                      {t('auth.signup')}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {t('auth.switchToLogin')}{' '}
+                    <button
+                      type="button"
+                      onClick={() => setFormType("login")}
+                      className="text-white underline hover:no-underline"
+                    >
+                      {t('auth.signin')}
+                    </button>
+                  </>
+                )}
+              </p>
             </div>
           </motion.div>
-
+          
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="info-section w-1/2 text-center max-md:w-full"
+            className="info-section text-white text-left w-1/2 max-md:w-full max-md:text-center"
           >
-            <h1 className="text-5xl font-bold mb-4" style={{ color: '#6b48ff' }}>
-              Project Shadow Casino
-            </h1>
-            <p className="text-gray-300 italic mb-8 text-lg">
-              Where fortunes are made and legends are born. Experience the most exclusive high-stakes gaming platform in the universe.
-            </p>
-            
-            <div className="space-y-4 mb-8">
-              <div className="bg-black/70 p-4 rounded-lg">
-                <div className="font-semibold text-white">Provably Fair</div>
-                <div className="text-gray-300 text-sm">Blockchain-verified fairness on all games with transparent algorithms.</div>
-              </div>
-              <div className="bg-black/70 p-4 rounded-lg">
-                <div className="font-semibold text-white">Instant Payouts</div>
-                <div className="text-gray-300 text-sm">Withdraw your winnings instantly with no processing delays.</div>
-              </div>
-              <div className="bg-black/70 p-4 rounded-lg">
-                <div className="font-semibold text-white">VIP Rewards</div>
-                <div className="text-gray-300 text-sm">Exclusive bonuses and personalized service for high rollers.</div>
-              </div>
-            </div>
-            
-            <p className="text-gray-300">
-              Join over 2.5 million players worldwide in the ultimate gaming experience.
-            </p>
+            <h1 className="text-6xl font-bold mb-4">{t('auth.welcome')}</h1>
+            <p className="text-2xl text-white/70">{t('auth.subtitle')}</p>
           </motion.div>
         </div>
       </div>
