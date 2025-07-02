@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useTranslation } from "@/providers/LanguageProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Minus, Plus } from "lucide-react";
@@ -28,6 +29,7 @@ export function PlinkoGame() {
   const { currency: currentCurrency, getCurrencySymbol } = useCurrency();
   const currencySymbol = getCurrencySymbol(currentCurrency);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [betAmount, setBetAmount] = useState("0.001");
   const [isDropping, setIsDropping] = useState(false);
@@ -396,8 +398,15 @@ export function PlinkoGame() {
               <div
                 key={index}
                 className={`flex-1 text-center py-2 text-xs font-semibold border-r border-gray-700 last:border-r-0 ${
-                  landedBucket === index ? 'bg-accent-gold text-black animate-pulse' : 
-
+                  landedBucket === index ? 'bg-accent-gold text-black animate-pulse' : ''
+                }`}
+              >
+                {multiplier}x
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Comprehensive Payout Logic Display */}
       <div className="bg-background-light rounded-xl p-6 mt-6">
@@ -475,18 +484,6 @@ export function PlinkoGame() {
             <li>Edge slots (2.0x) are rarest, center slots are most common</li>
             <li>You win when the multiplier is 1.0x or higher</li>
           </ul>
-        </div>
-      </div>
-
-                  multiplier >= 2.0 ? 'bg-red-500/20 text-red-400' :
-                  multiplier >= 1.0 ? 'bg-green-500/20 text-green-400' :
-                  'bg-gray-500/20 text-gray-400'
-                }`}
-              >
-                {multiplier.toFixed(1)}x
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 

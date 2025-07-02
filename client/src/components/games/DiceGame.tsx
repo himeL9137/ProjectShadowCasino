@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useTranslation } from "@/providers/LanguageProvider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ export function DiceGame() {
   const { currency: currentCurrency, getCurrencySymbol, formatAmount } = useCurrency();
   const currencySymbol = getCurrencySymbol(currentCurrency);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [betAmount, setBetAmount] = useState("1.00");
   const [isRolling, setIsRolling] = useState(false);
@@ -217,8 +219,8 @@ export function DiceGame() {
       <div className="p-6">
         <div className="mb-6 flex flex-col items-center justify-center bg-neutral-800 rounded-xl p-6 border border-neutral-700">
           <div className="text-white text-center mb-6">
-            <p className="text-lg font-semibold font-sans tracking-tight">Dice Slots</p>
-            <p className="text-sm text-neutral-400">Get matching dice in the middle row to win!</p>
+            <p className="text-lg font-semibold font-sans tracking-tight">{t('dice.slotsTitle')}</p>
+            <p className="text-sm text-neutral-400">{t('dice.instruction')}</p>
           </div>
 
           {/* Dice Grid - 5 dice */}
@@ -245,10 +247,10 @@ export function DiceGame() {
 
           {/* Win line indicator */}
           <div className="text-center">
-            <div className="text-sm text-neutral-400 font-sans">Middle row wins</div>
+            <div className="text-sm text-neutral-400 font-sans">{t('dice.middleRow')}</div>
             <div className="flex items-center justify-center mt-2">
               <div className="w-4 h-0.5 bg-green-500"></div>
-              <div className="mx-2 text-green-500 text-xs">WIN LINE</div>
+              <div className="mx-2 text-green-500 text-xs">{t('dice.winLine')}</div>
               <div className="w-4 h-0.5 bg-green-500"></div>
             </div>
           </div>
@@ -256,7 +258,7 @@ export function DiceGame() {
         
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-neutral-800 border border-neutral-700 rounded-xl p-4">
-            <div className="text-sm text-neutral-400 mb-1 font-sans">Bet Amount</div>
+            <div className="text-sm text-neutral-400 mb-1 font-sans">{t('games.betAmount')}</div>
             <div className="flex items-center bet-input-container">
               <Input
                 type="number"
@@ -275,8 +277,8 @@ export function DiceGame() {
           
           <div className="bg-neutral-800 border border-neutral-700 rounded-xl p-4">
             <div className="flex justify-between text-white font-semibold text-base font-sans">
-              <span>Multiplier: 1.1x</span>
-              <span>Win: {formatCurrency(possibleWin, currentCurrency)}</span>
+              <span>{t('dice.multiplier')}: 1.1x</span>
+              <span>{t('ui.win')}: {formatCurrency(possibleWin, currentCurrency)}</span>
             </div>
           </div>
         </div>
@@ -309,19 +311,19 @@ export function DiceGame() {
             {isRolling || rollMutation.isPending ? (
               <span className="flex items-center justify-center">
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                ROLLING...
+                {t('dice.rolling')}
               </span>
             ) : (
-              "ROLL DICE"
+              t('dice.rollDice')
             )}
           </Button>
         </div>
       </div>
       
       <div className="bg-neutral-800 p-4 border-t border-neutral-700">
-        <h3 className="font-medium text-white mb-2 font-sans">Recent Rolls</h3>
+        <h3 className="font-medium text-white mb-2 font-sans">{t('dice.recentRolls')}</h3>
         {history.length === 0 ? (
-          <p className="text-neutral-400 text-sm font-sans">No recent rolls</p>
+          <p className="text-neutral-400 text-sm font-sans">{t('dice.noRecentRolls')}</p>
         ) : (
           <div className="space-y-2">
             {history.slice(0, 3).map((item, index) => (
@@ -335,7 +337,7 @@ export function DiceGame() {
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className={`font-medium ${item.isWin ? 'text-green-400' : 'text-red-400'}`}>
-                    {item.isWin ? 'WIN' : 'LOSS'}
+                    {item.isWin ? t('ui.win') : t('ui.loss')}
                   </span>
                   <span className="text-neutral-300 text-sm">{formatCurrency(item.amount, currentCurrency)}</span>
                 </div>

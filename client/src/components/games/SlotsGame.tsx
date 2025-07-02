@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useTranslation } from "@/providers/LanguageProvider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ export function SlotsGame() {
   const { currency: currentCurrency, getCurrencySymbol } = useCurrency();
   const currencySymbol = getCurrencySymbol(currentCurrency);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [betAmount, setBetAmount] = useState("1.00");
   const [isSpinning, setIsSpinning] = useState(false);
@@ -153,7 +155,7 @@ export function SlotsGame() {
         
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-background-darker rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Bet Amount</div>
+            <div className="text-sm text-gray-400 mb-1">{t('games.betAmount')}</div>
             <div className="flex items-center bet-input-container">
               <Input
                 type="number"
@@ -171,7 +173,7 @@ export function SlotsGame() {
           </div>
           
           <div className="bg-background-darker rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Possible Win</div>
+            <div className="text-sm text-gray-400 mb-1">{t('ui.possibleWin')}</div>
             <div className="text-white text-lg font-medium">
               <CurrencyDisplay amount={possibleWin} />
             </div>
@@ -206,19 +208,19 @@ export function SlotsGame() {
             {isSpinning || spinMutation.isPending ? (
               <span className="flex items-center justify-center">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                SPINNING
+                {t('slots.spinning')}
               </span>
             ) : (
-              "SPIN"
+              t('slots.spin')
             )}
           </Button>
         </div>
       </div>
       
       <div className="bg-background-darker p-4 border-t border-gray-800">
-        <h3 className="font-medium text-white mb-2">Recent Spins</h3>
+        <h3 className="font-medium text-white mb-2">{t('slots.recentSpins')}</h3>
         {history.length === 0 ? (
-          <p className="text-gray-400 text-sm">No recent spins</p>
+          <p className="text-gray-400 text-sm">{t('slots.noRecentSpins')}</p>
         ) : (
           <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
             {history.map((item, index) => (
@@ -228,7 +230,7 @@ export function SlotsGame() {
                   item.isWin ? 'bg-win bg-opacity-20 text-win' : 'bg-loss bg-opacity-20 text-loss'
                 } rounded-lg p-2 text-center text-sm`}
               >
-                <span className="block font-medium">{item.isWin ? 'Win' : 'Loss'}</span>
+                <span className="block font-medium">{item.isWin ? t('slots.win') : t('slots.loss')}</span>
                 <span className="text-xs">
                   <CurrencyDisplay amount={item.amount} compact={true} />
                 </span>
