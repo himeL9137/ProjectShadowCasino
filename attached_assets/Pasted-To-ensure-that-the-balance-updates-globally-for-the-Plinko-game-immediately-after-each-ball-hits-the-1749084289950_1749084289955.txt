@@ -1,0 +1,58 @@
+To ensure that the balance updates globally for the Plinko game immediately after each ball hits the multiplier bar, you can modify the showGameResult function in your PlinkoMasterGame.tsx file. This function should now also call a method that updates the user's balance in real-time.
+
+Here’s how you can implement this:
+
+Step 1: Update Balance in showGameResult
+Make sure you update the real-time balance once the game result is received. This can be done using your existing real-time balance management logic or by calling a method that directly updates the balance for the user.
+
+Updated showGameResult Function
+Here's the modified showGameResult function for your PlinkoMasterGame.tsx:
+
+const showGameResult = (result: GameResult) => {
+    console.log("Showing game result:", result); // Debug log
+    setLastResult(result);
+    
+    // Update history
+    setHistory(prev => [
+        { 
+            isWin: result.isWin, 
+            amount: result.isWin ? result.winAmount.toFixed(2) : betAmount,
+            multiplier: result.multiplier
+        },
+        ...prev.slice(0, 4)
+    ]);
+    // Refresh user data to get updated balance
+    if (refreshUser) {
+        refreshUser();
+    }
+    // Real-time balance update logic when a game is won or lost
+    updateGlobalBalance(result);
+    if (result.isWin) {
+        toast({
+            title: "You won!",
+            description: `You won ${result.winAmount.toFixed(2)} ${currentCurrency}! Multiplier: ${result.multiplier.toFixed(1)}x`,
+            variant: "default",
+        });
+    } else {
+        toast({
+            title: "You lost",
+            description: `You lost ${parseFloat(betAmount).toFixed(2)} ${currentCurrency}. Multiplier: ${result.multiplier.toFixed(1)}x`,
+            variant: "destructive",
+        });
+    }
+};
+// Function to update global balance
+const updateGlobalBalance = (result: GameResult) => {
+    const updatedBalance = result.isWin ? user.balance + result.winAmount : user.balance - parseFloat(betAmount);
+    
+    // Call your logic here to update balance in context or real-time management service
+    // e.g., useContext or an API call to update the balance
+    refreshUser && refreshUser(); // Assuming this method fetches the latest user balance from backend
+};
+Step 2: Integrate Real-Time Balance Management
+Make sure your use-auth.tsx or wherever you handle user authentication and balance updates is properly set up to reactively manage balance changes. You can reference how the balance is updated from your backend with WebSocket or through API calls.
+
+Final Note
+Ensure that the updateGlobalBalance(result) function correctly interfaces with your existing balance management system so that any balance changes are reflected throughout your application.
+
+By following these modifications, the balance should update correctly after each ball hits the multiplier bar. Make sure to test thoroughly to verify that the behavior works as expected in your application.

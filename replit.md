@@ -1,107 +1,259 @@
-# Casino Game Platform - System Architecture
+# Shadow Casino - Casino Gaming Platform
 
 ## Overview
 
-This is a full-stack casino game platform built with modern web technologies. The application features a React frontend with TypeScript, an Express.js backend, and uses Drizzle ORM for database operations. It provides a comprehensive casino gaming experience with game management, user statistics, and a responsive design.
+Shadow Casino is a full-stack web application providing a comprehensive casino gaming platform with real-time features, multi-currency support, and administrative capabilities. The application features a modern React frontend with a Node.js/Express backend, utilizing WebSocket connections for real-time interactions.
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **UI Library**: Radix UI components with shadcn/ui design system
-- **Styling**: Tailwind CSS with custom casino theme variables
-- **State Management**: TanStack Query (React Query) for server state
-- **Routing**: Wouter for lightweight client-side routing
-- **Form Handling**: React Hook Form with Zod validation
-- **Build Tool**: Vite for fast development and optimized builds
+- **Framework**: React with TypeScript
+- **Build Tool**: Vite for fast development and optimized production builds
+- **UI Library**: Radix UI components with Tailwind CSS for modern, accessible design
+- **State Management**: Redux Toolkit for application state, React Query for server state
+- **Real-time Communication**: WebSocket client for live chat and game updates
+- **Routing**: React Router for single-page application navigation
 
 ### Backend Architecture
-- **Framework**: Express.js with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Session Management**: Express sessions with PostgreSQL store
-- **API Design**: RESTful endpoints with JSON responses
-- **Error Handling**: Centralized error middleware
-- **Development**: Hot module replacement with Vite integration
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript for type safety and better development experience
+- **Authentication**: JWT-based authentication with HTTP-only cookies
+- **Real-time**: WebSocket server for live features (chat, notifications)
+- **Session Management**: Express sessions with memory store
+- **File Upload**: Multer middleware for profile picture uploads
 
-### Data Storage
-- **Primary Database**: PostgreSQL (configured for Neon Database)
-- **ORM**: Drizzle ORM with type-safe database queries
-- **Schema**: Strongly typed schema definitions with Zod validation
-- **Migrations**: Drizzle Kit for database schema management
-- **Fallback**: In-memory storage implementation for development
+### Data Storage Strategy
+The application currently uses an in-memory storage system as a temporary solution, with plans to migrate to PostgreSQL:
+
+- **Current**: In-memory storage with mock implementations
+- **Planned**: PostgreSQL with Drizzle ORM
+- **Migration Ready**: Database schemas defined, migration scripts prepared
+- **Session Storage**: Memory-based session store for development
 
 ## Key Components
 
-### Database Schema
-The application uses four main tables:
-- **users**: User accounts with balance and authentication
-- **games**: Game catalog with categories, providers, and metadata
-- **gameResults**: Game play history and results
-- **userStats**: Aggregated user statistics and preferences
+### Authentication System
+- JWT token-based authentication with refresh mechanism
+- Password hashing using Node.js crypto with salt
+- Role-based access control (User, Admin roles)
+- Session persistence with HTTP-only cookies
+- IP tracking and login history
 
-### API Endpoints
-- `GET /api/games` - Retrieve all games
-- `GET /api/games/category/:category` - Filter games by category
-- `GET /api/games/featured` - Get featured games
-- `GET /api/games/search` - Search games by query
-- `POST /api/games/:id/play` - Play a game with bet amount
-- `GET /api/user` - Get current user information
-- `GET /api/user/stats` - Get user gaming statistics
+### Gaming Engine
+- Multiple game types support (Plinko, Number Guessing, etc.)
+- Biased RNG system favoring the house (45% win rate, 1.1x multiplier)
+- Real-time balance updates with transaction logging
+- Game history tracking and statistics
 
-### Frontend Components
-- **CasinoHeader**: Main navigation and user balance display
-- **CasinoSidebar**: Category navigation and game filters
-- **FeaturedGames**: Showcases promoted games
-- **GamesGrid**: Main game catalog with search and filtering
-- **GameModal**: Game play interface with betting controls
-- **StatsSection**: User statistics dashboard
+### Multi-Currency System
+- Support for 25+ currencies including USD, BDT, INR, BTC, EUR, GBP
+- Real-time exchange rate updates via external APIs
+- Currency conversion with fallback rates
+- User-specific currency preferences
+
+### Real-time Features
+- WebSocket-based live chat system
+- Real-time game notifications
+- Live balance updates
+- Connection management with heartbeat mechanism
+
+### Administrative Panel
+- User management (ban, mute, balance adjustment)
+- Transaction monitoring and analytics
+- Game settings configuration
+- Advertisement management
+- Multi-currency admin controls
 
 ## Data Flow
 
-1. **User Authentication**: Currently uses a default user system (demo mode)
-2. **Game Discovery**: Users browse games through categories or search
-3. **Game Play**: Users select bet amounts and play games through modal interface
-4. **Result Processing**: Game outcomes are calculated server-side and stored
-5. **Statistics Update**: User stats are automatically updated after each game
-6. **Balance Management**: Virtual currency system with real-time balance updates
+### User Registration & Authentication
+1. User submits registration form
+2. Password hashing with salt generation
+3. User record creation in storage
+4. JWT token generation and cookie setting
+5. Session establishment
+
+### Game Play Process
+1. User places bet with amount validation
+2. Balance deduction and transaction recording
+3. Game logic execution with biased RNG
+4. Result calculation and payout processing
+5. Balance update and transaction logging
+6. Real-time UI updates via WebSocket
+
+### Currency Management
+1. Exchange rate fetching from external APIs
+2. Rate caching with 5-minute expiration
+3. Currency conversion for cross-currency transactions
+4. User preference storage and application
 
 ## External Dependencies
 
-### Frontend Dependencies
-- **UI Components**: Comprehensive Radix UI component library
-- **Icons**: Lucide React for consistent iconography
-- **Date Handling**: date-fns for date manipulation
-- **Carousel**: Embla Carousel for game showcase
-- **Utilities**: clsx and class-variance-authority for styling
+### Core Dependencies
+- **@neondatabase/serverless**: PostgreSQL serverless driver (prepared for migration)
+- **drizzle-orm**: Type-safe ORM for database operations
+- **jsonwebtoken**: JWT token generation and verification
+- **ws**: WebSocket server implementation
+- **multer**: File upload handling
+- **axios**: HTTP client for external API calls
 
-### Backend Dependencies
-- **Database**: @neondatabase/serverless for PostgreSQL connection
-- **ORM**: drizzle-orm with PostgreSQL dialect
-- **Session**: connect-pg-simple for PostgreSQL session storage
-- **Validation**: Zod for runtime type checking
-- **Development**: tsx for TypeScript execution
+### Frontend Dependencies
+- **@radix-ui/***: Accessible component primitives
+- **@tanstack/react-query**: Server state management
+- **@reduxjs/toolkit**: Application state management
+- **tailwindcss**: Utility-first CSS framework
+
+### Development Tools
+- **tsx**: TypeScript execution for development
+- **esbuild**: Fast JavaScript bundler for production
+- **vite**: Frontend build tool and dev server
 
 ## Deployment Strategy
 
-### Build Process
-- **Frontend**: Vite builds optimized static assets to `dist/public`
-- **Backend**: esbuild bundles server code to `dist/index.js`
-- **Database**: Drizzle migrations applied via `db:push` command
+### Development Environment
+- **Runtime**: Node.js 20 with Replit environment
+- **Database**: In-memory storage (temporary)
+- **Build Process**: Vite dev server with hot reload
+- **Port Configuration**: Frontend (5173), Backend (5000)
 
-### Environment Configuration
-- **DATABASE_URL**: PostgreSQL connection string (required)
-- **NODE_ENV**: Environment mode (development/production)
-- **Session Configuration**: PostgreSQL-backed sessions for production
+### Production Deployment
+- **Build Command**: `npm run build` (Vite + esbuild)
+- **Start Command**: `npm run start` (production server)
+- **Static Assets**: Served from dist/public directory
+- **Environment**: Autoscale deployment target
 
-### Development Workflow
-- **Hot Reload**: Vite middleware integrated with Express server
-- **Type Safety**: Full TypeScript coverage with strict configuration
-- **Code Quality**: ESLint and Prettier configured for consistent formatting
+### Database Migration Plan
+1. **Current**: In-memory mock storage
+2. **Phase 1**: Enable PostgreSQL connection with existing schemas
+3. **Phase 2**: Run migration scripts to create tables
+4. **Phase 3**: Switch storage implementation to database-backed
+5. **Phase 4**: Remove mock implementations
+
+## Recent Changes
+- **June 24, 2025**: Fixed critical TypeScript compilation errors and performance issues
+  - Fixed missing closing tag in advanced-theme-selector component causing TypeScript compilation failure
+  - Fixed memory leaks by adding proper cleanup functions to setInterval calls
+  - Reduced excessive console logging that was causing performance degradation
+  - Fixed WebSocket reconnection logic to prevent infinite reconnection attempts
+  - Optimized exchange rate update frequency from 5 minutes to 30 minutes
+  - Improved error handling and reduced redundant logging in production
+  - Enhanced WebSocket connection cleanup to prevent memory leaks
+  - Fixed displayName typo in MenubarShortcut component
+
+## Previous Changes
+- **June 24, 2025**: Implemented theme-aware KYC verification modal
+  - Modal now dynamically adapts to user's selected theme colors and styling
+  - Added smooth animations, hover effects, and proper contrast for all themes
+  - Uses theme gradients, accent colors, warning colors, and text colors automatically
+  - Enhanced visual consistency across entire application theme system
+- **June 24, 2025**: Added interactive moving stars background to home page
+  - Implemented same moving stars animation as auth page with 500 animated stars
+  - Added twinkling and movement effects matching auth page style
+  - Stars disappear after 5 seconds when user interacts (mouse, click, scroll, keyboard, touch)
+  - Stars remain hidden until page refresh, creating engaging first-impression experience
+- **June 24, 2025**: Integrated existing themes system into comprehensive themes page
+  - Connected themes page to existing advanced theme system with 10+ professional themes
+  - Added theme categories, popularity ratings, and premium indicators
+  - Implemented real theme switching functionality using existing ThemeProvider
+  - Added theme previews with actual gradients and color palettes
+  - Integrated with existing theme management system and localStorage persistence
+  - Added proper routing and sidebar navigation to /themes
+- **June 24, 2025**: Implemented comprehensive advanced plinko game with full feature set
+  - Integrated complete plinko implementation with p5.js physics engine and Tone.js audio system
+  - Added provably fair gaming system with client/server seeds and cryptographic hashing
+  - Implemented intelligent rigging logic that activates when balance ≥ $150 to force losses
+  - Enhanced physics simulation with realistic ball bouncing, pin collisions, and boundary constraints
+  - Added comprehensive audio feedback including pin hits, ball landings, wins, and losses
+  - Implemented 17-slot multiplier system [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0]
+  - Added binomial probability calculations for each slot with click-to-view functionality
+  - Integrated responsive canvas that scales automatically with container size
+  - Added Space key support for ball dropping and comprehensive bet controls
+  - Implemented real-time balance tracking with immediate bet deduction and payout processing
+- **June 23, 2025**: Successfully implemented complete HTML game integration system with Lucky Dice Casino demo game
+  - Fixed all TypeScript syntax errors in HTML game rendering system
+  - Created comprehensive casino API bridge allowing HTML games to interact with balance system
+  - Built iframe communication system with PostMessage API for seamless bet processing
+  - Added CreateGameDialog component with sample game templates for easy game creation
+  - Integrated GameCodeViewer component allowing admins to view and edit game HTML code
+  - Added "Create New Game" button to admin panel with full CRUD operations
+  - Created Lucky Dice Casino game as working demonstration with animated dice, multiple bet types, and real balance integration
+  - HTML games now automatically connect to user balance and process wins/losses through casinoAPI.placeBet()
+- **June 23, 2025**: Fixed critical TypeScript type safety issues in storage system
+  - Resolved user ID type inconsistencies between storage interface (string) and implementation (number)
+  - Fixed authentication system compatibility with Replit Auth requirements
+  - Corrected currency conversion type casting in referral bonus system
+  - Achieved complete TypeScript compilation without errors
+  - Maintained existing custom JWT authentication (decided not to integrate Replit Auth)
+- **June 22, 2025**: Implemented comprehensive language selection system with 20+ languages
+  - Added complete internationalization system with translation support for English, Bengali, Spanish, French, German, Chinese, Japanese, Korean, Arabic, Hindi, Russian, Portuguese, Italian, Turkish, Dutch, Thai, Vietnamese, Indonesian, Malay, and Polish
+  - Created LanguageProvider with persistent language preferences stored in localStorage
+  - Built language selector components for auth page and app-wide usage with flag icons and native language names
+  - Added RTL (Right-to-Left) language support for Arabic and other RTL languages
+  - Integrated language selector into auth page with special auth-themed styling
+  - Added compact language selector to main header for easy access throughout the app
+  - Translated all auth page text and form labels with fallback to English for missing translations
+  - Language preference persists across sessions and automatically applies on app load
+- **June 22, 2025**: Removed non-working fund adjustment button from admin panel
+  - Deleted dollar sign button that was causing issues in user management
+  - Cleaned up unused fund adjustment dialog and related functions
+  - Simplified admin interface for better reliability
+- **June 22, 2025**: Fixed WebSocket chat system and profile picture display
+  - Resolved WebSocket authentication issues that prevented chat connections
+  - Implemented fallback user context for development environment
+  - Enhanced chat message broadcasting to include profile picture data
+  - Updated Avatar components to properly display profile pictures with error handling
+  - Chat now works with real-time messaging and profile picture support
+- **June 22, 2025**: Added ৬১,০২৯.০০৳ (BDT) to shadowHimel admin account
+  - Created shadowHimel user with admin privileges 
+  - Permanently credited 61,029.00 BDT to account balance
+  - Transaction recorded for audit trail with proper description
+- **June 22, 2025**: Implemented comprehensive referral program system with bonus credits
+  - Added complete referral system database schema with referral codes, bonuses, and tracking
+  - Built end-to-end referral functionality including unique code generation and sharing
+  - Created dedicated referral page with invite tracking, earnings dashboard, and settings management
+  - Integrated referral navigation into sidebar under account section
+  - Added referral bonus processing with configurable commission rates and signup bonuses
+  - Users can now invite friends and earn bonus credits for successful referrals
+- **June 22, 2025**: Updated new user registration to start with 0 balance instead of 500
+  - Modified all storage systems (in-memory, database, SQLite) to initialize new users with 0 balance
+  - Updated client-side registration form to send 0 as default balance
+  - Changed balance provider initial state to 0
+  - Existing users remain unaffected, only new registrations start with 0 balance
+- **June 22, 2025**: Enhanced wallet page to prominently display 80+ payment methods
+  - Added clear categorization of International, National & Local payment options
+  - Improved visual presentation with gradient background highlighting payment variety
+  - Listed specific examples for each payment category (PayPal, Stripe, bKash, etc.)
+- **June 22, 2025**: Implemented persistent login system with device/IP tracking
+  - Enhanced JWT authentication with automatic session renewal
+  - Added device fingerprinting and IP validation for security
+  - Users stay logged in across page refreshes for up to 30 days
+  - Sessions automatically expire when accessing from different IP address
+  - Comprehensive session cleanup on logout
+  - Improved authentication token storage across multiple sources
+  - Enhanced server error handling and graceful shutdown
+- **June 22, 2025**: Enhanced payment system with international methods and improved game management
+  - Added 20 international payment platforms: PayPal, Stripe, Skrill, Payoneer, Wise, Revolut, Cash App, Google Pay, Apple Pay, Alipay, WeChat Pay, LINE Pay, Kakao Pay, Venmo, Zelle, Square, Amazon Pay, Samsung Pay, Paysend, Neteller
+  - Enhanced admin game management with comprehensive table view for all custom games
+  - Added delete functionality with confirmation dialogs for custom games
+  - Improved payment method organization with international and regional categories
+  - Total payment methods now exceed 70+ options covering global and Bangladeshi markets
+  - Added proper fees, limits, and processing times for international payment platforms
+- **June 21, 2025**: Enhanced "Add New Game" functionality and comprehensive payment system
+  - Added custom HTML games support to schema and storage
+  - Created admin panel interface for adding games with HTML content
+  - Built dedicated games page with search and iframe rendering
+  - Added navigation links for improved discoverability
+  - Implemented CRUD operations for custom games management
+  - Fixed HTML game routing system for automatic functionality
+  - Added comprehensive deposit/withdrawal system with 53 Bangladeshi e-banking methods
+  - Integrated mobile banking (aamarPay, bKash, Nagad, Rocket, Upay, SureCash, OK Wallet, mCash, CellFin, t-cash)
+  - Added card payments (VISA, Mastercard, Amex, SCB, EBL, Citytouch)
+  - Added agent banking (Islami Bank, DBBL, Agrani, Sonali, Janata, and more)
+  - Created professional payment interface with fees, limits, and processing times
+  - Enhanced wallet page to redirect to comprehensive payment system with method filtering
 
 ## Changelog
-
-Changelog:
-- July 02, 2025. Initial setup
+- June 21, 2025. Initial setup
 
 ## User Preferences
 

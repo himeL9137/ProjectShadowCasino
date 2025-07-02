@@ -1,0 +1,99 @@
+To ensure that the ball does not drop outside the multiplier bar in your PlinkoMasterGame, we can add boundary checks to ensure that the ball's position does not exceed the boundaries of the slots.
+
+Here’s how you can modify the dropBallAnimation and the p5.draw method to handle these boundary checks:
+
+Adjust the logic in dropBallAnimation to ensure that the targetSlot is constrained within the valid range (0 to number of slots - 1).
+Update the slot landing check to ensure that the ball only lands in valid slots.
+Here is the updated code:
+
+const dropBallAnimation = (result: GameResult) => {
+  if (!p5InstanceRef.current) return;
+  const p5 = p5InstanceRef.current;
+  const gameState = gameStateRef.current;
+  
+  // Create animated ball
+  const ball = {
+    x: p5.width / 2,
+    y: 50,
+    vx: p5.random(-1, 1),
+    vy: 0,
+    row: 0,
+    targetSlot: Math.min(Math.max(result.gameData?.slotIndex || Math.floor(Math.random() * 16), 0), 15), // Ensure it's within bounds
+    ballColor: p5.color(p5.random(360), 100, 100)
+  };
+  
+  gameState.balls.push(ball);
+};
+p5.draw = () => {
+  p5.background(0);
+  // Draw pins
+  p5.fill(255);
+  for (const pin of gameState.pins) {
+    p5.ellipse(pin.x, pin.y, pinRadius * 2, pinRadius * 2);
+  }
+  // Draw slots
+  for (let i = 0; i < gameState.slots.length; i++) {
+    const slot = gameState.slots[i];
+    // Smooth animation
+    slot.animationOffset = p5.lerp(slot.animationOffset, slot.targetOffset, 0.1);
+    p5.fill(slot.color);
+    p5.rect(slot.x - slotWidth / 2, slot.y + slot.animationOffset, slotWidth, 15);
+    p5.fill(255);
+    p5.textAlign(p5.CENTER);
+    p5.textSize(10);
+    p5.text(slot.multiplier.toFixed(1) + 'x', slot.x, slot.y + 30 + slot.animationOffset);
+    if (p5.abs(slot.animationOffset - slot.targetOffset) < 0.1) {
+      slot.targetOffset = 0;
+    }
+  }
+  // Update and draw balls
+  for (let i = gameState.balls.length - 1; i >= 0; i--) {
+    const ball = gameState.balls[i];
+    ball.vy += gravity;
+    ball.vx *= friction;
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    // Pin collisions
+    if (ball.row < gameState.rows) {
+      for (const pin of gameState.pins) {
+        const d = p5.dist(ball.x, ball.y, pin.x, pin.y);
+        const collisionThreshold = ballRadius + pinRadius;
+        if (d < collisionThreshold) {
+          const angle = p5.atan2(ball.y - pin.y, ball.x - pin.x);
+          const overlap = collisionThreshold - d;
+          ball.x += p5.cos(angle) * overlap;
+          ball.y += p5.sin(angle) * overlap;
+          const currentSpeed = p5.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+          const newDirection = angle + p5.PI;
+          ball.vx = p5.cos(newDirection) * currentSpeed * bounceFactor;
+          ball.vy = p5.sin(newDirection) * currentSpeed * bounceFactor;
+          ball.row++;
+        }
+      }
+    }
+    // Check for landing in slot
+    for (let j = 0; j < gameState.slots.length; j++) {
+      const slot = gameState.slots[j];
+      if (ball.y > slot.y && p5.abs(ball.x - slot.x) < slotWidth / 2) {
+        // Ball landed
+        slot.targetOffset = 5;
+        gameState.balls.splice(i, 1);
+        setIsDropping(false);
+        break;
+      }
+    }
+    // Prevent ball from dropping off screen
+    if (ball.y > p5.height) {
+      gameState.balls.splice(i, 1);
+      setIsDropping(false);
+    }
+    // Draw ball
+    p5.fill(ball.ballColor);
+    p5.ellipse(ball.x, ball.y, ballRadius * 2, ballRadius * 2);
+  }
+};
+In this code:
+
+In dropBallAnimation, I made sure to constrain targetSlot to be between 0 and 15.
+In p5.draw, the ball's landing is checked against the slot boundaries, ensuring it lands in valid slots only.
+These changes should help prevent the ball from falling outside the multiplier bar. If you need further modifications, feel free to ask!

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plinko Game</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      background-color: #1a2c42;
+      margin: 0;
+      padding: 20px;
+    }
+    #controls {
+      width: 200px;
+      background-color: #0d1a2b;
+      padding: 15px;
+      border-radius: 10px;
+      color: #fff;
+      margin-right: 20px;
+    }
+    #controls label, #controls input, #controls button {
+      display: block;
+      margin: 10px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #controls input, #controls select {
+      background-color: #1a2c42;
+      color: #fff;
+      border: 1px solid #3a506b;
+      padding: 5px;
+      border-radius: 5px;
+    }
+    #controls button {
+      background-color: #3a506b;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #controls button:hover {
+      background-color: #4a607b;
+    }
+    #controls button#betButton {
+      background-color: #28a745;
+      font-weight: bold;
+    }
+    #controls button#betButton:hover {
+      background-color: #2cc058;
+    }
+    #balance, #probability, #result {
+      font-size: 0.9em;
+      color: #ccc;
+      margin-top: 10px;
+    }
+    #canvasContainer {
+      flex: 1;
+    }
+    .notification {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      display: none;
+      z-index: 10;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label for="bet">Bet Amount ($):</label>
+    <input type="number" id="bet" min="0.01" step="0.01" value="1">
+    <button id="betButton" onclick="dropBall()">Bet</button>
+    <div id="balance">Balance: $100.00</div>
+    <div id="probability">Click a slot to see probability</div>
+    <div id="result"></div>
+  </div>
+  <div id="canvasContainer"></div>
+  <div id="notification" class="notification"></div>
+  <script>
+    let pins = [];
+    let balls = [];
+    let slots = [];
+    const rows = 15;
+    let balance = 100;
+    let betAmount = 1;
+    let clientSeed = generateSeed();
+    let serverSeed = generateSeed();
+    let nonce = 0;
+    const pinSpacing = 30;
+    const slotWidth = 30;
+    const ballRadius = 5;
+    const pinRadius = 4;
+    const gravity = 3.1416 / 30;
+    const bounceFactor = -0.7;
+    const friction = 0.99;
+    const animationSpeed = 0.1; // Controls how quickly the slot returns to position
+
+    const fixedMultipliers = [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
+    // Indices for multipliers <= 1.0 (used for fair loss chance)
+    const losingSlotIndices = [4, 5, 6, 7, 8, 9, 10, 11];
+    // Indices for multipliers > 1.0 (used for fair win chance)
+    const winningSlotIndices = [0, 1, 2, 3, 12, 13, 14, 15];
+    // Indices for multipliers 0.8, 0.6, 0.4 (for rigging when balance is high)
+    // Note: 0.2x multiplier is not available in the current fixedMultipliers list.
+    // Rigging will target 0.8x, 0.6x, and 0.4x slots as per the available multipliers.
+    const riggedLosingSlotIndices = [5, 6, 7, 8, 9, 10];
+
+
+    // Define board boundaries
+    let boardLeft, boardRight;
+
+    // Tone.js synth for the landing sound
+    let landingSynth;
+
+    function setup() {
+      let canvas = createCanvas(600, 600);
+      canvas.parent('canvasContainer');
+      // Set color mode to HSB (Hue, Saturation, Brightness) for easier vibrant colors
+      colorMode(HSB, 360, 100, 100);
+      updateGame(); // Call updateGame once in setup
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') dropBall();
+      });
+
+      // Initialize Tone.js synth
+      // A simple sine wave synth for a clean sound
+      landingSynth = new Tone.Synth({
+        oscillator: {
+          type: "sine"
+        },
+        envelope: {
+          attack: 0.001,
+          decay: 0.2,
+          sustain: 0.1,
+          release: 0.5,
+        }
+      }).toDestination(); // Connect to the default audio output
+    }
+
+    function updateGame() {
+      betAmount = parseFloat(document.getElementById('bet').value);
+      pins = [];
+      slots = [];
+      let startY = 100;
+      let startX = width / 2;
+      for (let i = 0; i < rows; i++) {
+        let numPins = i + 1;
+        let y = startY + i * pinSpacing;
+        for (let j = 0; j < numPins; j++) {
+          let x = startX - (numPins - 1) * pinSpacing / 2 + j * pinSpacing;
+          pins.push({ x, y });
+        }
+      }
+      // Calculate board boundaries based on the bottom row of pins
+      let bottomRowPins = pins.filter(pin => pin.y === startY + (rows - 1) * pinSpacing);
+      boardLeft = Math.min(...bottomRowPins.map(pin => pin.x)) - pinRadius;
+      boardRight = Math.max(...bottomRowPins.map(pin => pin.x)) + pinRadius;
+
+      let numSlots = rows + 1;
+      let slotY = startY + rows * pinSpacing;
+      for (let i = 0; i < numSlots; i++) {
+        let multiplier = fixedMultipliers[i] !== undefined ? fixedMultipliers[i] : 0.0;
+        let x = startX - (numSlots - 1) * slotWidth / 2 + i * slotWidth;
+        let probability = calculateProbability(i, numSlots);
+        let color = getSlotColor(multiplier);
+        // Add animation properties to each slot
+        slots.push({ x, y: slotY, multiplier, probability, color, animationOffset: 0, targetOffset: 0 });
+      }
+    }
+
+    function getSlotColor(multiplier) {
+      // Using HSB for slot colors as well for consistency, mapping multiplier to hue
+      // Hue ranges from 0 (red) to 120 (green)
+      let hue = map(multiplier, 0.4, 2.0, 0, 120);
+      // Ensure hue stays within the 0-120 range
+      hue = constrain(hue, 0, 120);
+      // Saturation and brightness can be adjusted for desired depth
+      let saturation = 80; // High saturation for vibrant colors
+      let brightness = 90; // Relatively high brightness
+      return color(hue, saturation, brightness);
+    }
+
+    function dropBall() {
+      betAmount = parseFloat(document.getElementById('bet').value); // Ensure betAmount is up-to-date
+      if (balance < betAmount) {
+        alert('Insufficient balance!');
+        return;
+      }
+      // Deduct bet amount when the ball is dropped
+      balance -= betAmount;
+      updateBalance();
+
+      // Create the ball for visual simulation
+      let ball = {
+        x: width / 2,
+        y: 50,
+        vx: random(-1, 1),
+        vy: 0,
+        row: 0,
+        seed: generateHash(clientSeed, serverSeed, nonce++),
+        // Assign a random vibrant color using HSB
+        ballColor: color(random(360), 100, 100)
+      };
+      balls.push(ball);
+
+      // The payout calculation and result display will happen when the ball lands in the draw loop
+    }
+
+    // This function determines the payout outcome based on rigging logic
+    function simulateBallPath(seed, numSlots) {
+      // Rigging logic: If balance is >= $150, force outcome to 0.8x, 0.6x, or 0.4x slots
+      if (balance >= 150) {
+        console.log("Rigging: Forcing loss to 0.8x, 0.6x, or 0.4x slots (balance >= $150)");
+        // Select a random index from the specific rigged losing slots
+        return random(riggedLosingSlotIndices);
+      } else {
+        // If balance is less than $150, use the original 50/50 chance logic
+        let randomChance = random(); // Value between 0 and 1
+        if (randomChance < 0.5) { // 50% chance to win
+          console.log("Rigging: Fair chance - Win (balance < $150, 50% chance)");
+          // Select a random index from the winning slots
+          return random(winningSlotIndices);
+        } else { // 50% chance to lose
+          console.log("Rigging: Fair chance - Loss (balance < $150, 50% chance)");
+          // Select a random index from the general losing slots (includes 1.0x)
+          return random(losingSlotIndices);
+        }
+      }
+    }
+
+    function calculateProbability(slotIndex, numSlots) {
+      let n = rows;
+      let k = slotIndex;
+      let p = 0.5;
+      let combinations = (n, k) => {
+        if (k < 0 || k > n) return 0;
+        if (k === 0 || k === n) return 1;
+        if (k > n / 2) k = n - k;
+        let result = 1;
+        for (let i = 1; i <= k; i++) {
+          result = result * (n - i + 1) / i;
+        }
+        return result;
+      };
+      let probability = combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+      return (probability * 100).toFixed(2);
+    }
+
+    function showResult(payout) {
+      let notification = document.getElementById('notification');
+      let resultText = payout >= betAmount ?
+        `Win: $${(payout - betAmount).toFixed(2)} (Total: $${payout.toFixed(2)})` :
+        `Loss: $${betAmount.toFixed(2)}`;
+      notification.innerText = resultText;
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 2000);
+      document.getElementById('result').innerText = resultText;
+    }
+
+    function draw() {
+      background(0); // Solid black background to ensure canvas clears
+      // Pins and slots are updated in setup, no need to call updateGame here
+
+      // Draw pins
+      fill(255); // White color for pins
+      for (let pin of pins) {
+        ellipse(pin.x, pin.y, pinRadius * 2, pinRadius * 2);
+      }
+
+      // Draw slots and multipliers with animation
+      for (let i = 0; i < slots.length; i++) {
+        let slot = slots[i];
+
+        // Smoothly move the slot towards its target offset
+        slot.animationOffset = lerp(slot.animationOffset, slot.targetOffset, animationSpeed);
+
+        fill(slot.color); // Use the color determined by getSlotColor
+        // Apply the animation offset to the y position
+        rect(slot.x - slotWidth / 2, slot.y + slot.animationOffset, slotWidth, 15);
+        fill(255); // Set text color to white for readability
+        textAlign(CENTER);
+        textSize(10);
+        let multiplierText = slot.multiplier !== undefined ? slot.multiplier.toFixed(1) : '0.0';
+        // Apply the animation offset to the y position of the text
+        text(multiplierText + 'x', slot.x, slot.y + 30 + slot.animationOffset);
+
+        // Reset target offset if animation is almost complete
+        if (abs(slot.animationOffset - slot.targetOffset) < 0.1) {
+            slot.targetOffset = 0;
+        }
+      }
+
+      // Update and draw balls
+      for (let i = balls.length - 1; i >= 0; i--) {
+        let ball = balls[i];
+        ball.vy += gravity;
+        ball.vx *= friction;
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        // Constrain ball within board boundaries
+        if (ball.x < boardLeft + ballRadius) {
+          ball.x = boardLeft + ballRadius;
+          ball.vx *= bounceFactor; // Bounce off left boundary
+        } else if (ball.x > boardRight - ballRadius) {
+          ball.x = boardRight - ballRadius;
+          ball.vx *= bounceFactor; // Bounce off right boundary
+        }
+
+        // Pin collision detection and bounce
+        if (ball.row < rows) {
+          for (let pin of pins) {
+            let d = dist(ball.x, ball.y, pin.x, pin.y);
+            let collisionThreshold = ballRadius + pinRadius;
+            if (d < collisionThreshold) {
+              let angle = atan2(ball.y - pin.y, ball.x - pin.x);
+              let overlap = collisionThreshold - d;
+              ball.x += cos(angle) * overlap;
+              ball.y += sin(angle) * overlap;
+              let currentSpeed = sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+              let newDirection = angle + PI;
+              ball.vx = cos(newDirection) * currentSpeed * bounceFactor;
+              ball.vy = sin(newDirection) * currentSpeed * bounceFactor;
+              ball.row++;
+            }
+          }
+        }
+
+        // Check for landing in a slot
+        for (let i = 0; i < slots.length; i++) { // Iterate through slots to find the landing one
+            let slot = slots[i];
+            if (ball.y > slot.y && abs(ball.x - slot.x) < slotWidth / 2) {
+                // Ball has landed in this slot!
+                console.log("Ball visually landed in slot:", slot.multiplier + "x"); // Log visual landing slot
+
+                // Calculate the payout using the rigged logic based on the *simulated* path
+                let riggedSlotIndex = simulateBallPath(ball.seed, slots.length);
+                let payout = betAmount * slots[riggedSlotIndex].multiplier;
+
+                console.log("Balance before payout:", balance.toFixed(2)); // Log balance before payout
+                console.log("Rigged Slot Index:", riggedSlotIndex); // Log rigged slot index
+                console.log("Rigged Multiplier:", slots[riggedSlotIndex].multiplier); // Log rigged multiplier
+                console.log("Calculated Payout:", payout.toFixed(2)); // Log calculated payout
+
+                balance += payout; // Add payout to balance
+                updateBalance(); // Update the displayed balance again after payout
+                showResult(payout); // Show the result notification
+
+                console.log("Balance after payout:", balance.toFixed(2)); // Log balance after payout
+
+
+                // Trigger animation for the visually landed slot
+                slot.targetOffset = 5; // Set target offset to move down
+
+                // Play landing sound
+                // Adjust frequency and duration as needed for the desired sound
+                landingSynth.triggerAttackRelease("C4", "8n"); // Example: Play C4 note for an 8th note duration
+
+                balls.splice(balls.indexOf(ball), 1); // Remove the current ball
+                break; // Only land in one slot
+            }
+        }
+
+
+        // Remove ball if it goes off screen
+        if (ball.y > height) {
+          balls.splice(i, 1);
+        }
+
+        // Draw ball using its assigned color
+        fill(ball.ballColor);
+        ellipse(ball.x, ball.y, ballRadius * 2, ballRadius * 2);
+      }
+    }
+
+    function mousePressed() {
+      // Start Tone.js audio context on user interaction
+      if (Tone.context.state !== 'running') {
+        Tone.context.resume();
+      }
+
+      for (let slot of slots) {
+        if (mouseX > slot.x - slotWidth / 2 && mouseX < slot.x + slotWidth / 2 && mouseY > slot.y && mouseY < slot.y + 15) {
+          let probabilityText = slot.probability !== undefined ? slot.probability : '0.00';
+          let multiplierText = slot.multiplier !== undefined ? slot.multiplier.toFixed(1) : '0.0';
+          document.getElementById('probability').innerText = `Slot ${multiplierText}x: ${probabilityText}%`;
+          break;
+        }
+      }
+    }
+
+    function updateBalance() {
+      document.getElementById('balance').innerText = `Balance: $${balance.toFixed(2)}`;
+    }
+
+    function generateSeed() {
+      return Math.random().toString(36).substring(2, 15);
+    }
+
+    function generateHash(clientSeed, serverSeed, nonce) {
+      return sha256(clientSeed + serverSeed + nonce);
+    }
+
+    console.log('Client Seed:', clientSeed);
+    console.log('Server Seed:', serverSeed);
+    console.log('Verify fairness by checking hash of clientSeed + serverSeed + nonce.');
+  </script>
+</body>
+</html>

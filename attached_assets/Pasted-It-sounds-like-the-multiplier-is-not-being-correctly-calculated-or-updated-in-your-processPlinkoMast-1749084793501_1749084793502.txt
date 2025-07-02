@@ -1,0 +1,41 @@
+It sounds like the multiplier is not being correctly calculated or updated in your processPlinkoMasterGame logic. Let's ensure that when the ball lands, the correct multiplier is used based on the slot it lands in.
+
+Here's a revised section of the processPlinkoMasterGame method to ensure that the multiplier is accurately assigned and returned:
+
+private static processPlinkoMasterGame(isWin: boolean, betAmount: number): GameResult {
+    const slotMultipliers = [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
+    
+    // Simulate ball path
+    const weights = [1, 2, 3, 4, 5, 6, 7, 8, 8, 7, 6, 5, 4, 3, 2, 1];
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    let random = Math.random() * totalWeight;
+    let slotIndex = 0;
+    for (let i = 0; i < weights.length; i++) {
+        random -= weights[i];
+        if (random <= 0) {
+            slotIndex = i;
+            break;
+        }
+    }
+    // Get the multiplier for this slot
+    const multiplier = slotMultipliers[slotIndex] || 1.0; // Fallback to 1.0 if something goes wrong
+    
+    // Calculate win amount based on the multiplier
+    const winAmount = isWin ? betAmount * multiplier : 0;
+    return {
+        isWin: multiplier >= 1.0,
+        winAmount: winAmount, // Return the calculated win amount
+        multiplier: multiplier, // Send the correct multiplier back
+        gameData: {
+            slotIndex,
+            ballPath: [], // Include the ball path if applicable
+        }
+    };
+}
+Key Changes You Should Check in Your Implementation:
+Slot Index Calculation: Ensure that the slot index is determined correctly based on the ball path.
+Multiplier During Win Calculation: The multiplier now directly reflects the slot index where the ball lands.
+Returning Multiplier: The result should return the actual multiplier used, instead of possibly returning an unexpected value.
+Additionally, ensure that the frontend (PlinkoMasterGame.tsx) is using and displaying the multiplier correctly after receiving the game result. Make sure that the UI properly reads the multiplier from the returned GameResult.
+
+Once you've made these changes, please test the game to see if the multiplier is now displaying correctly. If issues persist, you may need to check if the ball path logic correctly aligns with the expected behavior in your UI.

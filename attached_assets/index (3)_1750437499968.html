@@ -1,0 +1,279 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Shadow Casino</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000, #1a0033);
+            font-family: Arial, sans-serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+        }
+        @media (max-width: 768px) {
+            .container { flex-direction: column; width: 90%; }
+            .login-box, .info-box { width: 100%; margin-bottom: 20px; }
+        }
+        .login-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            width: 40%;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideIn 0.5s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .login-box h2 {
+            margin-top: 0;
+            color: #fff;
+            text-align: center;
+            width: 100%;
+        }
+        .login-box form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+        }
+        .login-box div {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .login-box label {
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            transition: background 0.3s ease;
+        }
+        .login-box input:focus {
+            background: #444;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background: #6b48ff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .login-box button:hover {
+            transform: scale(1.05);
+            background: #8a6aff;
+        }
+        .login-box a {
+            color: #6b48ff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .login-box a:hover {
+            color: #8a6aff;
+        }
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            width: 100%;
+        }
+        .info-box {
+            width: 50%;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 0.2s forwards;
+        }
+        .info-box h1 {
+            color: #6b48ff;
+            margin: 0;
+        }
+        .info-box p.tagline {
+            color: #ccc;
+            font-style: italic;
+        }
+        .info-box .features {
+            margin: 20px 0;
+        }
+        .info-box .features div {
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: twinkle 5s infinite, move 20s linear infinite;
+            will-change: transform;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+        @keyframes move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50vw, 50vh); }
+        }
+        @keyframes slideIn {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 35px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: rotate(10deg) scale(1.1);
+        }
+        .star, .login-box, .info-box {
+            backface-visibility: hidden;
+        }
+    </style>
+    <script>
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.querySelector('input[type="text"]').value;
+            const password = document.querySelector('input[type="password"]').value;
+            if (username && password.length >= 6) {
+                alert('Login successful! (Simulated)');
+            } else {
+                alert('Please enter a valid username and password (min 6 characters).');
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="stars">
+        <script>
+            for (let i = 0; i < 500; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 10}s, ${Math.random() * 10}s`;
+                document.querySelector('.stars').appendChild(star);
+            }
+        </script>
+    </div>
+    <img src="https://i.imgur.com/L0S1BDe.png" alt="Project Shadow Casino Logo" class="logo">
+    <div class="container">
+        <div class="login-box">
+            <h2>Member Login</h2>
+            <form>
+                <div>
+                    <label>Username</label>
+                    <input type="text" placeholder="Enter your username" required minlength="3">
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" placeholder="Enter your password" required minlength="6">
+                </div>
+                <button type="submit">Login</button>
+                <div class="links">
+                    <a href="#">Forgot Password?</a>
+                    <a href="register.html">Create Account</a>
+                    <a href="#">Help Center</a>
+                </div>
+            </form>
+        </div>
+        <div class="info-box">
+            <h1>Project Shadow Casino</h1>
+            <p class="tagline">Where fortunes are made and legends are born. Experience the most exclusive high-stakes gaming platform in the universe.</p>
+            <div class="features">
+                <div>Provably Fair<br>Blockchain-verified fairness on all games with transparent algorithms.</div>
+                <div>Instant Payouts<br>Withdraw your winnings instantly with no processing delays.</div>
+                <div>VIP Rewards<br>Exclusive bonuses and personalized service for high rollers.</div>
+            </div>
+            <p>Join over 2.5 million players worldwide in the ultimate gaming experience.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[vite] connecting...
+[vite] failed to connect to websocket.
+your current setup:
+  (browser) c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+your current setup:
+(browser) c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/ &lt;--[HTTP]--&gt; localhost:5173/ (server)
+(browser) c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev:/ &lt;--[WebSocket (failing)]--&gt; localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+at t.value (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+The requested module '/src/lib/api.ts' does not provide an export named 'api'
+[vite] 
+TypeError {}
+message: "Cannot read properties of undefined (reading 'send')"
+stack: "TypeError: Cannot read properties of undefined (reading 'send')↵ at Object.send (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/@vite/client:483:10)↵ at Object.send (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/@vite/client:849:21)↵ at Object.send (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/@vite/client:326:24)↵ at Object.send (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/@vite/client:417:33)↵ at HMRClient.send (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/@vite/client:136:20)↵ at HMRContext.send (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/@vite/client:100:20)↵ at sendError (https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/:17:7)↵ at https://c71b2f1e-769e-46c3-aff8-746f3a20f240-00-bp5k9d16mof8.kirk.replit.dev/:21:3"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object

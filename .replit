@@ -4,18 +4,15 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["jq"]
 
 [deployment]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 run = ["npm", "run", "start"]
 
-[[ports]]
-localPort = 5000
-externalPort = 80
-
 [workflows]
-runButton = "Project"
+runButton = "Run Dev Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -34,3 +31,25 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "WORKI"
+mode = "sequential"
+author = 42697133
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Run Dev Server"
+author = 42697133
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

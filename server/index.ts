@@ -1,10 +1,21 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupAuth } from "./auth";
 
 const app = express();
+// Use CORS with credentials support
+app.use(
+  cors({
+    origin: true, // Allow all origins during development
+    credentials: true, // Allow cookies in requests
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser()); // Add cookie parser for JWT
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -37,6 +48,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Setup authentication system
+  setupAuth(app);
+
+  // Register API routes
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -59,12 +74,36 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  const port = process.env.PORT || 5000;
+  
+  // Add graceful error handling for port conflicts
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Server will exit.`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+
+  // Add graceful shutdown handling
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully');
+    server.close(() => {
+      process.exit(0);
+    });
+  });
+
+  const portNumber = typeof port === 'string' ? parseInt(port, 10) : port;
+  server.listen(portNumber, "0.0.0.0", () => {
+    log(`serving on port ${portNumber}`);
   });
 })();

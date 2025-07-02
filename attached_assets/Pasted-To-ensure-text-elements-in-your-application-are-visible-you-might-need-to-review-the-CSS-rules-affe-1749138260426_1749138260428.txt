@@ -1,0 +1,72 @@
+To ensure text elements in your application are visible, you might need to review the CSS rules affecting the colors used throughout your elements. Based on the context you've shared, you've implemented several changes to heighten text visibility. Here's an enhanced approach to check whether the rules are correctly applied:
+
+Inspect Text Colors: Make sure that text colors are set correctly, especially against different background colors.
+
+Check CSS Specificity: It's possible that other CSS rules are overriding your changes. To ensure your new visibility rules have higher specificity, try the following modifications.
+
+Here's an updated version of your CSS with emphasis on text visibility across different elements:
+
+/* Include the following in your client/src/index.css */
+.app-wrapper,
+body {
+    color: hsl(var(--foreground)) !important; /* Ensure base text color */
+}
+.app-wrapper *,
+body * {
+    color: inherit !important; /* Inherit color for all child elements */
+}
+.app-wrapper label,
+body label,
+.app-wrapper p,
+body p,
+.app-wrapper span,
+body span,
+.app-wrapper h1,
+body h1,
+.app-wrapper h2,
+body h2,
+.app-wrapper h3,
+body h3,
+.app-wrapper h4,
+body h4,
+.app-wrapper h5,
+body h5,
+.app-wrapper h6,
+body h6,
+.app-wrapper a,
+body a {
+    color: hsl(var(--foreground)) !important; /* Override color for headings, links, etc. */
+}
+.app-wrapper input,
+body input,
+.app-wrapper textarea,
+body textarea {
+    color: hsl(var(--foreground)) !important; /* Set input and textarea text color */
+    background-color: hsl(var(--input)) !important; /* Ensure background for inputs is set */
+}
+.app-wrapper button,
+body button {
+    color: hsl(var(--foreground)) !important; /* Set button text color */
+}
+/* Ensuring form elements have correct visibility */
+.app-wrapper form *,
+body form * {
+    color: hsl(var(--foreground)) !important;
+}
+/* Specific fixes for destructive text */
+.app-wrapper .text-destructive,
+body .text-destructive {
+    color: hsl(var(--destructive)) !important; /* Specific rules for destructive colors */
+}
+/* Adjust visibility for specific components */
+.app-wrapper .card *,
+body .card *,
+.app-wrapper .login-form *,
+body .login-form *,
+.app-wrapper .auth-form *,
+body .auth-form * {
+    color: hsl(var(--foreground)) !important; /* Ensure cards and forms have proper text color */
+}
+This should cover most visibility issues by enforcing that all nested elements within certain classes inherit the foreground color. Make sure to verify the changes are rendered properly in the browser. If problems persist, use your browser's developer tools to inspect the computed styles for specific elements to see if there are conflicts.
+
+If you still encounter visibility issues, examine other components/styles potentially affecting your elements.

@@ -1,0 +1,136 @@
+1. Backend: processWin & processBet — Make sure to update balance atomically & return new balance
+In your server/balance-manager.ts, core wallet update logic should:
+
+Update balance atomically in SQLite (no separate SELECT + UPDATE)
+
+Return the updated balance immediately
+
+Handle errors and throw or log if failed
+
+Example for atomic balance update in updateBalance:
+
+ts
+Copy
+Edit
+import db from './db'; // your SQLite instance
+
+export async function updateBalance(userId: string, amount: number): Promise<number> {
+  // Run atomic update query
+  await db.run(
+    `UPDATE wallets SET balance = balance + ? WHERE user_id = ?`,
+    [amount, userId]
+  );
+
+  // Fetch new balance
+  const row = await db.get(`SELECT balance FROM wallets WHERE user_id = ?`, [userId]);
+  if (!row) throw new Error('User wallet not found');
+  return row.balance;
+}
+Then your processWin and processBet could look like:
+
+ts
+Copy
+Edit
+export async function processWin(userId: string, winAmount: number) {
+  if (winAmount <= 0) return; // no-op if nothing to add
+
+  const newBalance = await updateBalance(userId, winAmount);
+  return newBalance;
+}
+
+export async function processBet(userId: string, betAmount: number) {
+  if (betAmount <= 0) return; // no-op if invalid bet
+
+  const newBalance = await updateBalance(userId, -betAmount);
+  return newBalance;
+}
+2. API Route Handlers: Return new balance in response
+In your routes that handle Dice, Slots, Plinko plays, make sure:
+
+They await these balance updates
+
+Return the new balance in the JSON response
+
+Example in Express:
+
+ts
+Copy
+Edit
+app.post('/api/dice/play', async (req, res) => {
+  const { userId, betAmount } = req.body;
+  // Run dice logic, get winAmount
+  const winAmount = calculateWin(...);
+
+  // Deduct bet amount first
+  await processBet(userId, betAmount);
+
+  // If win, add winning
+  if (winAmount > 0) {
+    const balanceAfterWin = await processWin(userId, winAmount);
+    return res.json({ success: true, balance: balanceAfterWin, winAmount });
+  } else {
+    // No win, return balance after bet
+    const userBalance = await getBalance(userId);
+    return res.json({ success: true, balance: userBalance, winAmount: 0 });
+  }
+});
+3. Frontend: Update Redux store immediately after play
+Modify your React frontend wallet handler to use the returned balance and update Redux store:
+
+ts
+Copy
+Edit
+import { useDispatch } from 'react-redux';
+import { walletSlice } from '../lib/store/slices/walletSlice';
+
+const dispatch = useDispatch();
+
+async function playDice(betAmount) {
+  const res = await fetch('/api/dice/play', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, betAmount }),
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    dispatch(walletSlice.actions.updateBalance(data.balance.toString()));
+    // show win or loss based on data.winAmount
+  } else {
+    // handle error
+  }
+}
+4. WebSocket: Sync fallback
+Since you use WebSocket for real-time updates, make sure:
+
+Your backend emits balance updates immediately after DB update
+
+Your frontend listens and updates Redux store accordingly as a fallback or for external changes (deposits, withdrawals)
+
+Example backend emit (pseudo-code):
+
+ts
+Copy
+Edit
+websocketServer.emit('balance-update', { userId, balance: newBalance });
+Frontend listener:
+
+ts
+Copy
+Edit
+websocketClient.on('balance-update', ({ userId, balance }) => {
+  if (userId === currentUser.id) {
+    dispatch(walletSlice.actions.updateBalance(balance.toString()));
+  }
+});
+Summary & What to Do Next:
+Refactor balance updates to use atomic queries in updateBalance().
+
+Make sure all game APIs await these and return new balance in response.
+
+Update your frontend wallet state immediately from API response.
+
+Use WebSocket as a realtime sync fallback, not the main source.
+
+Add console logs on backend & frontend for debugging balance changes.
+

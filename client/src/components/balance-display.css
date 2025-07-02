@@ -1,0 +1,145 @@
+/* Balance Display Animation Styles */
+
+/* Increase animation - green flash + scale up then down */
+.balance-increase {
+  animation: balanceIncrease 1.5s ease-out;
+}
+
+@keyframes balanceIncrease {
+  0% {
+    color: inherit;
+    transform: scale(1);
+  }
+  20% {
+    color: #10b981; /* Green color */
+    transform: scale(1.1);
+  }
+  40% {
+    color: #10b981;
+    transform: scale(1.1);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+/* Decrease animation - red flash + scale down then up */
+.balance-decrease {
+  animation: balanceDecrease 1.5s ease-out;
+}
+
+@keyframes balanceDecrease {
+  0% {
+    color: inherit;
+    transform: scale(1);
+  }
+  20% {
+    color: #ef4444; /* Red color */
+    transform: scale(0.95);
+  }
+  40% {
+    color: #ef4444;
+    transform: scale(0.95);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+/* Currency change animation - blue flash + slide up and in */
+.currency-change {
+  animation: currencyChange 1.5s ease-out;
+}
+
+@keyframes currencyChange {
+  0% {
+    opacity: 0.6;
+    color: inherit;
+    transform: translateY(5px) scale(0.98);
+  }
+  20% {
+    opacity: 1;
+    color: #3b82f6; /* Blue color */
+    transform: translateY(-2px) scale(1.05);
+  }
+  40% {
+    opacity: 1;
+    color: #3b82f6;
+    transform: translateY(0) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    color: inherit;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Additional animations for different balance change scenarios */
+
+/* Large increase - more dramatic effect for big wins */
+.balance-large-increase {
+  animation: balanceLargeIncrease 2s ease-out;
+}
+
+@keyframes balanceLargeIncrease {
+  0% {
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
+  20% {
+    color: #10b981;
+    transform: scale(1.15);
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  }
+  40% {
+    color: #10b981;
+    transform: scale(1.15);
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  }
+  60% {
+    color: #10b981;
+    transform: scale(1.1);
+    text-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
+}
+
+/* Large decrease - more dramatic effect for big losses */
+.balance-large-decrease {
+  animation: balanceLargeDecrease 2s ease-out;
+}
+
+@keyframes balanceLargeDecrease {
+  0% {
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
+  20% {
+    color: #ef4444;
+    transform: scale(0.9);
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  }
+  40% {
+    color: #ef4444;
+    transform: scale(0.9);
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  }
+  60% {
+    color: #ef4444;
+    transform: scale(0.95);
+    text-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
+}

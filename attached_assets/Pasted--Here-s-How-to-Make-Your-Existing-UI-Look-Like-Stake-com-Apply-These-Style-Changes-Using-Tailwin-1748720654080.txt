@@ -1,0 +1,92 @@
+✅ Here's How to Make Your Existing UI Look Like Stake.com
+🎨 Apply These Style Changes Using TailwindCSS
+You don’t need to change your JSX layout, just update the Tailwind classes to match the Stake look.
+
+🌑 1. Background and Theme
+Set a dark, clean background.
+
+html
+Copy
+Edit
+<div className="bg-neutral-900 text-white min-h-screen p-4">
+💰 2. Bet Input Field
+Update styles for a clean, sharp input.
+
+html
+Copy
+Edit
+<input
+  className="w-full bg-neutral-800 border border-neutral-700 text-white text-center py-2 px-4 rounded-lg focus:ring-2 focus:ring-green-400"
+/>
+🔘 3. Buttons (Roll Over / Under / Roll)
+Make them rounded with subtle glow on hover:
+
+html
+Copy
+Edit
+<button className="px-4 py-2 rounded-full bg-neutral-800 text-white border border-neutral-700 hover:bg-green-500 hover:text-black transition duration-200">
+  Roll Under
+</button>
+Or for the Roll button:
+
+html
+Copy
+Edit
+<button className="w-full py-3 px-6 rounded-xl bg-green-500 text-black font-bold text-lg hover:bg-green-400 transition duration-200 shadow-lg">
+  🎲 Roll
+</button>
+🎚️ 4. Sliders
+Make your range input styled:
+
+html
+Copy
+Edit
+<input
+  type="range"
+  min="0"
+  max="100"
+  className="w-full accent-green-500"
+/>
+📈 5. Labels for Multiplier & Chance
+Use bold text, align sides:
+
+html
+Copy
+Edit
+<div className="flex justify-between text-white font-semibold text-base">
+  <span>Target: 50.00</span>
+  <span>Multiplier: 2.00x</span>
+</div>
+🧮 6. Roll History Bubbles
+Display recent rolls as colored dots (green for wins, red for losses):
+
+html
+Copy
+Edit
+<div className="flex space-x-2 mt-4">
+  {history.map((roll, i) => (
+    <div
+      key={i}
+      className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${
+        roll.win ? 'bg-green-500 text-black' : 'bg-red-500 text-white'
+      }`}
+    >
+      {roll.value}
+    </div>
+  ))}
+</div>
+🧪 7. Font
+Use a clean font like Inter or Satoshi, and apply consistency via Tailwind classes:
+
+html
+Copy
+Edit
+<div className="font-sans text-sm tracking-tight">
+✅ Summary
+Element	Change
+Background	bg-neutral-900
+Inputs	bg-neutral-800, text-white
+Buttons	hover:bg-green-500, rounded
+Slider	accent-green-500
+Roll History	Color-coded bubbles
+Font	Clean sans-serif (font-sans)

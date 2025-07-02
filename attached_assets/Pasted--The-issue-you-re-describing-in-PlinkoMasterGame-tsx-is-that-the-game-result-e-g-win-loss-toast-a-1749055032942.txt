@@ -1,0 +1,30 @@
+
+The issue you're describing in PlinkoMasterGame.tsx is that the game result (e.g., win/loss toast and last multiplier) is shown immediately after the API call succeeds, which happens before the ball animation completes and hits the multiplier bar. This spoils the suspense of the game, as the result is revealed too early. To fix this, we need to delay displaying the result until the ball lands in a slot on the multiplier bar.
+
+Here’s the plan to fix this:
+
+Store the API result temporarily without updating the UI immediately.
+Wait until the ball lands in a slot (as detected in the p5.js draw function).
+Only then update the UI with the result (e.g., show the toast, update lastResult, and add to history).
+Let’s modify the PlinkoMasterGame component to achieve this. The key changes will be in the dropMutation onSuccess handler and the p5.draw function where the ball landing is detected.
+
+Here’s the updated code with the fix:
+
+PlinkoMasterGame.tsx
+typescript
+Explanation of Changes
+New State for Pending Result:
+Added pendingResult state to store the API result temporarily when dropMutation succeeds.
+Instead of immediately updating lastResult, history, and showing the toast in onSuccess, we now store the result in pendingResult.
+Show Result on Ball Landing:
+In the p5.draw function, when the ball lands in a slot (ball.y > slot.y && p5.abs(ball.x - slot.x) < slotWidth / 2), we now call showGameResult(pendingResult) to display the result.
+After showing the result, pendingResult is cleared (setPendingResult(null)).
+Fallback for Off-Screen Balls:
+If the ball somehow goes off-screen (ball.y > p5.height), we still show the result as a fallback to avoid losing the game outcome.
+Retained Previous Fix:
+The code also includes the previous fix for ensuring the ball doesn't drop outside the multiplier bar, by constraining ball.x between the first and last slot positions.
+Testing the Fix
+When you click "DROP BALL", the ball will animate through the pins.
+The result (toast, lastResult, and history) will only appear once the ball lands in a slot on the multiplier bar, preserving the suspense of the animation.
+If the ball somehow goes off-screen (though the boundary fix should prevent this), the result will still be shown as a fallback.
+If you notice any issues, such as the animation taking too long or the result not showing in edge cases, let me know, and we can adjust the timing or add further safeguards!

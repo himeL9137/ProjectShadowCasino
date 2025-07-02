@@ -1,0 +1,604 @@
+
+Let's modify the PlinkoMasterGame.tsx component to allow players to drop multiple balls, with a maximum limit of 30 balls at a time. The current implementation only allows one ball to drop at a time because the isDropping state prevents additional drops until the previous ball lands. We need to:
+
+Allow multiple balls to be dropped by removing the isDropping restriction for initiating new drops.
+Track the number of active balls and enforce a maximum limit of 30.
+Ensure that results are still shown only when each ball lands (as per the previous fix).
+Update the UI to reflect that multiple balls can be dropped.
+Here’s the updated code for PlinkoMasterGame.tsx:
+import { useState, useRef, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+import { useCurrency } from "@/providers/CurrencyProvider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2, Minus, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { GameType } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+
+interface GameResult {
+  isWin: boolean;
+  winAmount: number;
+  multiplier: number;
+  gameData: {
+    slotIndex?: number;
+    ballPath?: number[];
+    [key: string]: any;
+  };
+}
+
+declare global {
+  interface Window {
+    p5: any;
+  }
+}
+
+export function PlinkoMasterGame() {
+  const { user } = useAuth();
+  const { currency: currentCurrency, getCurrencySymbol } = useCurrency();
+  const currencySymbol = getCurrencySymbol(currentCurrency);
+  const { toast } = useToast();
+  
+  const [betAmount, setBetAmount] = useState("1.00");
+  const [activeBalls, setActiveBalls] = useState(0); // Track number of active balls
+  const [lastResult, setLastResult] = useState<GameResult | null>(null);
+  const [history, setHistory] = useState<{ isWin: boolean; amount: string; multiplier: number }[]>([]);
+  const [selectedSlotInfo, setSelectedSlotInfo] = useState<string>("Click a slot to see probability");
+  const [pendingResults, setPendingResults] = useState<(GameResult & { ballId: number })[]>([]); // Store pending results with ball IDs
+  const [ballCounter, setBallCounter] = useState(0); // Unique ID for each ball
+
+  const MAX_BALLS = 30; // Maximum number of balls allowed
+
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const p5InstanceRef = useRef<any>(null);
+  const gameStateRef = useRef({
+    pins: [] as any[],
+    balls: [] as any[],
+    slots: [] as any[],
+    rows: 15,
+    balance: 0,
+    isGameRunning: false
+  });
+
+  const fixedMultipliers = [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
+
+  const dropMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/games/play", {
+        gameType: GameType.PLINKO,
+        betAmount: parseFloat(betAmount),
+        currency: currentCurrency
+      });
+      return res.json() as Promise<GameResult>;
+    },
+    onSuccess: (data) => {
+      const currentBallId = ballCounter;
+      setBallCounter(prev => prev + 1);
+      // Store the result with a ball ID
+      setPendingResults(prev => [...prev, { ...data, ballId: currentBallId }]);
+      // Increment active balls
+      setActiveBalls(prev => prev + 1);
+      // Trigger ball drop animation
+      if (p5InstanceRef.current) {
+        dropBallAnimation(data, currentBallId);
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to place bet",
+        variant: "destructive",
+      });
+      setActiveBalls(prev => Math.max(0, prev - 1));
+    },
+  });
+
+  const handleDrop = () => {
+    const numericBetAmount = parseFloat(betAmount);
+    if (isNaN(numericBetAmount) || numericBetAmount <= 0) {
+      toast({
+        title: "Invalid bet",
+        description: "Please enter a valid bet amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to play",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (activeBalls >= MAX_BALLS) {
+      toast({
+        title: "Maximum balls reached",
+        description: `You can only drop up to ${MAX_BALLS} balls at a time.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    dropMutation.mutate();
+  };
+
+  const dropBallAnimation = (result: GameResult, ballId: number) => {
+    if (!p5InstanceRef.current) return;
+
+    const p5 = p5InstanceRef.current;
+    const gameState = gameStateRef.current;
+    
+    const ball = {
+      id: ballId, // Unique ID to match with pending result
+      x: p5.width / 2,
+      y: 50,
+      vx: p5.random(-1, 1),
+      vy: 0,
+      row: 0,
+      targetSlot: result.gameData?.slotIndex || Math.floor(Math.random() * 16),
+      ballColor: p5.color(p5.random(360), 100, 100)
+    };
+    
+    gameState.balls.push(ball);
+  };
+
+  const showGameResult = (result: GameResult) => {
+    setLastResult(result);
+    
+    setHistory(prev => [
+      { 
+        isWin: result.isWin, 
+        amount: result.isWin ? result.winAmount.toString() : betAmount,
+        multiplier: result.multiplier
+      },
+      ...prev.slice(0, 4)
+    ]);
+    
+    if (result.isWin) {
+      toast({
+        title: "You won!",
+        description: `You won ${result.winAmount} ${currentCurrency}`,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "You lost",
+        description: `You lost ${betAmount} ${currentCurrency}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const initializeP5 = () => {
+    if (!canvasRef.current || p5InstanceRef.current) return;
+
+    const sketch = (p5: any) => {
+      const gameState = gameStateRef.current;
+      const pinSpacing = 30;
+      const slotWidth = 30;
+      const ballRadius = 5;
+      const pinRadius = 4;
+      const gravity = 3.1416 / 30;
+      const bounceFactor = -0.7;
+      const friction = 0.99;
+
+      p5.setup = () => {
+        const canvas = p5.createCanvas(600, 600);
+        canvas.parent(canvasRef.current);
+        p5.colorMode(p5.HSB, 360, 100, 100);
+        
+        gameState.pins = [];
+        const startY = 100;
+        const startX = p5.width / 2;
+        
+        for (let i = 0; i < gameState.rows; i++) {
+          const numPins = i + 1;
+          const y = startY + i * pinSpacing;
+          for (let j = 0; j < numPins; j++) {
+            const x = startX - (numPins - 1) * pinSpacing / 2 + j * pinSpacing;
+            gameState.pins.push({ x, y });
+          }
+        }
+
+        gameState.slots = [];
+        const numSlots = gameState.rows + 1;
+        const slotY = startY + gameState.rows * pinSpacing;
+        
+        for (let i = 0; i < numSlots; i++) {
+          const multiplier = fixedMultipliers[i] || 0.0;
+          const x = startX - (numSlots - 1) * slotWidth / 2 + i * slotWidth;
+          const probability = calculateProbability(i, numSlots);
+          const color = getSlotColor(p5, multiplier);
+          
+          gameState.slots.push({ 
+            x, 
+            y: slotY, 
+            multiplier, 
+            probability, 
+            color, 
+            animationOffset: 0, 
+            targetOffset: 0 
+          });
+        }
+      };
+
+      p5.draw = () => {
+        p5.background(0);
+
+        p5.fill(255);
+        for (const pin of gameState.pins) {
+          p5.ellipse(pin.x, pin.y, pinRadius * 2, pinRadius * 2);
+        }
+
+        for (let i = 0; i < gameState.slots.length; i++) {
+          const slot = gameState.slots[i];
+          
+          slot.animationOffset = p5.lerp(slot.animationOffset, slot.targetOffset, 0.1);
+          
+          p5.fill(slot.color);
+          p5.rect(slot.x - slotWidth / 2, slot.y + slot.animationOffset, slotWidth, 15);
+          
+          p5.fill(255);
+          p5.textAlign(p5.CENTER);
+          p5.textSize(10);
+          p5.text(slot.multiplier.toFixed(1) + 'x', slot.x, slot.y + 30 + slot.animationOffset);
+
+          if (p5.abs(slot.animationOffset - slot.targetOffset) < 0.1) {
+            slot.targetOffset = 0;
+          }
+        }
+
+        for (let i = gameState.balls.length - 1; i >= 0; i--) {
+          const ball = gameState.balls[i];
+          ball.vy += gravity;
+          ball.vx *= friction;
+          ball.x += ball.vx;
+          ball.y += ball.vy;
+
+          if (ball.row < gameState.rows) {
+            for (const pin of gameState.pins) {
+              const d = p5.dist(ball.x, ball.y, pin.x, pin.y);
+              const collisionThreshold = ballRadius + pinRadius;
+              if (d < collisionThreshold) {
+                const angle = p5.atan2(ball.y - pin.y, ball.x - pin.x);
+                const overlap = collisionThreshold - d;
+                ball.x += p5.cos(angle) * overlap;
+                ball.y += p5.sin(angle) * overlap;
+                const currentSpeed = p5.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                const newDirection = angle + p5.PI;
+                ball.vx = p5.cos(newDirection) * currentSpeed * bounceFactor;
+                ball.vy = p5.sin(newDirection) * currentSpeed * bounceFactor;
+                ball.row++;
+              }
+            }
+          }
+
+          const firstSlotX = gameState.slots[0].x - slotWidth / 2;
+          const lastSlotX = gameState.slots[gameState.slots.length - 1].x + slotWidth / 2;
+          if (ball.x < firstSlotX) {
+            ball.x = firstSlotX;
+            ball.vx = Math.abs(ball.vx);
+          }
+          if (ball.x > lastSlotX) {
+            ball.x = lastSlotX;
+            ball.vx = -Math.abs(ball.vx);
+          }
+
+          for (let j = 0; j < gameState.slots.length; j++) {
+            const slot = gameState.slots[j];
+            if (ball.y > slot.y && p5.abs(ball.x - slot.x) < slotWidth / 2) {
+              slot.targetOffset = 5;
+              gameState.balls.splice(i, 1);
+              setActiveBalls(prev => Math.max(0, prev - 1));
+              // Find the matching pending result
+              const pendingResult = pendingResults.find(res => res.ballId === ball.id);
+              if (pendingResult) {
+                showGameResult(pendingResult);
+                setPendingResults(prev => prev.filter(res => res.ballId !== ball.id));
+              }
+              break;
+            }
+          }
+
+          if (ball.y > p5.height) {
+            gameState.balls.splice(i, 1);
+            setActiveBalls(prev => Math.max(0, prev - 1));
+            const pendingResult = pendingResults.find(res => res.ballId === ball.id);
+            if (pendingResult) {
+              showGameResult(pendingResult);
+              setPendingResults(prev => prev.filter(res => res.ballId !== ball.id));
+            }
+          }
+
+          p5.fill(ball.ballColor);
+          p5.ellipse(ball.x, ball.y, ballRadius * 2, ballRadius * 2);
+        }
+      };
+
+      p5.mousePressed = () => {
+        for (const slot of gameState.slots) {
+          if (p5.mouseX > slot.x - slotWidth / 2 && p5.mouseX < slot.x + slotWidth / 2 && 
+              p5.mouseY > slot.y && p5.mouseY < slot.y + 15) {
+            setSelectedSlotInfo(`Slot ${slot.multiplier.toFixed(1)}x: ${slot.probability}%`);
+            break;
+          }
+        }
+      };
+    };
+
+    if (typeof window !== 'undefined' && !window.p5) {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js';
+      script.onload = () => {
+        p5InstanceRef.current = new window.p5(sketch);
+      };
+      document.head.appendChild(script);
+    } else if (window.p5) {
+      p5InstanceRef.current = new window.p5(sketch);
+    }
+  };
+
+  const calculateProbability = (slotIndex: number, numSlots: number): string => {
+    const n = gameStateRef.current.rows;
+    const k = slotIndex;
+    const p = 0.5;
+    
+    const combinations = (n: number, k: number): number => {
+      if (k < 0 || k > n) return 0;
+      if (k === 0 || k === n) return 1;
+      if (k > n / 2) k = n - k;
+      let result = 1;
+      for (let i = 1; i <= k; i++) {
+        result = result * (n - i + 1) / i;
+      }
+      return result;
+    };
+    
+    const probability = combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+    return (probability * 100).toFixed(2);
+  };
+
+  const getSlotColor = (p5: any, multiplier: number) => {
+    const hue = p5.map(multiplier, 0.4, 2.0, 0, 120);
+    const constrainedHue = p5.constrain(hue, 0, 120);
+    return p5.color(constrainedHue, 80, 90);
+  };
+
+  useEffect(() => {
+    initializeP5();
+    
+    return () => {
+      if (p5InstanceRef.current) {
+        p5InstanceRef.current.remove();
+        p5InstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  const adjustBetAmount = (adjustment: number) => {
+    const current = parseFloat(betAmount) || 0;
+    const newAmount = Math.max(0.01, current + adjustment);
+    setBetAmount(newAmount.toString());
+  };
+
+  const setBetToHalf = () => {
+    const current = parseFloat(betAmount) || 0;
+    setBetAmount((current / 2).toString());
+  };
+
+  const setBetToDouble = () => {
+    const current = parseFloat(betAmount) || 0;
+    setBetAmount((current * 2).toString());
+  };
+
+  const setBetToMax = () => {
+    if (user?.balance) {
+      setBetAmount(user.balance);
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="bg-background-light rounded-xl p-6 mb-6">
+        <div className="flex justify-center">
+          <div ref={canvasRef} className="border border-gray-700 rounded-lg" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-background-light rounded-xl p-6">
+          <h3 className="text-lg font-semibold mb-4">Bet Controls</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => adjustBetAmount(-0.01)}
+                disabled={activeBalls >= MAX_BALLS}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  value={betAmount}
+                  onChange={(e) => setBetAmount(e.target.value)}
+                  disabled={activeBalls >= MAX_BALLS}
+                  className="text-center"
+                  step="0.01"
+                  min="0.01"
+                />
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => adjustBetAmount(0.01)}
+                disabled={activeBalls >= MAX_BALLS}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <Button variant="outline" size="sm" onClick={setBetToHalf} disabled={activeBalls >= MAX_BALLS}>
+                1/2
+              </Button>
+              <Button variant="outline" size="sm" onClick={setBetToDouble} disabled={activeBalls >= MAX_BALLS}>
+                2x
+              </Button>
+              <Button variant="outline" size="sm" onClick={setBetToMax} disabled={activeBalls >= MAX_BALLS}>
+                Max
+              </Button>
+            </div>
+
+            <Button
+              onClick={handleDrop}
+              disabled={activeBalls >= MAX_BALLS || dropMutation.isPending}
+              className="w-full bg-accent-gold hover:bg-accent-gold/90 text-black font-semibold py-3"
+              size="lg"
+            >
+              {activeBalls > 0 || dropMutation.isPending ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  DROPPING... ({activeBalls}/{MAX_BALLS})
+                </>
+              ) : (
+                <>
+                  <span className="text-xl mr-2">🏀</span>
+                  DROP BALL
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-background-light rounded-xl p-6">
+          <h3 className="text-lg font-semibold mb-4">Game Info</h3>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Balance:</span>
+              <span className="font-semibold">
+                {currencySymbol}{user?.balance || "0.00"}
+              </span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span className="text-gray-400">Bet Amount:</span>
+              <span className="font-semibold">
+                {currencySymbol}{betAmount}
+              </span>
+            </div>
+            
+            {lastResult && (
+              <div className="flex justify-between">
+                <span className="text-gray-400">Last Multiplier:</span>
+                <span className={`font-semibold ${
+                  lastResult.multiplier > 1 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {lastResult.multiplier.toFixed(1)}x
+                </span>
+              </div>
+            )}
+
+            <div className="p-3 bg-background-darker rounded-lg">
+              <p className="text-sm text-gray-400">{selectedSlotInfo}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-background-light rounded-xl p-6">
+          <h3 className="text-lg font-semibold mb-4">Recent Games</h3>
+          
+          <div className="space-y-2">
+            {history.length > 0 ? (
+              history.map((game, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg flex justify-between items-center ${
+                    game.isWin ? 'bg-green-500/10' : 'bg-red-500/10'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className={game.isWin ? 'text-green-400' : 'text-red-400'}>
+                      {game.isWin ? 'WIN' : 'LOSS'}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {game.multiplier.toFixed(1)}x
+                    </span>
+                  </div>
+                  <span className="font-semibold">
+                    {currencySymbol}{game.amount}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-gray-400 text-center py-4">
+                No games played yet
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+PlinkoMasterGame.tsx
+typescript
+Explanation of Changes
+Track Active Balls:
+Replaced isDropping with activeBalls to track the number of balls currently animating.
+Added MAX_BALLS = 30 as the maximum limit for active balls.
+Allow Multiple Drops:
+Removed the isDropping check that prevented new drops while a ball was animating.
+Added a check in handleDrop to ensure activeBalls < MAX_BALLS before allowing a new drop.
+If the limit is reached, a toast notification informs the player.
+Track Balls and Results with IDs:
+Added ballCounter to assign a unique id to each ball.
+Added an id property to each ball in dropBallAnimation.
+Modified pendingResults to store each result with its corresponding ballId.
+When a ball lands, we match its id with the pendingResults to show the correct result.
+Update UI:
+Updated the "DROP BALL" button to show the current number of active balls (e.g., "DROPPING... (5/30)") when balls are animating.
+Disabled bet adjustment buttons when the maximum number of balls is reached.
+Decrement Active Balls:
+In the p5.draw function, when a ball lands or goes off-screen, decremented activeBalls to reflect the updated count.
+Testing the Changes
+You can now click "DROP BALL" multiple times, and up to 30 balls will drop simultaneously.
+Each ball will animate independently, and the result for each ball will only be shown when it lands in a slot.
+If you try to drop more than 30 balls, a toast will notify you of the limit.
+The UI updates to show the number of active balls, and bet controls are disabled when the limit is reached.
+Potential Considerations
+Performance: Dropping 30 balls at once may cause performance issues on lower-end devices due to the physics calculations in p5.draw. If you notice lag, we can reduce MAX_BALLS or optimize the physics simulation (e.g., by simplifying collision detection).
+Visual Clutter: With many balls, the canvas might look crowded. You could add a slight delay between drops (e.g., 200ms) to space them out visually:
+tsx
+const handleDrop = () => {
+  if (activeBalls >= MAX_BALLS) {
+    toast({ ... });
+    return;
+  }
+  setTimeout(() => dropMutation.mutate(), 200);
+};
+Result Overload: If 30 balls land in quick succession, the toast notifications might be overwhelming. You could batch the results and show a summary toast instead:
+tsx
+const showGameResult = (result: GameResult) => {
+  setLastResult(result);
+  setHistory(prev => [
+    { 
+      isWin: result.isWin, 
+      amount: result.isWin ? result.winAmount.toString() : betAmount,
+      multiplier: result.multiplier
+    },
+    ...prev.slice(0, 4)
+  ]);
+  // Batch toast notifications if needed
+};
+If you encounter any issues or want to adjust the maximum number of balls or add features like a delay between drops, let me know!

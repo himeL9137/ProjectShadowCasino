@@ -1,0 +1,36 @@
+The error you're encountering, Error: server.handleUpgrade() was called more than once with the same socket, indicates that your WebSocket server is attempting to handle an upgrade request for a socket that has already been upgraded, likely due to a misconfiguration or an issue in the connection handling logic.
+
+Here are a few steps you can take to resolve the issue:
+
+Ensure Unique Socket Instances: Make sure that you're not trying to upgrade the same WebSocket connection multiple times. This typically involves checking that the same socket isn't being reused across multiple connection requests.
+
+Properly Manage Connections: Review the code in your WebSocket server where you're handling connections. Ensure that each connection request creates a new instance of the socket and that you’re not firing the upgrade process redundantly.
+
+Debugging Logs: Insert debugging logs around your WebSocket connection setup to confirm the number of connections being established.
+
+Here’s an example of how to correctly manage and respond to WebSocket connections in your server:
+
+import { WebSocketServer } from 'ws';
+const wss = new WebSocketServer({ port: 5000 });
+wss.on('connection', (ws) => {
+  console.log("New WebSocket client connected");
+  // Handle messages from clients
+  ws.on('message', (message) => {
+    console.log(`Received message: ${message}`);
+    // Handle message logic
+  });
+  // Ensure the connection closes gracefully
+  ws.on('close', () => {
+    console.log("WebSocket client disconnected");
+  });
+  // Send a welcome message
+  ws.send("Welcome to the WebSocket server!");
+});
+Additional Recommendations:
+Ensure that the WebSocket server is not started multiple times; only a single instance should be created.
+Check that your WebSocket handling does not have any overlapping logic that might trigger multiple connections inadvertently.
+If you are using any middleware or similar constructs, check their configurations to ensure they are isolating connections properly.
+Debugging the JWT Verification Step:
+If you're using JWT for verification, make sure that the token logic doesn’t create reconnection loops or unnecessary duplicate connections when clients try to reconnect.
+
+Make these adjustments, then restart your server, and keep an eye on the console logs to monitor WebSocket connection attempts. This should help in resolving the issues and ensuring stability in your real-time balance updates.

@@ -1,0 +1,66 @@
+To resolve the issue where the player's winnings are not correctly calculated when the ball lands on the multiplier, we need to ensure that the win amount is calculated correctly in the processPlinkoMasterGame method. We’ll also need to confirm that the updated balance is reflected correctly.
+
+Here's how we can implement this:
+
+Update the processPlinkoMasterGame method in server/games.ts to calculate the win amount based on the multiplier:
+private static processPlinkoMasterGame(isWin: boolean, betAmount: number): GameResult {
+    const slotMultipliers = [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
+    // Simulate ball path (existing logic)
+    const weights = [/* existing weight logic */];
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    let random = Math.random() * totalWeight;
+    let slotIndex = 0;
+    for (let i = 0; i < weights.length; i++) {
+        random -= weights[i];
+        if (random <= 0) {
+            slotIndex = i;
+            break;
+        }
+    }
+    const multiplier = slotMultipliers[slotIndex] || 1.0; // Fallback to 1.0 if something goes wrong
+    const winAmount = isWin ? betAmount * multiplier : 0;
+    return {
+        isWin,
+        winAmount,
+        multiplier: isWin ? multiplier : 0,
+        gameData: {
+            slotIndex
+        }
+    };
+}
+Make sure the showGameResult function in PlinkoMasterGame.tsx correctly handles the winAmount when displaying the result:
+In the already provided definition of showGameResult, ensure it's correctly using result.winAmount:
+
+const showGameResult = (result: GameResult) => {
+    console.log("Showing game result:", result); // Debug log
+    setLastResult(result);
+    
+    setHistory(prev => [
+        { 
+            isWin: result.isWin, 
+            amount: result.isWin ? result.winAmount.toFixed(2) : betAmount,
+            multiplier: result.multiplier
+        },
+        ...prev.slice(0, 4)
+    ]);
+    // Proceed with existing balance update logic...
+    
+    // Notify the user of their win
+    if (result.isWin) {
+        toast({
+            title: "You won!",
+            description: `You won ${result.winAmount.toFixed(2)} ${currentCurrency}! Multiplier: ${result.multiplier.toFixed(1)}x`,
+            variant: "default",
+        });
+    } else {
+        toast({
+            title: "You lost",
+            description: `You lost ${parseFloat(betAmount).toFixed(2)} ${currentCurrency}. Multiplier: ${result.multiplier.toFixed(1)}x`,
+            variant: "destructive",
+        });
+    }
+};
+Summary of Changes
+Ensure the win amount calculation in the backend (processPlinkoMasterGame) uses the correct multiplier.
+Ensure the front-end displays the correct win amount and updates the user's balance accordingly after a game result.
+This should correctly award the player based on where the ball lands, regardless of the selected currency. Make sure to test the implementation with different bets to ensure accuracy!

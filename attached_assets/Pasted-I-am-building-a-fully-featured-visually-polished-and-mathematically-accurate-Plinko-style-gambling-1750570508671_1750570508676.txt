@@ -1,0 +1,63 @@
+I am building a fully-featured, visually polished, and mathematically accurate Plinko-style gambling game similar to the one featured on Stake.com. The game should be visually responsive and interactive, and it must feature a 16-slot multiplier bar with a symmetrical and color-coded structure that reflects the risk-based outcome of each drop. The user will input a bet amount (e.g., $1, $2, $10), and a virtual ball will be dropped into a simulated board. The ball will land in one of 16 available slots at the bottom of the board, each associated with a specific payout multiplier.
+
+The visual layout is symmetrical from left to right, and the slot multipliers go in this exact order from left to right:
+[2.0x, 1.8x, 1.6x, 1.4x, 1.0x, 0.8x, 0.6x, 0.4x, 0.4x, 0.6x, 0.8x, 1.0x, 1.4x, 1.6x, 1.8x, 2.0x].
+
+Each multiplier corresponds to a slot, so if a player places a $1 bet and the ball lands in the first slot (index 0), they should receive $2.00 in payout (1 * 2.0). If it lands in slot 5 (0.8x), they should receive $0.80. If it lands in slot 7 (0.4x), the payout is $0.40. The calculation is simple:
+payout = bet * multiplierBar[slotIndex].
+
+However, despite the simplicity of the logic, I am encountering a bug or misbehavior in my current implementation where the returned payout amount is not aligning accurately with the correct multiplier, which could be due to indexing errors, asynchronous state update delays, multiple ball overlap confusion, or even simple bugs in the rounding and payout logic.
+
+The goal is to ensure that this Plinko game functions 100% correctly and reliably reflects the multiplier value that the ball visually lands on. The multiplier table and the logic should perfectly reflect what the player sees. For example, if a player bets 1 and the ball lands in the 4th slot (1.4x), they must receive $1.40 back without fail. Any deviation from this logic is unacceptable in a real-money or simulation game.
+
+Additionally, I want the game to support multiple balls being dropped at once — for example, 5 balls dropped in parallel. Each ball must independently land on its own slot and generate its own payout based on that result. In such cases, the total payout is the sum of all the ball payouts, and the UI should clearly show the result per ball (slot index, multiplier hit, and payout), as well as the overall result.
+
+The backend logic (or frontend game engine) must be able to:
+
+Use a predefined weighted probability distribution for each slot to simulate fairness or bias depending on the desired house edge.
+
+Handle multiple ball drops with accurate payout per ball.
+
+Correctly display the multiplier value for each slot in a visually styled and color-coded board (e.g., green for 2x, red for 0.4x, etc.).
+
+Ensure the payout calculation always uses the right slotIndex from where the ball lands.
+
+Prevent bugs due to state desynchronization in asynchronous React logic or race conditions.
+
+Update the user's balance by subtracting the total bet and adding the correct payout from each drop.
+
+To simplify and isolate the problem, I want to begin by strictly focusing on the core payout logic and multiplier mapping system, making sure that the visual representation, game logic, and numerical computation are all synchronized and mathematically accurate.
+
+Please write or review a robust and pure JavaScript/TypeScript function that takes two inputs:
+
+betAmount: number (e.g., 1, 2, 10)
+
+slotIndex: number (from 0 to 15)
+
+It should use the exact multiplierBar array shown above, and return:
+
+the raw multiplier value
+
+the payout result (rounded to 2 decimal places)
+
+the profit/loss relative to the original bet
+
+The function must be 100% deterministic and mathematically correct.
+
+Also ensure that the slot index passed into the function must always map to the correct value in the multiplier array: index 0 = 2.0x, index 1 = 1.8x, ..., index 15 = 2.0x. This mapping must be strictly followed in every part of the logic.
+
+Once this function is fully working, I want to hook it into my Zustand-based React frontend, where dropping a ball sets its result state to include slot index, multiplier, and payout. This state can then be used to update the UI, display win/loss results, and reflect the payout in the user's wallet. The payout function must return consistent values on every call — no unexpected side effects or randomness.
+
+Later, I plan to expand this to support multiple difficulty modes (Low, Medium, High risk) with different multiplier tables, as well as support provably fair hash-based random generation using seeds. For now, the top priority is ensuring the current multiplier table works with exact precision for a single bet and multiple bets at once.
+
+The final implementation should be capable of handling:
+
+a single $10 bet that lands on 2.0x and pays $20
+
+a $10 bet that lands on 0.4x and pays $4.00
+
+five $2 bets that land on slots 0, 3, 7, 12, 15, with corresponding payouts calculated independently and summed
+
+precise two-decimal rounding and output
+
+Please focus on making the logic bug-free, airtight, and idiot-proof — no rounding bugs, no off-by-one errors, and no mismatch between index and multiplier. If the user bets $1 and hits 1.4x, they must get $1.40 back. This logic must work flawlessly in production with real money.

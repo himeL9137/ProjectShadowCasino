@@ -1,0 +1,77 @@
+To address the issues with your three games (Slots, Plinko, and Dice), I've streamlined the updates as follows:
+
+1. Fixing Server-side Issues
+In server/game-transactions.ts, change any CommonJS require() syntax to ES module imports. For example:
+
+import { SomeFunction } from './someFile'; // Adjust based on your actual module
+2. Fixing Frontend Issues
+SlotsGame:
+
+Ensure that the function getCurrencySymbol is defined. If it’s imported from another file, verify the import path.
+In client/src/components/games/SlotsGame.tsx:
+
+import { getCurrencySymbol } from '../path/to/util'; // Adjust the path
+PlinkoGame:
+
+Update the toast hook to utilize the correct hook.
+In client/src/components/games/PlinkoGame.tsx:
+
+import { useToast } from '../path/to/hooks/use-toast'; // Replace with correct import
+DiceGame:
+
+Improve error handling to avoid logging empty objects.
+In client/src/components/games/DiceGame.tsx:
+
+const rollMutation = useMutation({
+  mutationFn: async () => {
+    return gameService.playDiceGame(parseFloat(betAmount), currentCurrency);
+  },
+  onError: (error) => {
+    console.error("Error in dice game:", error);
+    // Handle specific error scenarios here
+  },
+});
+3. Updating the Dice Game Interface
+Ensure that the Dice game matches the design of the other games.
+
+In client/src/components/games/DiceGame.tsx:
+
+Apply consistent dark theme colors (bg-background-light, bg-background-darker).
+Align the layout structure to match the card-based format of the Slots and Plinko games.
+Here's an example update:
+
+<div className="bg-background-light rounded-xl overflow-hidden">
+  <div className="p-6">
+    <Card>
+      <CardHeader>Your Dice Game</CardHeader>
+      <CardContent>
+        {/* Add game UI components here */}
+      </CardContent>
+    </Card>
+  </div>
+</div>
+4. Enhancing Game Functionality
+Ensure that your balance updates globally when playing any game. Use context or a global state management solution like Redux or React Context.
+
+Here’s a sample context setup:
+
+// BalanceContext.js
+import React, { createContext, useContext, useState } from "react";
+const BalanceContext = createContext();
+export function useBalance() {
+  return useContext(BalanceContext);
+}
+export function BalanceProvider({ children }) {
+  const [balance, setBalance] = useState(1000); // Set initial balance
+  const updateBalance = (amount) => {
+    setBalance((prev) => prev + amount);
+  };
+  return (
+    <BalanceContext.Provider value={{ balance, updateBalance }}>
+      {children}
+    </BalanceContext.Provider>
+  );
+}
+Wrap your application with this provider in your main component.
+
+By addressing these fixes, you should see improved functionality across your casino games. If you have any more specific issues or further adjustments needed, feel free to ask!
