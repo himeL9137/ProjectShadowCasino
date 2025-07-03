@@ -215,6 +215,14 @@ export const authenticateJWT = async (
     req.user = decoded;
     console.log("JWT token verified for user:", decoded.username, "with role:", decoded.role);
 
+    // Update user session tracking
+    try {
+      await storage.updateUserLastSeen(decoded.id);
+      await storage.updateUserOnlineStatus(decoded.id, true);
+    } catch (error) {
+      console.error("Failed to update user session tracking:", error);
+    }
+
     // Refresh the cookie to extend session on each request
     res.cookie("jwt", token, {
       httpOnly: false,
@@ -479,7 +487,17 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/logout", (req, res) => {
+  app.post("/api/logout", authenticateJWT, async (req, res) => {
+    try {
+      // Mark user as offline before logout
+      if (req.user?.id) {
+        await storage.updateUserOnlineStatus(req.user.id, false);
+        console.log(`User ${req.user.username} marked as offline`);
+      }
+    } catch (error) {
+      console.error("Failed to update user online status during logout:", error);
+    }
+
     // Clear the JWT cookie with same settings
     res.clearCookie("jwt", {
       path: '/',

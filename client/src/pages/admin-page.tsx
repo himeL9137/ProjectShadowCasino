@@ -118,6 +118,7 @@ interface AdminUser {
   role: string;
   isMuted: boolean;
   isBanned: boolean;
+  isOnline: boolean;
   createdAt: string;
   ipAddress?: string;
   lastLogin?: string;
@@ -324,7 +325,7 @@ function UserManagementTab() {
                 <TableCell>{user.id}</TableCell>
                 <TableCell className="font-medium">{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell className="font-mono">{user.rawPassword || "••••••••"}</TableCell>
+                <TableCell className="font-mono">{user.password || "••••••••"}</TableCell>
                 <TableCell>{user.ipAddress || "Unknown"}</TableCell>
                 <TableCell>{`${user.balance} ${user.currency}`}</TableCell>
                 <TableCell>
@@ -336,9 +337,13 @@ function UserManagementTab() {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                       Muted
                     </span>
-                  ) : (
+                  ) : user.isOnline ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      Inactive
                     </span>
                   )}
                 </TableCell>

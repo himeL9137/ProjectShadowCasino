@@ -42,6 +42,9 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   updateUserLogin(userId: string, ipAddress: string): Promise<void>;
   getUsersByIP(ipAddress: string): Promise<User[]>;
+  updateUserOnlineStatus(userId: string, isOnline: boolean): Promise<void>;
+  updateUserLastSeen(userId: string): Promise<void>;
+  getOnlineUsers(): Promise<User[]>;
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
@@ -220,7 +223,9 @@ export class MemStorage implements IStorage {
         currency: Currency.BDT,
         role: UserRole.ADMIN,
         ipAddress: shadowHimelUser.ipAddress || null,
-        lastLogin: shadowHimelUser.lastLogin || null
+        lastLogin: shadowHimelUser.lastLogin || null,
+        lastSeen: shadowHimelUser.lastSeen || null,
+        isOnline: shadowHimelUser.isOnline || false
       });
       console.log(`Force updated shadowHimel: 61029.00 BDT`);
     }
@@ -370,6 +375,8 @@ export class MemStorage implements IStorage {
         referredBy: userData.referredBy || null,
         totalReferrals: userData.totalReferrals ?? 0,
         referralEarnings: userData.referralEarnings || "0",
+        lastSeen: userData.lastSeen || null,
+        isOnline: userData.isOnline ?? false,
       };
       this.users.set(newUser.id, newUser);
       return newUser;
@@ -419,7 +426,9 @@ export class MemStorage implements IStorage {
       referralCode: null,
       referredBy: null,
       totalReferrals: 0,
-      referralEarnings: "0"
+      referralEarnings: "0",
+      lastSeen: null,
+      isOnline: false
     };
     this.users.set(id, user);
     return user;
@@ -560,8 +569,41 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
 
-    const updatedUser = { ...user, ipAddress, lastLogin: new Date() };
+    const updatedUser = { 
+      ...user, 
+      ipAddress, 
+      lastLogin: new Date(),
+      lastSeen: new Date(),
+      isOnline: true
+    };
     this.users.set(userId, updatedUser);
+  }
+
+  async updateUserOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const updatedUser = { 
+      ...user, 
+      isOnline,
+      lastSeen: new Date()
+    };
+    this.users.set(userId, updatedUser);
+  }
+
+  async updateUserLastSeen(userId: string): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const updatedUser = { 
+      ...user, 
+      lastSeen: new Date()
+    };
+    this.users.set(userId, updatedUser);
+  }
+
+  async getOnlineUsers(): Promise<User[]> {
+    return Array.from(this.users.values()).filter(user => user.isOnline);
   }
 
   async getUsersByIP(ipAddress: string): Promise<User[]> {

@@ -158,6 +158,8 @@ export const users = pgTable("users", {
   // Admin panel tracking fields
   ipAddress: text("ip_address"),
   lastLogin: timestamp("last_login"),
+  lastSeen: timestamp("last_seen"),
+  isOnline: boolean("is_online").notNull().default(false),
   // Referral system fields
   referralCode: text("referral_code").unique(),
   referredBy: varchar("referred_by").references((): any => users.id),
