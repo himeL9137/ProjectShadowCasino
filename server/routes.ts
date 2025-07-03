@@ -5,6 +5,7 @@ import { setupAuth as setupReplitAuth, isAuthenticated } from "./replitAuth";
 import { setupAuth, authenticateJWT, isAdmin } from "./auth";
 import { setupWalletRoutes } from "./wallet";
 import { setupAdminRoutes } from "./admin";
+import { setupAdminAuditRoutes } from "./admin-audit";
 import { setupGameTransactions } from "./game-transactions";
 import { setupNotionRoutes } from "./notion-routes";
 import { SocketService } from "./socket";
@@ -71,6 +72,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup admin routes
   setupAdminRoutes(app);
+  
+  // Setup admin audit routes for transparency
+  setupAdminAuditRoutes(app);
 
   // Setup game transaction routes
   setupGameTransactions(app);

@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Search, UserPlus, Edit, Trash2, Ban, AlertTriangle, DollarSign, Play, Gamepad2 } from 'lucide-react';
+import { Loader2, Search, UserPlus, Edit, Trash2, Ban, AlertTriangle, DollarSign, Play, Gamepad2, Shield } from 'lucide-react';
 import { Currency } from '@shared/schema';
 import { adminApiCall, get, post } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -1298,7 +1298,19 @@ export default function AdminPage() {
   return (
     <MainLayout>
       <div className="py-10 px-4 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-10">Admin Dashboard</h1>
+        <div className="flex items-center justify-between mb-10">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/admin/audit'}
+              className="flex items-center gap-2"
+            >
+              <Shield className="h-4 w-4" />
+              View Audit Trail
+            </Button>
+          </div>
+        </div>
         
         <Tabs defaultValue="users" value={activeAdminTab} onValueChange={setActiveAdminTab}>
           <TabsList className="mb-8 grid grid-cols-4 md:w-[600px]">

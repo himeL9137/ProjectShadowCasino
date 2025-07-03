@@ -88,6 +88,12 @@ export interface IStorage {
     details?: any,
   ): Promise<void>;
 
+  // Admin audit operations for transparency
+  getAdminActions(limit?: number): Promise<any[]>;
+  getAdminActionsByAdmin(adminId: string, limit?: number): Promise<any[]>;
+  getAdminActionsByTarget(targetUserId: string, limit?: number): Promise<any[]>;
+  getAdminActionStats(): Promise<any>;
+
   // Notification operations
   addUserNotification(userId: string, message: string, type: string): Promise<void>;
   getUserNotifications(userId: string): Promise<any[]>;
@@ -127,6 +133,7 @@ export class MemStorage implements IStorage {
   private referrals: Map<number, Referral>;
   private referralSettings: ReferralSettings;
   private notifications: Map<string, any[]>;
+  private adminActions: Map<number, any>;
 
   currentUserId: number = 1;
   currentTransactionId: number = 1;
@@ -136,6 +143,7 @@ export class MemStorage implements IStorage {
   currentGameSettingId: number = 1;
   currentCustomGameId: number = 1;
   currentReferralId: number = 1;
+  currentAdminActionId: number = 1;
 
   sessionStore: session.SessionStore;
 
@@ -149,6 +157,7 @@ export class MemStorage implements IStorage {
     this.customGames = new Map();
     this.referrals = new Map();
     this.notifications = new Map();
+    this.adminActions = new Map();
     
     // Initialize referral settings with defaults
     this.referralSettings = {
@@ -748,15 +757,122 @@ export class MemStorage implements IStorage {
     targetUserId?: string,
     details?: any,
   ): Promise<void> {
-    // In a real database, you would log this to an admin_actions table
-    // For this in-memory implementation, we'll just log to console
-    console.log("Admin Action:", {
+    const id = this.currentAdminActionId++;
+    const adminAction = {
+      id,
       adminId,
-      actionType,
+      action: actionType,
       targetUserId,
       details,
-      timestamp: new Date(),
+      createdAt: new Date(),
+    };
+    
+    this.adminActions.set(id, adminAction);
+    
+    // Log to console for immediate visibility
+    console.log(`🔐 Admin Action Logged: ${actionType} by ${adminId}`, {
+      targetUserId,
+      details,
+      timestamp: new Date().toISOString(),
     });
+  }
+
+  // Admin audit operations for transparency
+  async getAdminActions(limit: number = 100): Promise<any[]> {
+    const actions = Array.from(this.adminActions.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
+    
+    // Enrich with admin username
+    const enrichedActions = await Promise.all(
+      actions.map(async (action) => {
+        const admin = await this.getUser(action.adminId);
+        return {
+          ...action,
+          adminUsername: admin?.username || "Unknown",
+        };
+      })
+    );
+    
+    return enrichedActions;
+  }
+
+  async getAdminActionsByAdmin(adminId: string, limit: number = 50): Promise<any[]> {
+    const actions = Array.from(this.adminActions.values())
+      .filter((action) => action.adminId === adminId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
+    
+    // Enrich with admin username
+    const enrichedActions = await Promise.all(
+      actions.map(async (action) => {
+        const admin = await this.getUser(action.adminId);
+        return {
+          ...action,
+          adminUsername: admin?.username || "Unknown",
+        };
+      })
+    );
+    
+    return enrichedActions;
+  }
+
+  async getAdminActionsByTarget(targetUserId: string, limit: number = 50): Promise<any[]> {
+    const actions = Array.from(this.adminActions.values())
+      .filter((action) => action.targetUserId === targetUserId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
+    
+    // Enrich with admin username
+    const enrichedActions = await Promise.all(
+      actions.map(async (action) => {
+        const admin = await this.getUser(action.adminId);
+        return {
+          ...action,
+          adminUsername: admin?.username || "Unknown",
+        };
+      })
+    );
+    
+    return enrichedActions;
+  }
+
+  async getAdminActionStats(): Promise<any> {
+    const allActions = Array.from(this.adminActions.values());
+    const totalActions = allActions.length;
+    
+    // Actions by type
+    const actionsByType = allActions.reduce((acc, action) => {
+      acc[action.action] = (acc[action.action] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    // Actions by admin
+    const actionsByAdmin = allActions.reduce((acc, action) => {
+      acc[action.adminId] = (acc[action.adminId] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    // Enrich admin stats with usernames
+    const enrichedActionsByAdmin = await Promise.all(
+      Object.entries(actionsByAdmin).map(async ([adminId, count]) => {
+        const admin = await this.getUser(adminId);
+        return {
+          adminId,
+          adminUsername: admin?.username || "Unknown",
+          count,
+        };
+      })
+    );
+    
+    return {
+      totalActions,
+      actionsByType: Object.entries(actionsByType).map(([action, count]) => ({
+        action,
+        count,
+      })),
+      actionsByAdmin: enrichedActionsByAdmin,
+    };
   }
 
   // Custom games operations

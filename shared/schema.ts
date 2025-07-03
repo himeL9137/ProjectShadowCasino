@@ -211,7 +211,7 @@ export const advertisements = pgTable("advertisements", {
   id: serial("id").primaryKey(),
   script: text("script").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  createdBy: integer("created_by")
+  createdBy: varchar("created_by")
     .notNull()
     .references(() => users.id),
 });
@@ -225,7 +225,7 @@ export const gameSettings = pgTable("game_settings", {
   winChance: real("win_chance").notNull().default(10), // percentage
   maxMultiplier: real("max_multiplier").notNull().default(1.1),
   lastUpdated: timestamp("last_updated").notNull().defaultNow(),
-  updatedBy: integer("updated_by").references(() => users.id),
+  updatedBy: varchar("updated_by").references(() => users.id),
 });
 
 // Schema for user registration
@@ -326,7 +326,7 @@ export const customGames = pgTable("custom_games", {
   description: text("description"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  createdBy: integer("created_by")
+  createdBy: varchar("created_by")
     .notNull()
     .references(() => users.id),
 });
@@ -351,10 +351,10 @@ export type InsertCustomGame = z.infer<typeof insertCustomGameSchema>;
 // Referrals table - tracks individual referral relationships and bonuses
 export const referrals = pgTable("referrals", {
   id: serial("id").primaryKey(),
-  referrerId: integer("referrer_id")
+  referrerId: varchar("referrer_id")
     .notNull()
     .references(() => users.id), // User who made the referral
-  refereeId: integer("referee_id")
+  refereeId: varchar("referee_id")
     .notNull()
     .references(() => users.id), // User who was referred
   referralCode: text("referral_code").notNull(), // Code used for referral
@@ -376,7 +376,7 @@ export const referralSettings = pgTable("referral_settings", {
   maxReferralsPerUser: integer("max_referrals_per_user").notNull().default(3), // Max 3 referrals per user
   isActive: boolean("is_active").notNull().default(true),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  updatedBy: integer("updated_by").references(() => users.id),
+  updatedBy: varchar("updated_by").references(() => users.id),
 });
 
 // Schema for referral operations

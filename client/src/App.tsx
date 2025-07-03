@@ -29,6 +29,7 @@ import ProfilePage from "@/pages/profile-page";
 import WalletPage from "@/pages/wallet-page";
 import TransactionHistoryPage from "@/pages/transaction-history-page";
 import AdminPage from "@/pages/admin-page";
+import AdminAuditPage from "@/pages/AdminAuditPage";
 import NewAuthPage from "@/pages/new-auth-page";
 import GamesPage from "@/pages/games-page";
 import HtmlGamePage from "@/pages/html-game-page";
@@ -938,6 +939,7 @@ export default function App() {
 
                 {/* Admin Panel - Only accessible by authorized admins */}
                 <AdminProtectedRoute path="/admin" component={AdminPage} />
+                <AdminProtectedRoute path="/admin/audit" component={AdminAuditPage} />
                 <ProtectedRoute path="/html-game/:id" component={HtmlGamePage} />
 
                 {/* 404 Not Found page */}
