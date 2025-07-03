@@ -447,9 +447,12 @@ export function setupAuth(app: Express) {
             .json({ message: "Invalid username or password" });
         }
 
-        // Update user's IP address and last login
+        // Update user's IP address, last login, and online status
         try {
           await storage.updateUserLogin(user.id, clientIP, savePassword);
+          await storage.updateUserOnlineStatus(user.id, true);
+          await storage.updateUserLastSeen(user.id);
+          console.log(`User ${user.username} marked as online during login`);
         } catch (updateError) {
           console.error("Error updating user login info:", updateError);
         }

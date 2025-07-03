@@ -228,17 +228,19 @@ export function setupAdminRoutes(app: Express) {
       console.log("Admin request to fetch users received from:", req.user?.username || "Unknown");
       const users = await storage.getAllUsers();
       
-      // Enhance user data with additional information
+      // Enhance user data with additional information including online status
       const enhancedUsers = users.map(user => {
-        // Cast to the appropriate types
+        // Cast to the appropriate types and include isOnline and lastSeen
         return {
           ...user,
           ipAddress: (user.ipAddress as string) || "Unknown",
-          lastLogin: (user.lastLogin as Date) || null
+          lastLogin: (user.lastLogin as Date) || null,
+          isOnline: user.isOnline || false,
+          lastSeen: user.lastSeen || null
         } as AdminUser;
       });
       
-      console.log(`Sending back ${enhancedUsers.length} users`);
+      console.log(`Sending back ${enhancedUsers.length} users with online status`);
       res.json(enhancedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);

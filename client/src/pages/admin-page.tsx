@@ -122,6 +122,7 @@ interface AdminUser {
   createdAt: string;
   ipAddress?: string;
   lastLogin?: string;
+  lastSeen?: string;
 }
 
 interface Transaction {
@@ -141,6 +142,25 @@ interface UserStats {
   mutedUsers: number;
   bannedUsers: number;
   lastLogins: Array<{ id: number, username: string, lastLogin: string }>;
+}
+
+// Helper function to format lastSeen time
+function formatLastSeen(lastSeenStr?: string): string {
+  if (!lastSeenStr) return "Never";
+  
+  const lastSeen = new Date(lastSeenStr);
+  const now = new Date();
+  const diffMs = now.getTime() - lastSeen.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  
+  return lastSeen.toLocaleDateString();
 }
 
 // User Management Tab Component
@@ -329,23 +349,28 @@ function UserManagementTab() {
                 <TableCell>{user.ipAddress || "Unknown"}</TableCell>
                 <TableCell>{`${user.balance} ${user.currency}`}</TableCell>
                 <TableCell>
-                  {user.isBanned ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      Banned
+                  <div className="flex flex-col gap-1">
+                    {user.isBanned ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Banned
+                      </span>
+                    ) : user.isMuted ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Muted
+                      </span>
+                    ) : user.isOnline ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Inactive
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {user.isOnline ? "Online now" : `Last seen: ${formatLastSeen(user.lastSeen)}`}
                     </span>
-                  ) : user.isMuted ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Muted
-                    </span>
-                  ) : user.isOnline ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      Inactive
-                    </span>
-                  )}
+                  </div>
                 </TableCell>
                 <TableCell>{user.lastLogin || "Never"}</TableCell>
                 <TableCell>

@@ -114,6 +114,15 @@ export class SocketService {
         username: user.username,
       });
 
+      // Mark user as online when they connect
+      try {
+        await storage.updateUserOnlineStatus(user.id, true);
+        await storage.updateUserLastSeen(user.id);
+        console.log(`User ${user.username} marked as online on WebSocket connect`);
+      } catch (error) {
+        console.error("Failed to update user online status:", error);
+      }
+
       // Automatically send chat history to newly connected authenticated client
       this.sendChatHistory(socket, user);
 
@@ -152,7 +161,17 @@ export class SocketService {
         }
       });
 
-      socket.on("close", () => {
+      socket.on("close", async () => {
+        const client = this.clients.get(socket);
+        if (client) {
+          // Mark user as offline when they disconnect
+          try {
+            await storage.updateUserOnlineStatus(client.userId, false);
+            console.log(`User ${client.username} marked as offline on disconnect`);
+          } catch (error) {
+            console.error("Failed to update user offline status:", error);
+          }
+        }
         this.clients.delete(socket);
         console.log("Client disconnected from WebSocket");
       });
