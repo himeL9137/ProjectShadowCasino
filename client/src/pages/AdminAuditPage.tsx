@@ -15,8 +15,10 @@ interface AdminAction {
   adminUsername: string;
   action: AdminActionType;
   targetUserId?: string;
+  targetUsername?: string;
   details?: any;
   createdAt: string;
+  ipAddress?: string;
 }
 
 interface AdminStats {
@@ -111,18 +113,112 @@ export default function AdminAuditPage() {
 
   // Format action details for display
   const formatActionDetails = (action: AdminAction) => {
-    if (!action.details) return 'No details';
+    if (!action.details) return 'No details available';
     
     const details = action.details;
+    
+    // Create a formatted display of all details
+    const formatDetailValue = (value: any): string => {
+      if (value === null || value === undefined) return 'N/A';
+      if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+      if (typeof value === 'object') return JSON.stringify(value, null, 2);
+      return String(value);
+    };
+
     switch (action.action) {
       case AdminActionType.EDIT_BALANCE:
-        return `Amount: ${details.amount || 'N/A'}, Currency: ${details.fromCurrency || 'N/A'}, Reason: ${details.reason || 'No reason provided'}`;
+        return (
+          <div className="space-y-1">
+            <div><span className="font-medium">Action:</span> {details.action || 'N/A'}</div>
+            <div><span className="font-medium">Amount:</span> {details.amount || 'N/A'} {details.fromCurrency || 'N/A'}</div>
+            {details.toAmount && (
+              <div><span className="font-medium">Converted Amount:</span> {details.toAmount} {details.toCurrency || 'N/A'}</div>
+            )}
+            <div><span className="font-medium">Reason:</span> {details.reason || 'No reason provided'}</div>
+            {details.transactionId && (
+              <div><span className="font-medium">Transaction ID:</span> {details.transactionId}</div>
+            )}
+          </div>
+        );
+        
       case AdminActionType.BAN_USER:
-        return `Status: ${details.status || 'N/A'}, Notification: ${details.notification || 'None'}`;
+        return (
+          <div className="space-y-1">
+            <div><span className="font-medium">Status:</span> {details.status || formatDetailValue(details.isBanned)}</div>
+            {details.notification && (
+              <div><span className="font-medium">Notification:</span> {details.notification}</div>
+            )}
+            {details.reason && (
+              <div><span className="font-medium">Reason:</span> {details.reason}</div>
+            )}
+          </div>
+        );
+        
       case AdminActionType.MUTE_USER:
-        return `Muted: ${details.isMuted ? 'Yes' : 'No'}`;
+        return (
+          <div className="space-y-1">
+            <div><span className="font-medium">Muted:</span> {formatDetailValue(details.isMuted)}</div>
+            {details.duration && (
+              <div><span className="font-medium">Duration:</span> {details.duration}</div>
+            )}
+            {details.reason && (
+              <div><span className="font-medium">Reason:</span> {details.reason}</div>
+            )}
+          </div>
+        );
+        
+      case AdminActionType.APPROVE_WITHDRAWAL:
+      case AdminActionType.APPROVE_DEPOSIT:
+        return (
+          <div className="space-y-1">
+            <div><span className="font-medium">Transaction ID:</span> {details.transactionId || 'N/A'}</div>
+            <div><span className="font-medium">Amount:</span> {details.amount || 'N/A'} {details.currency || 'N/A'}</div>
+            {details.method && (
+              <div><span className="font-medium">Method:</span> {details.method}</div>
+            )}
+            {details.reason && (
+              <div><span className="font-medium">Reason:</span> {details.reason}</div>
+            )}
+          </div>
+        );
+        
+      case AdminActionType.EDIT_GAME_ODDS:
+        return (
+          <div className="space-y-1">
+            <div><span className="font-medium">Game Type:</span> {details.gameType || 'N/A'}</div>
+            <div><span className="font-medium">Win Chance:</span> {details.winChance || 'N/A'}%</div>
+            <div><span className="font-medium">Max Multiplier:</span> {details.maxMultiplier || 'N/A'}x</div>
+            {details.reason && (
+              <div><span className="font-medium">Reason:</span> {details.reason}</div>
+            )}
+          </div>
+        );
+        
+      case AdminActionType.ADD_ADVERTISEMENT:
+        return (
+          <div className="space-y-1">
+            <div><span className="font-medium">Ad Type:</span> {details.type || 'N/A'}</div>
+            {details.title && (
+              <div><span className="font-medium">Title:</span> {details.title}</div>
+            )}
+            {details.placement && (
+              <div><span className="font-medium">Placement:</span> {details.placement}</div>
+            )}
+          </div>
+        );
+        
       default:
-        return JSON.stringify(details);
+        // For any other action types, display all available fields
+        return (
+          <div className="space-y-1">
+            {Object.entries(details).map(([key, value]) => (
+              <div key={key}>
+                <span className="font-medium">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</span>{' '}
+                {formatDetailValue(value)}
+              </div>
+            ))}
+          </div>
+        );
     }
   };
 
@@ -340,18 +436,32 @@ export default function AdminAuditPage() {
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="font-medium">Admin ID:</span> {action.adminId}
+                            <div className="space-y-1">
+                              <div><span className="font-medium">Admin ID:</span> {action.adminId}</div>
+                              <div><span className="font-medium">Admin Username:</span> {action.adminUsername || 'Unknown'}</div>
                             </div>
                             {action.targetUserId && (
-                              <div>
-                                <span className="font-medium">Target User:</span> {action.targetUserId}
+                              <div className="space-y-1">
+                                <div><span className="font-medium">Target User ID:</span> {action.targetUserId}</div>
+                                <div><span className="font-medium">Target Username:</span> {action.targetUsername || 'User ID: ' + action.targetUserId}</div>
                               </div>
                             )}
                           </div>
                           
-                          <div className="text-sm">
-                            <span className="font-medium">Details:</span> {formatActionDetails(action)}
+                          <div className="text-sm mt-3 p-3 bg-muted/30 rounded-md">
+                            <div className="font-medium mb-2 text-base">Action Details:</div>
+                            {formatActionDetails(action)}
+                          </div>
+                          
+                          {action.ipAddress && (
+                            <div className="text-sm mt-2">
+                              <span className="font-medium">IP Address:</span> {action.ipAddress}
+                            </div>
+                          )}
+                          
+                          <div className="text-xs text-muted-foreground mt-2">
+                            <span className="font-medium">Action ID:</span> #{action.id} | 
+                            <span className="ml-2 font-medium">Timestamp:</span> {new Date(action.createdAt).toISOString()}
                           </div>
                         </div>
                       </div>
