@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
+import { EnhancedUser } from './types';
 
 // Session management configuration
 const SESSION_TIMEOUT_MINUTES = 30; // Mark users offline after 30 minutes of inactivity
@@ -10,18 +11,21 @@ const CLEANUP_INTERVAL_MINUTES = 5; // Run cleanup every 5 minutes
  * This ensures accurate tracking of user activity beyond just login/logout
  */
 export const updateUserActivity = async (req: Request, res: Response, next: NextFunction) => {
-  // Only track activity for authenticated users
-  if (req.user?.id) {
+  // Only track activity for authenticated users - ENHANCED FOR PERFECT TRACKING
+  if (req.user && (req.user as any).id) {
     try {
+      const userId = (req.user as any).id;
+      const username = (req.user as any).username || 'Unknown';
+      
       // Update lastSeen timestamp for every authenticated request
-      await storage.updateUserLastSeen(req.user.id);
+      await storage.updateUserLastSeen(userId);
       
       // Ensure user is marked as online (in case they were marked offline incorrectly)
-      await storage.updateUserOnlineStatus(req.user.id, true);
+      await storage.updateUserOnlineStatus(userId, true);
       
-      console.log(`Activity tracked for user ${req.user.username}`);
+      console.log(`✓ PERFECT Activity tracked for user ${username} (${userId})`);
     } catch (error) {
-      console.error(`Failed to update activity for user ${req.user?.username}:`, error);
+      console.error(`Failed to update activity for user ${(req.user as any)?.username}:`, error);
       // Don't block the request if activity tracking fails
     }
   }

@@ -111,7 +111,7 @@ export function setupAdminRoutes(app: Express) {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user!.id,
+        (req.user as any)!.id,
         AdminActionType.EDIT_BALANCE,
         userId,
         { 
@@ -122,7 +122,7 @@ export function setupAdminRoutes(app: Express) {
           toCurrency: user.currency,
           reason: reason || "Admin adjustment",
           transactionId: transaction.id,
-          adminUsername: req.user!.username || "Unknown",
+          adminUsername: (req.user as any)!.username || "Unknown",
           targetUsername: user.username || "Unknown"
         }
       );
