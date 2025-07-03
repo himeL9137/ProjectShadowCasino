@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApiCall } from "@/lib/api";
+import { useTranslation } from '@/providers/LanguageProvider';
 
 type User = {
   id: number;
@@ -26,6 +27,7 @@ type User = {
 
 export function UserManagement() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,11 +76,11 @@ export function UserManagement() {
         setUsers(mockUsers);
       } catch (err) {
         console.error("Error fetching users:", err);
-        setError(err instanceof Error ? err.message : "Failed to load users");
+        setError(err instanceof Error ? err.message : t('admin.errorLoadingUsers'));
         
         toast({
-          title: "Error Loading Users",
-          description: err instanceof Error ? err.message : "An error occurred while loading users",
+          title: t('admin.errorLoadingUsers'),
+          description: err instanceof Error ? err.message : t('admin.errorUpdatingUser'),
           variant: "destructive",
         });
       } finally {
@@ -99,15 +101,15 @@ export function UserManagement() {
       ));
       
       toast({
-        title: `User ${isBanned ? "Banned" : "Unbanned"}`,
-        description: `User has been ${isBanned ? "banned" : "unbanned"} successfully`,
+        title: isBanned ? t('admin.userBanned') : t('admin.userUnbanned'),
+        description: isBanned ? t('admin.userBannedSuccess') : t('admin.userUnbannedSuccess'),
       });
     } catch (err) {
       console.error("Error toggling user ban:", err);
       
       toast({
-        title: "Action Failed",
-        description: err instanceof Error ? err.message : "An error occurred while updating user",
+        title: t('admin.actionFailed'),
+        description: err instanceof Error ? err.message : t('admin.errorUpdatingUser'),
         variant: "destructive",
       });
     }
@@ -123,15 +125,15 @@ export function UserManagement() {
       ));
       
       toast({
-        title: `User ${isMuted ? "Muted" : "Unmuted"}`,
-        description: `User has been ${isMuted ? "muted" : "unmuted"} successfully`,
+        title: isMuted ? t('admin.userMuted') : t('admin.userUnmuted'),
+        description: isMuted ? t('admin.userMutedSuccess') : t('admin.userUnmutedSuccess'),
       });
     } catch (err) {
       console.error("Error toggling user mute:", err);
       
       toast({
-        title: "Action Failed",
-        description: err instanceof Error ? err.message : "An error occurred while updating user",
+        title: t('admin.actionFailed'),
+        description: err instanceof Error ? err.message : t('admin.errorUpdatingUser'),
         variant: "destructive",
       });
     }
@@ -150,7 +152,7 @@ export function UserManagement() {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        <span className="ml-3">Loading users...</span>
+        <span className="ml-3">{t('admin.loadingUsers')}</span>
       </div>
     );
   }
@@ -160,13 +162,13 @@ export function UserManagement() {
       <div className="bg-red-500/10 border border-red-500/30 rounded-md p-4 flex items-start">
         <AlertCircle className="text-red-500 mr-3 mt-0.5 flex-shrink-0" />
         <div>
-          <h3 className="text-red-500 font-medium mb-1">Error Loading Users</h3>
+          <h3 className="text-red-500 font-medium mb-1">{t('admin.errorLoadingUsers')}</h3>
           <p className="text-red-400 text-sm">{error}</p>
           <button 
             className="mt-2 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded text-sm"
             onClick={() => window.location.reload()}
           >
-            Try Again
+            {t('admin.tryAgain')}
           </button>
         </div>
       </div>

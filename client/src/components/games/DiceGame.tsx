@@ -96,14 +96,14 @@ export function DiceGame() {
       // Show toast
       if (data.isWin) {
         toast({
-          title: "You won!",
-          description: `Winning combination! You won ${formatCurrency(data.winAmount, currentCurrency)}!`,
+          title: t('games.youWon'),
+          description: `${t('games.youWon')} ${formatCurrency(data.winAmount, currentCurrency)}!`,
           variant: "default",
         });
       } else {
         toast({
-          title: "You lost",
-          description: "No winning combination this time",
+          title: t('games.youLost'),
+          description: t('games.youLost'),
           variant: "destructive",
         });
       }
@@ -113,7 +113,7 @@ export function DiceGame() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: t('ui.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -132,8 +132,8 @@ export function DiceGame() {
     const betValue = parseFloat(betAmount);
     if (isNaN(betValue) || betValue <= 0) {
       toast({
-        title: "Invalid bet",
-        description: "Please enter a valid bet amount",
+        title: t('dice.invalidBet'),
+        description: t('dice.betAmountError'),
         variant: "destructive",
       });
       return;

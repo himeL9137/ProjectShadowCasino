@@ -58,14 +58,14 @@ export function SlotsGame() {
       // Show toast
       if (data.isWin) {
         toast({
-          title: "You won!",
-          description: `You won ${data.winAmount} ${currentCurrency}`,
+          title: t('games.youWon'),
+          description: `${t('games.youWon')} ${data.winAmount} ${currentCurrency}`,
           variant: "default",
         });
       } else {
         toast({
-          title: "You lost",
-          description: `You lost ${betAmount} ${currentCurrency}`,
+          title: t('games.youLost'),
+          description: `${t('games.youLost')} ${betAmount} ${currentCurrency}`,
           variant: "destructive",
         });
       }
@@ -75,7 +75,7 @@ export function SlotsGame() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: t('ui.error'),
         description: error.message,
         variant: "destructive",
       });

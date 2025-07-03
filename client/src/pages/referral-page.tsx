@@ -10,6 +10,7 @@ import { Copy, Gift, Users, DollarSign, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { useTranslation } from '@/providers/LanguageProvider';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -59,6 +60,7 @@ export function ReferralPage() {
   const [referralCodeInput, setReferralCodeInput] = useState("");
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Fetch user's referral data
   const { data: referrals = [], isLoading: referralsLoading } = useQuery<Referral[]>({
@@ -78,15 +80,15 @@ export function ReferralPage() {
     },
     onSuccess: (data) => {
       toast({
-        title: "Referral Code Generated",
-        description: `Your referral code is: ${data.referralCode}`,
+        title: t('referrals.codeGenerated'),
+        description: `${t('referrals.yourCodeIs')} ${data.referralCode}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to generate referral code",
+        title: t('ui.error'),
+        description: error.message || t('referrals.generateError'),
         variant: "destructive",
       });
     },
@@ -101,8 +103,8 @@ export function ReferralPage() {
     },
     onSuccess: (data) => {
       toast({
-        title: "Success!",
-        description: data.message || "Referral code applied successfully! Both you and your referrer have received 30 BDT bonus.",
+        title: t('referrals.success'),
+        description: data.message || t('referrals.applied'),
       });
       setReferralCodeInput("");
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
@@ -111,8 +113,8 @@ export function ReferralPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to apply referral code",
+        title: t('ui.error'),
+        description: error.message || t('referrals.applyError'),
         variant: "destructive",
       });
     },
@@ -126,8 +128,8 @@ export function ReferralPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copied!",
-      description: "Referral code copied to clipboard",
+      title: t('referrals.copied'),
+      description: t('referrals.copiedDesc'),
     });
   };
 
@@ -143,10 +145,10 @@ export function ReferralPage() {
       <div className="container mx-auto px-4 py-8 space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Referral Program
+            {t('referrals.title')}
           </h1>
           <p className="text-muted-foreground">
-            Refer friends and both get {settings?.signupBonus || "30"} {user?.currency || 'BDT'} instantly! You can invite up to {settings?.maxReferralsPerUser || 3} people.
+            {t('referrals.enterCode')} {settings?.signupBonus || "30"} {user?.currency || 'BDT'} {t('referrals.instantly')} You can invite up to {settings?.maxReferralsPerUser || 3} people.
           </p>
         </div>
 
@@ -155,7 +157,7 @@ export function ReferralPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Gift className="h-5 w-5 text-purple-600" />
-              Program Benefits
+              {t('referrals.programBenefits')}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid md:grid-cols-3 gap-4">
@@ -163,27 +165,27 @@ export function ReferralPage() {
               <div className="h-12 w-12 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                 <DollarSign className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="font-semibold">Instant Bonus</h3>
+              <h3 className="font-semibold">{t('referrals.instantBonus')}</h3>
               <p className="text-sm text-muted-foreground">
-                Earn {settings?.signupBonus || "30"} {user?.currency || 'BDT'} for your first {maxEarningReferrals} successful referrals
+                {t('referrals.earnForFirst')} {settings?.signupBonus || "30"} {user?.currency || 'BDT'} {t('referrals.forFirstReferrals')} {maxEarningReferrals} {t('referrals.successfulReferrals')}
               </p>
             </div>
             <div className="text-center space-y-2">
               <div className="h-12 w-12 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="font-semibold">Build Your Network</h3>
+              <h3 className="font-semibold">{t('referrals.buildNetwork')}</h3>
               <p className="text-sm text-muted-foreground">
-                Continue referring friends even after earning limit - help them get bonuses!
+                {t('referrals.continueReferring')}
               </p>
             </div>
             <div className="text-center space-y-2">
               <div className="h-12 w-12 mx-auto bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
                 <Star className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold">Premium Rewards</h3>
+              <h3 className="font-semibold">{t('referrals.premiumRewards')}</h3>
               <p className="text-sm text-muted-foreground">
-                {canStillEarn ? `${remainingEarningSlots} slots remaining` : "All reward slots used"} for bonus earnings
+                {canStillEarn ? `${remainingEarningSlots} ${t('referrals.slotsRemaining')}` : t('referrals.allSlotsUsed')} {t('referrals.forBonusEarnings')}
               </p>
             </div>
           </CardContent>
@@ -197,7 +199,7 @@ export function ReferralPage() {
                 <div className="text-2xl font-bold text-green-600">
                   {totalEarnings.toFixed(2)} {user?.currency || 'BDT'}
                 </div>
-                <p className="text-sm text-muted-foreground">Total Earnings</p>
+                <p className="text-sm text-muted-foreground">{t('referrals.totalEarnings')}</p>
               </div>
             </CardContent>
           </Card>
@@ -205,7 +207,7 @@ export function ReferralPage() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">{activeReferrals}</div>
-                <p className="text-sm text-muted-foreground">Active Referrals</p>
+                <p className="text-sm text-muted-foreground">{t('referrals.activeReferrals')}</p>
               </div>
             </CardContent>
           </Card>
@@ -213,7 +215,7 @@ export function ReferralPage() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">{rewardedReferrals}/{maxEarningReferrals}</div>
-                <p className="text-sm text-muted-foreground">Rewarded Referrals</p>
+                <p className="text-sm text-muted-foreground">{t('referrals.rewardedReferrals')}</p>
               </div>
             </CardContent>
           </Card>
@@ -222,9 +224,9 @@ export function ReferralPage() {
         {/* My Referral Code */}
         <Card>
           <CardHeader>
-            <CardTitle>Your Referral Code</CardTitle>
+            <CardTitle>{t('referrals.yourReferralCode')}</CardTitle>
             <CardDescription>
-              Share this code with friends to help them get started and earn bonuses!
+              {t('referrals.shareCodeDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -245,19 +247,19 @@ export function ReferralPage() {
               </div>
             ) : (
               <div className="text-center space-y-4">
-                <p className="text-muted-foreground">You don't have a referral code yet.</p>
+                <p className="text-muted-foreground">{t('referrals.noCodeYet')}</p>
                 <Button
                   onClick={() => generateCodeMutation.mutate()}
                   disabled={generateCodeMutation.isPending}
                 >
-                  {generateCodeMutation.isPending ? "Generating..." : "Generate Referral Code"}
+                  {generateCodeMutation.isPending ? t('referrals.generating') : t('referrals.generateReferralCode')}
                 </Button>
               </div>
             )}
             
             {user?.referralCode && (
               <div className="space-y-2">
-                <Label>Share your referral link:</Label>
+                <Label>{t('referrals.shareReferralLink')}</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     value={`${window.location.origin}/signup?ref=${user.referralCode}`}
@@ -280,19 +282,19 @@ export function ReferralPage() {
         {/* Use Referral Code */}
         <Card>
           <CardHeader>
-            <CardTitle>Have a Referral Code?</CardTitle>
+            <CardTitle>{t('referrals.haveCode')}</CardTitle>
             <CardDescription>
-              Enter a friend's referral code and both of you get {settings?.signupBonus || "30"} {user?.currency || 'BDT'} instantly!
+              {t('referrals.enterCode')} {settings?.signupBonus || "30"} {user?.currency || 'BDT'} {t('referrals.instantly')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="referralCode">Referral Code</Label>
+              <Label htmlFor="referralCode">{t('referrals.referralCodeLabel')}</Label>
               <Input
                 id="referralCode"
                 value={referralCodeInput}
                 onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())}
-                placeholder="Enter referral code"
+                placeholder={t('referrals.enterCodePlaceholder')}
                 className="font-mono"
               />
             </div>
@@ -301,12 +303,12 @@ export function ReferralPage() {
               disabled={!referralCodeInput || useCodeMutation.isPending}
               className="w-full"
             >
-              {useCodeMutation.isPending ? "Applying..." : "Apply Referral Code"}
+              {useCodeMutation.isPending ? t('referrals.applying') : t('referrals.applyCode')}
             </Button>
             {user?.referredBy && (
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <p className="text-sm text-green-700 dark:text-green-300">
-                  ✓ You've already used a referral code and helped a friend earn bonus credits!
+                  {t('referrals.alreadyUsed')}
                 </p>
               </div>
             )}
@@ -317,9 +319,9 @@ export function ReferralPage() {
         {referrals.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Your Referrals</CardTitle>
+              <CardTitle>{t('referrals.yourReferrals')}</CardTitle>
               <CardDescription>
-                Track your referral history and earnings
+                {t('referrals.trackHistory')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -330,9 +332,9 @@ export function ReferralPage() {
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
                     <div className="space-y-1">
-                      <div className="font-medium">Referral #{referral.id}</div>
+                      <div className="font-medium">{t('referrals.referralNumber')}{referral.id}</div>
                       <div className="text-sm text-muted-foreground">
-                        Code: {referral.referralCode}
+                        {t('referrals.code')}: {referral.referralCode}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {new Date(referral.createdAt).toLocaleDateString()}
@@ -345,7 +347,9 @@ export function ReferralPage() {
                           referral.status === "active" ? "secondary" : "outline"
                         }
                       >
-                        {referral.status}
+                        {referral.status === 'rewarded' ? t('referrals.rewarded') : 
+                         referral.status === 'active' ? t('referrals.active') : 
+                         t('referrals.pending')}
                       </Badge>
                       <div className="text-sm font-medium">
                         +{parseFloat(referral.totalEarnings || "0").toFixed(2)} {user?.currency || 'BDT'}
