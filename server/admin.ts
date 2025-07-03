@@ -3,6 +3,7 @@ import { authenticateJWT, isAdmin } from "./auth";
 import { storage } from "./storage";
 import { AdminActionType, Currency, TransactionType, User } from "@shared/schema";
 import { enhancedCurrencyConverter } from "./utils/enhanced-currency-converter";
+import { userActivityTracker } from "./user-activity-tracker";
 
 // Admin User interface for responses
 interface AdminUser extends User {
@@ -222,28 +223,59 @@ export function setupAdminRoutes(app: Express) {
     }
   });
 
-  // Get all users with sensitive information (for admin panel)
+  // Get all users with sensitive information (for admin panel) - ENHANCED WITH ACCURATE ACTIVITY TRACKING
   app.get("/api/admin/users", adminMiddleware, async (req: Request, res: Response) => {
     try {
       console.log("Admin request to fetch users received from:", req.user?.username || "Unknown");
       const users = await storage.getAllUsers();
       
-      // Enhance user data with additional information including online status
+      // Enhance user data with ACCURATE activity status from activity tracker
       const enhancedUsers = users.map(user => {
-        // Cast to the appropriate types and include isOnline and lastSeen
+        // Get real-time activity status from the enhanced activity tracker
+        const activityStatus = userActivityTracker.getUserActivityStatus(user.id);
+        
         return {
           ...user,
           ipAddress: (user.ipAddress as string) || "Unknown",
           lastLogin: (user.lastLogin as Date) || null,
-          isOnline: user.isOnline || false,
-          lastSeen: user.lastSeen || null
+          isOnline: activityStatus.isActive,  // FIXED: Use real activity status instead of static storage value
+          lastSeen: activityStatus.lastSeen || user.lastSeen,  // Use most recent activity data
+          status: activityStatus.isActive ? 'Active' : 'Offline'  // Clear status indicator
         } as AdminUser;
       });
       
-      console.log(`Sending back ${enhancedUsers.length} users with online status`);
+      const summary = userActivityTracker.getActivitySummary();
+      console.log(`✓ Enhanced admin users data with accurate activity tracking:`);
+      console.log(`  - Total users: ${enhancedUsers.length}`);
+      console.log(`  - Actually active: ${summary.totalActive}`);
+      console.log(`  - Active users: ${summary.activeUsers.join(', ') || 'none'}`);
+      
       res.json(enhancedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // New debugging endpoint to check activity tracker status
+  app.get("/api/admin/activity-status", adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const summary = userActivityTracker.getActivitySummary();
+      const activeUsers = userActivityTracker.getActiveUsers();
+      
+      res.json({
+        summary,
+        activeUsers: activeUsers.map(session => ({
+          userId: session.userId,
+          username: session.username,
+          lastActivity: session.lastActivity,
+          isActive: session.isActive,
+          timeSinceLastActivity: Date.now() - session.lastActivity.getTime()
+        })),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error getting activity status:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

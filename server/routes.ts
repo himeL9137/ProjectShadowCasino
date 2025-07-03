@@ -11,6 +11,8 @@ import { setupNotionRoutes } from "./notion-routes";
 import { SocketService } from "./socket";
 import { GameController } from "./games";
 import { startExchangeRateUpdates } from "./utils/enhanced-currency-converter";
+import { startSessionCleanup, updateUserActivity } from "./session-middleware";
+import { userActivityTracker, trackUserActivity } from "./user-activity-tracker";
 import { profilePictureUpload, deleteOldProfilePicture, getProfilePictureUrl, DEFAULT_AVATAR_URL } from "./upload-middleware";
 import {
   Currency,
@@ -49,6 +51,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Make the stop function available globally if needed
   (global as any).stopExchangeRateUpdates = stopExchangeRateUpdates;
 
+  // Start automatic session cleanup for user activity tracking
+  const stopSessionCleanup = startSessionCleanup();
+  // Make the stop function available globally if needed
+  (global as any).stopSessionCleanup = stopSessionCleanup;
+
   // Setup Replit authentication routes
   await setupReplitAuth(app);
   
@@ -67,6 +74,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup legacy authentication routes (for backward compatibility)
   setupAuth(app);
 
+  // Add enhanced activity tracking middleware for all authenticated API routes
+  app.use('/api', trackUserActivity);
+  
   // Setup wallet routes
   setupWalletRoutes(app);
 

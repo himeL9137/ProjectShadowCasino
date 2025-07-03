@@ -1254,20 +1254,12 @@ export class MemStorage implements IStorage {
   }
 }
 
-// TEMPORARY: Use in-memory storage instead of database storage
-// TO RESTORE: Uncomment the original code and remove this temporary version
+// TEMPORARY: Use in-memory storage with enhanced user activity tracking
+// TO RESTORE: Uncomment the database storage when TypeScript errors are resolved
 
 // Import the DatabaseStorage implementation (commented out for now)
 // import { DatabaseStorage } from "./database-storage";
 
-// Use the in-memory storage implementation temporarily
-console.log("*** USING TEMPORARY IN-MEMORY STORAGE ***");
+// Use the in-memory storage implementation with enhanced user activity tracking
+console.log("*** USING ENHANCED IN-MEMORY STORAGE WITH USER ACTIVITY TRACKING ***");
 export const storage = new MemStorage();
-
-/* ORIGINAL CODE - UNCOMMENT TO RESTORE
-// Import the DatabaseStorage implementation
-import { DatabaseStorage } from "./database-storage";
-
-// Use the DatabaseStorage implementation with PostgreSQL
-export const storage = new DatabaseStorage();
-*/

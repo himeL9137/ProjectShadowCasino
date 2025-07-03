@@ -732,4 +732,50 @@ export class DatabaseStorage implements IStorage {
       console.error("Error processing referral bonus:", error);
     }
   }
+
+  // User activity tracking methods for proper online status management
+  async updateUserOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        isOnline,
+        lastSeen: new Date() 
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserLastSeen(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        lastSeen: new Date() 
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getOnlineUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.isOnline, true));
+  }
+
+  async updateUserLogin(userId: string, ipAddress: string, savePassword?: boolean): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        ipAddress,
+        lastLogin: new Date(),
+        lastSeen: new Date(),
+        isOnline: true
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getUsersByIP(ipAddress: string): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.ipAddress, ipAddress));
+  }
 }

@@ -4,6 +4,7 @@ import { promisify } from "util";
 import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { User, UserRole, Currency } from "@shared/schema";
+import { userActivityTracker } from "./user-activity-tracker";
 
 // Extend the Express Request type to include our user property
 declare global {
@@ -215,10 +216,11 @@ export const authenticateJWT = async (
     req.user = decoded;
     console.log("JWT token verified for user:", decoded.username, "with role:", decoded.role);
 
-    // Update user session tracking
+    // Update user session tracking with enhanced activity monitoring
     try {
       await storage.updateUserLastSeen(decoded.id);
       await storage.updateUserOnlineStatus(decoded.id, true);
+      console.log(`User ${decoded.username} activity tracked (IP: ${currentIP})`);
     } catch (error) {
       console.error("Failed to update user session tracking:", error);
     }
@@ -447,12 +449,15 @@ export function setupAuth(app: Express) {
             .json({ message: "Invalid username or password" });
         }
 
-        // Update user's IP address, last login, and online status
+        // Update user's IP address, last login, and online status with enhanced tracking
         try {
-          await storage.updateUserLogin(user.id, clientIP, savePassword);
+          await storage.updateUserLogin(user.id, clientIP);
           await storage.updateUserOnlineStatus(user.id, true);
           await storage.updateUserLastSeen(user.id);
-          console.log(`User ${user.username} marked as online during login`);
+          
+          // Use enhanced activity tracker for proper status management
+          await userActivityTracker.markUserActive(user.id, user.username, clientIP);
+          console.log(`User ${user.username} marked as ACTIVE during login with enhanced tracking`);
         } catch (updateError) {
           console.error("Error updating user login info:", updateError);
         }
@@ -492,10 +497,13 @@ export function setupAuth(app: Express) {
 
   app.post("/api/logout", authenticateJWT, async (req, res) => {
     try {
-      // Mark user as offline before logout
+      // Mark user as offline before logout with enhanced tracking
       if (req.user?.id) {
         await storage.updateUserOnlineStatus(req.user.id, false);
-        console.log(`User ${req.user.username} marked as offline`);
+        
+        // Use enhanced activity tracker for proper status management
+        await userActivityTracker.markUserInactive(req.user.id, 'logout');
+        console.log(`User ${req.user.username} marked as INACTIVE (logout) with enhanced tracking`);
       }
     } catch (error) {
       console.error("Failed to update user online status during logout:", error);
