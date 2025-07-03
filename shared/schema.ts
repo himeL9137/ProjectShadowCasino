@@ -106,9 +106,22 @@ export enum AdminActionType {
   APPROVE_WITHDRAWAL = "approve_withdrawal",
   APPROVE_DEPOSIT = "approve_deposit",
   BAN_USER = "ban_user",
+  UNBAN_USER = "unban_user",
   MUTE_USER = "mute_user",
+  UNMUTE_USER = "unmute_user",
   EDIT_GAME_ODDS = "edit_game_odds",
   ADD_ADVERTISEMENT = "add_advertisement",
+  EDIT_ADVERTISEMENT = "edit_advertisement",
+  DELETE_ADVERTISEMENT = "delete_advertisement",
+  CREATE_GAME = "create_game",
+  EDIT_GAME = "edit_game",
+  DELETE_GAME = "delete_game",
+  VIEW_USER_DETAILS = "view_user_details",
+  EXPORT_USER_DATA = "export_user_data",
+  SYSTEM_MAINTENANCE = "system_maintenance",
+  CHANGE_USER_ROLE = "change_user_role",
+  RESET_USER_PASSWORD = "reset_user_password",
+  LOGIN_AS_USER = "login_as_user",
 }
 
 // Session storage table for Replit Auth

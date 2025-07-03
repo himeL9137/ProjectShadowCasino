@@ -34,7 +34,12 @@ interface AdminUser {
   email: string;
   balance: string;
   currency: string;
+  role: string;
   isBanned: boolean;
+  isMuted: boolean;
+  createdAt: string;
+  ipAddress?: string;
+  lastLogin?: string;
 }
 
 interface Transaction {
@@ -164,7 +169,104 @@ export function BalanceManagement() {
     setErrorMessage('');
     setSuccessMessage('');
     setIsAdjustmentModalOpen(true);
+  }
+
+  // Handle user ban/unban
+  const handleUserBanToggle = async (user: AdminUser) => {
+    try {
+      const action = user.isBanned ? 'unban' : 'ban';
+      const reason = prompt(`Please provide a reason for ${action}ing ${user.username}:`);
+      
+      if (reason === null) return; // User cancelled
+      
+      const response = await adminApiCall<{user: AdminUser, message: string}>(
+        'POST',
+        `/api/admin/users/${user.id}/${action}`,
+        { reason: reason || `Admin ${action} action` }
+      );
+      
+      // Update user in the list
+      const updatedUsers = users.map(u => 
+        u.id === user.id ? { ...u, isBanned: !user.isBanned } : u
+      );
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers.filter(user => 
+        searchTerm ? (
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        ) : true
+      ));
+      
+      toast.success(`User ${user.username} successfully ${action}ned`);
+    } catch (error: any) {
+      toast.error(error.message || `Failed to ${user.isBanned ? 'unban' : 'ban'} user`);
+    }
   };
+
+  // Handle user mute/unmute
+  const handleUserMuteToggle = async (user: AdminUser) => {
+    try {
+      const action = user.isMuted ? 'unmute' : 'mute';
+      const reason = prompt(`Please provide a reason for ${action}ing ${user.username}:`);
+      
+      if (reason === null) return; // User cancelled
+      
+      const response = await adminApiCall<{user: AdminUser, message: string}>(
+        'POST',
+        `/api/admin/users/${user.id}/${action}`,
+        { reason: reason || `Admin ${action} action` }
+      );
+      
+      // Update user in the list
+      const updatedUsers = users.map(u => 
+        u.id === user.id ? { ...u, isMuted: !user.isMuted } : u
+      );
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers.filter(user => 
+        searchTerm ? (
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        ) : true
+      ));
+      
+      toast.success(`User ${user.username} successfully ${action}d`);
+    } catch (error: any) {
+      toast.error(error.message || `Failed to ${user.isMuted ? 'unmute' : 'mute'} user`);
+    }
+  };
+
+  // Handle view user details
+  const handleViewUserDetails = async (user: AdminUser) => {
+    try {
+      const response = await adminApiCall<{
+        user: AdminUser, 
+        transactions: any[], 
+        gameHistory: any[], 
+        message: string
+      }>(
+        'GET',
+        `/api/admin/users/${user.id}/details`,
+        undefined
+      );
+      
+      // Show detailed user information
+      const detailsMessage = `
+User Details for ${user.username}:
+- Email: ${user.email}
+- Balance: ${user.balance} ${user.currency}
+- Role: ${user.role}
+- Status: ${user.isBanned ? 'Banned' : 'Active'} ${user.isMuted ? '(Muted)' : ''}
+- Total Transactions: ${response.transactions.length}
+- Total Games Played: ${response.gameHistory.length}
+- Joined: ${new Date(user.createdAt).toLocaleDateString()}
+      `;
+      
+      alert(detailsMessage);
+      toast.success('User details accessed and logged for audit');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to fetch user details');
+    }
+  };;
 
   const convertAmount = (amount: string, fromCurrency: string, toCurrency: string): string => {
     if (!exchangeRates || !amount) return '0';
@@ -477,7 +579,7 @@ export function BalanceManagement() {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{`${user.balance} ${user.currency}`}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-end space-x-1 flex-wrap">
                           <Button
                             variant="outline"
                             size="sm"
@@ -490,6 +592,35 @@ export function BalanceManagement() {
                             onClick={() => handleAdjustmentOpen(user)}
                           >
                             Adjust Balance
+                          </Button>
+                          
+                          {/* Ban/Unban Button */}
+                          <Button
+                            size="sm"
+                            variant={user.isBanned ? "outline" : "destructive"}
+                            onClick={() => handleUserBanToggle(user)}
+                            disabled={user.role === 'admin'} // Prevent banning admins
+                          >
+                            {user.isBanned ? 'Unban' : 'Ban'}
+                          </Button>
+                          
+                          {/* Mute/Unmute Button */}
+                          <Button
+                            size="sm"
+                            variant={user.isMuted ? "outline" : "secondary"}
+                            onClick={() => handleUserMuteToggle(user)}
+                            disabled={user.role === 'admin'} // Prevent muting admins
+                          >
+                            {user.isMuted ? 'Unmute' : 'Mute'}
+                          </Button>
+                          
+                          {/* View Details Button */}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleViewUserDetails(user)}
+                          >
+                            Details
                           </Button>
                         </div>
                       </TableCell>

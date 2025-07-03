@@ -125,6 +125,36 @@ export default function AdminAuditPage() {
       return String(value);
     };
 
+    // Format based on action type for better readability
+    const formatByActionType = (action: AdminAction): string => {
+      const details = action.details;
+      
+      switch (action.action) {
+        case AdminActionType.EDIT_BALANCE:
+          return `Action: ${details?.action || 'N/A'}\nAmount: ${details?.amount || 'N/A'} ${details?.fromCurrency || 'N/A'}\nConverted: ${details?.toAmount || 'N/A'} ${details?.toCurrency || 'N/A'}\nReason: ${details?.reason || 'N/A'}`;
+        
+        case AdminActionType.BAN_USER:
+        case AdminActionType.UNBAN_USER:
+        case AdminActionType.MUTE_USER:
+        case AdminActionType.UNMUTE_USER:
+          return `Reason: ${details?.reason || 'N/A'}\nTarget User: ${details?.targetUsername || 'N/A'}\nPrevious Status: ${details?.previousBanStatus !== undefined ? (details.previousBanStatus ? 'Banned' : 'Not Banned') : details?.previousMuteStatus !== undefined ? (details.previousMuteStatus ? 'Muted' : 'Not Muted') : 'N/A'}`;
+        
+        case AdminActionType.CHANGE_USER_ROLE:
+          return `Old Role: ${details?.oldRole || 'N/A'}\nNew Role: ${details?.newRole || 'N/A'}\nTarget User: ${details?.targetUsername || 'N/A'}`;
+        
+        case AdminActionType.VIEW_USER_DETAILS:
+          return `Target User: ${details?.targetUsername || 'N/A'}\nAccessed Sections: ${details?.accessedSections ? details.accessedSections.join(', ') : 'N/A'}`;
+        
+        default:
+          // Default formatting for other action types
+          return Object.entries(details).map(([key, value]) => 
+            `${key}: ${formatDetailValue(value)}`
+          ).join('\n');
+      }
+    };
+
+    return formatByActionType(action);
+
     switch (action.action) {
       case AdminActionType.EDIT_BALANCE:
         return (
