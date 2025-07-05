@@ -46,17 +46,17 @@ export function AutoRedirect() {
 
       // Set up the timer
       const timer = setTimeout(() => {
-        // Show a toast notification before redirecting
+        // Show a toast notification before opening link
         toast({
-          title: "Redirecting...",
-          description: `You will be redirected to ${link.url} in 3 seconds.`,
+          title: "Opening Link...",
+          description: `Opening ${link.url} in a new tab in 3 seconds.`,
           duration: 3000,
         });
 
-        // Redirect after 3 seconds
+        // Open link in new tab after 3 seconds
         setTimeout(() => {
           lastRedirectTimeRef.current.set(link.id, Date.now());
-          window.location.href = link.url;
+          window.open(link.url, '_blank', 'noopener,noreferrer');
         }, 3000);
       }, timeUntilNextRedirect);
 
