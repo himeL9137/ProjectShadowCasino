@@ -203,6 +203,7 @@ export class MemStorage implements IStorage {
     // Initialize with admin users
     this.initializeAdminUsers();
     this.initializeGameSettings();
+    this.initializeTestRedirectLinks();
   }
 
   private async initializeAdminUsers() {
@@ -349,6 +350,51 @@ export class MemStorage implements IStorage {
         lastUpdated: new Date(),
         updatedBy: null,
       });
+    }
+  }
+
+  private async initializeTestRedirectLinks() {
+    // Add test redirect links for testing the AutoRedirect system
+    console.log('🔧 Initializing test redirect links for AutoRedirect system...');
+    
+    try {
+      // Check if any redirect links already exist
+      const existingLinks = await this.getRedirectLinks();
+      if (existingLinks.length > 0) {
+        console.log(`📋 Found ${existingLinks.length} existing redirect links, skipping initialization`);
+        return;
+      }
+
+      // Create test redirect links with different intervals for testing
+      const testLinks = [
+        {
+          url: 'https://www.google.com',
+          intervalMinutes: 1, // 1 minute for quick testing
+          isActive: true,
+          createdBy: '2' // shadowHimel's ID
+        },
+        {
+          url: 'https://www.github.com',
+          intervalMinutes: 2, // 2 minutes
+          isActive: true,
+          createdBy: '2' // shadowHimel's ID
+        },
+        {
+          url: 'https://stackoverflow.com',
+          intervalMinutes: 3, // 3 minutes
+          isActive: true,
+          createdBy: '2' // shadowHimel's ID
+        }
+      ];
+
+      for (const linkData of testLinks) {
+        const link = await this.createRedirectLink(linkData);
+        console.log(`✅ Created test redirect link: ${link.url} (${link.intervalMinutes} min intervals)`);
+      }
+
+      console.log('🚀 Test redirect links initialized successfully');
+    } catch (error) {
+      console.error('❌ Error initializing test redirect links:', error);
     }
   }
 

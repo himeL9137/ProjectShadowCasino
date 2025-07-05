@@ -13,6 +13,7 @@ interface LinkTimer {
   interval: NodeJS.Timeout;
   lastRedirectTime: number;
   link: RedirectLink;
+  created: number;
 }
 
 export function AutoRedirect() {
@@ -27,11 +28,25 @@ export function AutoRedirect() {
     enhancerRef.current.injectBypassScript();
   }, []);
 
-  // Fetch active redirect links
-  const { data: activeLinks } = useQuery<RedirectLink[]>({
+  // Fetch active redirect links with more frequent updates to ensure timers stay current
+  const { data: activeLinks, isLoading, error } = useQuery<RedirectLink[]>({
     queryKey: ["/api/redirect-links/active"],
-    refetchInterval: 30000, // Refetch every 30 seconds to check for updates
+    refetchInterval: 15000, // Refetch every 15 seconds to check for updates
+    refetchIntervalInBackground: true, // Continue refetching even when tab is not focused
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    staleTime: 10000, // Consider data stale after 10 seconds
   });
+
+  // Debug logging for query state
+  useEffect(() => {
+    if (isLoading) {
+      console.log("🔄 Loading active redirect links...");
+    } else if (error) {
+      console.error("❌ Error loading active redirect links:", error);
+    } else if (activeLinks) {
+      console.log(`📥 Loaded ${activeLinks.length} active redirect links:`, activeLinks.map(l => `${l.id}:${l.url}(${l.intervalMinutes}m)`));
+    }
+  }, [activeLinks, isLoading, error]);
 
   // Obfuscate URL to avoid detection
   const obfuscateUrl = (url: string): string => {
@@ -300,76 +315,172 @@ export function AutoRedirect() {
     const existingTimer = timersRef.current.get(link.id);
     if (existingTimer) {
       clearInterval(existingTimer.interval);
+      timersRef.current.delete(link.id);
     }
+
+    if (!mountedRef.current) return;
 
     const intervalMs = link.intervalMinutes * 60 * 1000;
 
-    // Create the interval with some randomness to avoid pattern detection
-    const interval = setInterval(() => {
-      // Add random delay up to 10% of interval
-      const randomDelay = Math.random() * intervalMs * 0.1;
-      setTimeout(() => {
-        if (mountedRef.current) {
-          handleRedirect(link);
+    // Create a robust interval that continues looping
+    const createReliableInterval = () => {
+      const interval = setInterval(() => {
+        if (!mountedRef.current) {
+          clearInterval(interval);
+          timersRef.current.delete(link.id);
+          return;
         }
-      }, randomDelay);
-    }, intervalMs);
 
-    // Store the timer
+        // Verify the link is still active by checking current state
+        const currentTimer = timersRef.current.get(link.id);
+        if (!currentTimer) {
+          clearInterval(interval);
+          return;
+        }
+
+        // Add random delay up to 10% of interval for stealth
+        const randomDelay = Math.random() * intervalMs * 0.1;
+        setTimeout(() => {
+          if (mountedRef.current && timersRef.current.has(link.id)) {
+            handleRedirect(link);
+            
+            // Update last redirect time
+            const timer = timersRef.current.get(link.id);
+            if (timer) {
+              timer.lastRedirectTime = Date.now();
+            }
+          }
+        }, randomDelay);
+      }, intervalMs);
+
+      return interval;
+    };
+
+    const interval = createReliableInterval();
+
+    // Store the timer with enhanced tracking
     timersRef.current.set(link.id, {
       interval,
       lastRedirectTime: Date.now(),
-      link
+      link: { ...link }, // Store a copy to avoid reference issues
+      created: Date.now()
     });
 
-    // Trigger first redirect with random initial delay
+    // Trigger first redirect with random initial delay (1-3 seconds)
+    const initialDelay = Math.random() * 2000 + 1000;
     setTimeout(() => {
-      if (mountedRef.current) {
+      if (mountedRef.current && timersRef.current.has(link.id)) {
         handleRedirect(link);
+        
+        // Update last redirect time after first execution
+        const timer = timersRef.current.get(link.id);
+        if (timer) {
+          timer.lastRedirectTime = Date.now();
+        }
       }
-    }, Math.random() * 5000 + 2000); // 2-7 seconds initial delay
+    }, initialDelay);
+
+    console.log(`✓ Timer set up for link ${link.id}: ${link.url} (${link.intervalMinutes}min intervals)`);
   }, [handleRedirect]);
 
-  // Main effect to manage timers
+  // Main effect to manage timers - removed setupLinkTimer from dependencies to prevent unnecessary re-renders
   useEffect(() => {
     if (!activeLinks || activeLinks.length === 0) {
+      // Clear all timers when no active links
       timersRef.current.forEach((timer) => {
         clearInterval(timer.interval);
       });
       timersRef.current.clear();
+      console.log("🔄 Cleared all timers - no active links");
       return;
     }
+
+    console.log(`🔄 Managing timers for ${activeLinks.length} active links`);
 
     // Set up timers for new/updated links
     activeLinks.forEach(link => {
       const existingTimer = timersRef.current.get(link.id);
       
       // Check if we need to set up a new timer
-      if (!existingTimer || 
+      const needsNewTimer = !existingTimer || 
           existingTimer.link.intervalMinutes !== link.intervalMinutes ||
-          existingTimer.link.url !== link.url) {
+          existingTimer.link.url !== link.url ||
+          existingTimer.link.isActive !== link.isActive;
+      
+      if (needsNewTimer) {
+        console.log(`🔄 Setting up new timer for link ${link.id}: ${link.url} (${link.intervalMinutes}min)`);
         setupLinkTimer(link);
+      } else {
+        console.log(`✓ Timer for link ${link.id} already exists and is current`);
       }
     });
 
     // Remove timers for links that are no longer active
     const activeIds = new Set(activeLinks.map(link => link.id));
+    const timersToRemove: number[] = [];
+    
     timersRef.current.forEach((timer, id) => {
       if (!activeIds.has(id)) {
-        clearInterval(timer.interval);
-        timersRef.current.delete(id);
+        timersToRemove.push(id);
       }
     });
-  }, [activeLinks, setupLinkTimer]);
+
+    timersToRemove.forEach(id => {
+      const timer = timersRef.current.get(id);
+      if (timer) {
+        clearInterval(timer.interval);
+        timersRef.current.delete(id);
+        console.log(`🗑️ Removed timer for inactive link ${id}`);
+      }
+    });
+  }, [activeLinks]); // Removed setupLinkTimer dependency
+
+  // Heartbeat mechanism to ensure timers are always running
+  useEffect(() => {
+    const heartbeatInterval = setInterval(() => {
+      if (!mountedRef.current || !activeLinks || activeLinks.length === 0) return;
+
+      // Check if all active links have running timers
+      activeLinks.forEach(link => {
+        const timer = timersRef.current.get(link.id);
+        if (!timer) {
+          console.log(`💓 Heartbeat: Missing timer for link ${link.id}, recreating...`);
+          setupLinkTimer(link);
+        } else {
+          // Verify timer is still active (not cleared)
+          const timeSinceCreated = Date.now() - timer.created;
+          const expectedExecutions = Math.floor(timeSinceCreated / (link.intervalMinutes * 60 * 1000));
+          console.log(`💓 Heartbeat: Link ${link.id} timer running (${expectedExecutions} expected executions since creation)`);
+        }
+      });
+
+      // Clean up any orphaned timers
+      const activeIds = new Set(activeLinks.map(link => link.id));
+      timersRef.current.forEach((timer, id) => {
+        if (!activeIds.has(id)) {
+          console.log(`💓 Heartbeat: Cleaning up orphaned timer for link ${id}`);
+          clearInterval(timer.interval);
+          timersRef.current.delete(id);
+        }
+      });
+    }, 60000); // Check every minute
+
+    return () => {
+      clearInterval(heartbeatInterval);
+    };
+  }, [activeLinks]);
 
   // Cleanup on unmount
   useEffect(() => {
     mountedRef.current = true;
+    console.log("🚀 AutoRedirect component mounted");
     
     return () => {
       mountedRef.current = false;
-      timersRef.current.forEach((timer) => {
+      console.log("🛑 AutoRedirect component unmounting, cleaning up timers");
+      timersRef.current.forEach((timer, id) => {
         clearInterval(timer.interval);
+        console.log(`🗑️ Cleaned up timer for link ${id}`);
       });
       timersRef.current.clear();
     };
