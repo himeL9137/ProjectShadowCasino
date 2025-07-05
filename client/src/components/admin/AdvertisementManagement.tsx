@@ -45,7 +45,7 @@ interface RedirectLink {
   createdBy: string;
 }
 
-export function LinkManagement() {
+export function AdvertisementManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,7 +75,7 @@ export function LinkManagement() {
       resetForm();
       toast({
         title: "Success",
-        description: "Redirect link created successfully",
+        description: "Advertisement link created successfully",
       });
     },
     onError: (error: Error) => {
@@ -100,7 +100,7 @@ export function LinkManagement() {
       resetForm();
       toast({
         title: "Success",
-        description: "Redirect link updated successfully",
+        description: "Advertisement link updated successfully",
       });
     },
     onError: (error: Error) => {
@@ -121,7 +121,7 @@ export function LinkManagement() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/redirect-links"] });
       toast({
         title: "Success",
-        description: "Redirect link deleted successfully",
+        description: "Advertisement link deleted successfully",
       });
     },
     onError: (error: Error) => {
@@ -208,7 +208,7 @@ export function LinkManagement() {
   };
 
   const handleDeleteLink = (id: number) => {
-    if (confirm("Are you sure you want to delete this redirect link?")) {
+    if (confirm("Are you sure you want to delete this advertisement link?")) {
       deleteLinkMutation.mutate(id);
     }
   };
@@ -239,12 +239,12 @@ export function LinkManagement() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold">Link Management</h3>
-          <p className="text-sm text-gray-500">Manage automatic redirect links for users</p>
+          <h3 className="text-lg font-semibold">Advertisement Management</h3>
+          <p className="text-sm text-gray-500">Manage automatic advertisement redirect links for users</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Redirect Link
+          Add Advertisement Link
         </Button>
       </div>
 
@@ -273,7 +273,7 @@ export function LinkManagement() {
             {filteredLinks.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                  No redirect links found
+                  No advertisement links found
                 </TableCell>
               </TableRow>
             ) : (
@@ -359,9 +359,9 @@ export function LinkManagement() {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Redirect Link</DialogTitle>
+            <DialogTitle>Add Advertisement Link</DialogTitle>
             <DialogDescription>
-              Create a new automatic redirect link that will activate after the specified interval.
+              Create a new automatic advertisement redirect link that will activate after the specified interval.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -417,9 +417,9 @@ export function LinkManagement() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Redirect Link</DialogTitle>
+            <DialogTitle>Edit Advertisement Link</DialogTitle>
             <DialogDescription>
-              Update the redirect link settings.
+              Update the advertisement link settings.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

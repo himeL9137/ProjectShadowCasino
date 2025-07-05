@@ -4,7 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SystemTab as SystemTabComponent } from '@/components/admin/SystemTab';
 import { BalanceManagement } from '@/components/admin/BalanceManagement';
-import { LinkManagement } from '@/components/admin/LinkManagement';
+import { AdvertisementManagement } from '@/components/admin/AdvertisementManagement';
 import { 
   Table, 
   TableBody, 
@@ -1349,7 +1349,7 @@ export default function AdminPage() {
             <TabsTrigger value="balance">Balance</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
             <TabsTrigger value="games">Game Management</TabsTrigger>
-            <TabsTrigger value="links">Link Management</TabsTrigger>
+            <TabsTrigger value="links">Advertisement Management</TabsTrigger>
           </TabsList>
           
           <TabsContent value="users">
@@ -1369,7 +1369,7 @@ export default function AdminPage() {
           </TabsContent>
           
           <TabsContent value="links">
-            <LinkManagement />
+            <AdvertisementManagement />
           </TabsContent>
         </Tabs>
       </div>
