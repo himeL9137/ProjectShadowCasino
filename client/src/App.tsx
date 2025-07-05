@@ -38,6 +38,7 @@ import { ReferralPage } from "@/pages/referral-page";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import Landing from "@/pages/Landing";
 import ThemesPage from "@/pages/themes";
+import PinDemoPage from "@/pages/pin-demo";
 import { AutoRedirect } from "@/components/AutoRedirect";
 import { AdBlockBypass } from "@/components/AdBlockBypass";
 
@@ -935,6 +936,7 @@ export default function App() {
                 <ProtectedRoute path="/chat" component={ChatPage} />
                 <ProtectedRoute path="/currency" component={CurrencyPage} />
                 <ProtectedRoute path="/themes" component={ThemesPage} />
+                <ProtectedRoute path="/pin-demo" component={PinDemoPage} />
                 <ProtectedRoute path="/account/profile" component={ProfilePage} />
                 <ProtectedRoute path="/account/wallet" component={WalletPage} />
                 <ProtectedRoute path="/account/history" component={TransactionHistoryPage} />

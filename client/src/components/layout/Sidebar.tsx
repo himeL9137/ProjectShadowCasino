@@ -3,7 +3,7 @@ import {
   Gamepad2, Dice5, TrendingUp,
   MessageSquare, DollarSign, User, Wallet,
   ClipboardList, ShieldAlert, Activity,
-  Palette, Settings, ChevronLeft, ChevronRight, Menu, Users
+  Palette, Settings, ChevronLeft, ChevronRight, Menu, Users, Pin
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { UserRole } from "@shared/schema";
@@ -349,6 +349,26 @@ export function Sidebar() {
             {isCollapsed && (
               <TooltipContent side="right">
                 <p>Themes</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/pin-demo">
+                <div className={`flex items-center p-2 rounded-md mb-1 ${
+                  isRouteActive("/pin-demo")
+                    ? "bg-background-light text-primary"
+                    : "text-gray-300 hover:bg-background-light hover:text-primary"
+                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
+                  <Pin className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
+                  {!isCollapsed && <span>3D Pin Demo</span>}
+                </div>
+              </Link>
+            </TooltipTrigger>
+            {isCollapsed && (
+              <TooltipContent side="right">
+                <p>3D Pin Demo</p>
               </TooltipContent>
             )}
           </Tooltip>
