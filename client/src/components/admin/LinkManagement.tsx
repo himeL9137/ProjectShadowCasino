@@ -214,7 +214,7 @@ export function LinkManagement() {
   };
 
   const filteredLinks = links?.filter(link =>
-    link.url.toLowerCase().includes(searchQuery.toLowerCase())
+    link.url && link.url.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   if (isLoading) {
