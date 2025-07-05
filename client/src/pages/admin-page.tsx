@@ -1357,13 +1357,13 @@ export default function AdminPage() {
           </div>
         </div>
         
-        <Tabs defaultValue="users" value={activeAdminTab} onValueChange={setActiveAdminTab}>
-          <TabsList className="mb-8 grid grid-cols-5 md:w-[750px]">
-            <TabsTrigger value="users">User Management</TabsTrigger>
-            <TabsTrigger value="balance">Balance</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
-            <TabsTrigger value="games">Game Management</TabsTrigger>
-            <TabsTrigger value="links">Advertisement Management</TabsTrigger>
+        <Tabs defaultValue="users" value={activeAdminTab} onValueChange={setActiveAdminTab} className="w-full">
+          <TabsList className="mb-8 grid grid-cols-5 w-full max-w-4xl">
+            <TabsTrigger value="users" className="text-xs sm:text-sm">User Management</TabsTrigger>
+            <TabsTrigger value="balance" className="text-xs sm:text-sm">Balance</TabsTrigger>
+            <TabsTrigger value="system" className="text-xs sm:text-sm">System</TabsTrigger>
+            <TabsTrigger value="games" className="text-xs sm:text-sm">Game Management</TabsTrigger>
+            <TabsTrigger value="links" className="text-xs sm:text-sm">Advertisement Management</TabsTrigger>
           </TabsList>
           
           <TabsContent value="users">
@@ -1382,8 +1382,10 @@ export default function AdminPage() {
             <GameManagementTab />
           </TabsContent>
           
-          <TabsContent value="links">
-            <AdvertisementManagement />
+          <TabsContent value="links" className="w-full overflow-hidden">
+            <div className="max-w-full">
+              <AdvertisementManagement />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

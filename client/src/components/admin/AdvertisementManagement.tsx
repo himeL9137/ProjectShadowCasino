@@ -237,15 +237,15 @@ export function AdvertisementManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex-1">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+        <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold">Advertisement Management</h3>
           <p className="text-sm text-gray-500">Manage automatic advertisement redirect links for users</p>
         </div>
-        <div className="flex-shrink-0">
-          <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
+        <div className="flex-shrink-0 w-full sm:w-auto">
+          <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto whitespace-nowrap">
             <Plus className="h-4 w-4 mr-2" />
             Add Advertisement Link
           </Button>
@@ -264,16 +264,16 @@ export function AdvertisementManagement() {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-hidden w-full">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="w-full table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead>URL</TableHead>
-                <TableHead>Interval</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-2/5 min-w-[200px]">URL</TableHead>
+                <TableHead className="w-1/6 min-w-[100px]">Interval</TableHead>
+                <TableHead className="w-1/6 min-w-[100px]">Status</TableHead>
+                <TableHead className="w-1/6 min-w-[100px]">Created</TableHead>
+                <TableHead className="w-1/6 min-w-[120px] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -286,17 +286,17 @@ export function AdvertisementManagement() {
               ) : (
                 filteredLinks.map((link) => (
                   <TableRow key={link.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-gray-400" />
-                        <span className="font-mono text-sm truncate max-w-[400px]" title={link.url}>
+                    <TableCell className="max-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Globe className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <span className="font-mono text-sm truncate flex-1 min-w-0" title={link.url}>
                           {link.url}
                         </span>
                         <a
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600"
+                          className="text-blue-500 hover:text-blue-600 flex-shrink-0"
                         >
                           <ExternalLink className="h-4 w-4" />
                         </a>
