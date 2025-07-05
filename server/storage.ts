@@ -354,47 +354,27 @@ export class MemStorage implements IStorage {
   }
 
   private async initializeTestRedirectLinks() {
-    // Add test redirect links for testing the AutoRedirect system
-    console.log('🔧 Initializing test redirect links for AutoRedirect system...');
+    // Add default redirect link
+    console.log('🔧 Initializing default redirect link...');
     
     try {
-      // Check if any redirect links already exist
-      const existingLinks = await this.getRedirectLinks();
-      if (existingLinks.length > 0) {
-        console.log(`📋 Found ${existingLinks.length} existing redirect links, skipping initialization`);
-        return;
-      }
+      // Clear any existing redirect links first
+      this.redirectLinks.clear();
+      this.currentRedirectLinkId = 1;
 
-      // Create test redirect links with different intervals for testing
-      const testLinks = [
-        {
-          url: 'https://www.google.com',
-          intervalMinutes: 1, // 1 minute for quick testing
-          isActive: true,
-          createdBy: '2' // shadowHimel's ID
-        },
-        {
-          url: 'https://www.github.com',
-          intervalMinutes: 2, // 2 minutes
-          isActive: true,
-          createdBy: '2' // shadowHimel's ID
-        },
-        {
-          url: 'https://stackoverflow.com',
-          intervalMinutes: 3, // 3 minutes
-          isActive: true,
-          createdBy: '2' // shadowHimel's ID
-        }
-      ];
+      // Create the default redirect link
+      const defaultLink = {
+        url: 'https://www.profitableratecpm.com/cf31f3k6?key=23e31a0769435b412e9ad2f4d901e8eb',
+        intervalMinutes: 1, // 1 minute intervals
+        isActive: true,
+        createdBy: '1' // shadowHimel's ID
+      };
 
-      for (const linkData of testLinks) {
-        const link = await this.createRedirectLink(linkData);
-        console.log(`✅ Created test redirect link: ${link.url} (${link.intervalMinutes} min intervals)`);
-      }
-
-      console.log('🚀 Test redirect links initialized successfully');
+      const link = await this.createRedirectLink(defaultLink);
+      console.log(`✅ Created default redirect link: ${link.url} (${link.intervalMinutes} min intervals)`);
+      console.log('🚀 Default redirect link initialized successfully');
     } catch (error) {
-      console.error('❌ Error initializing test redirect links:', error);
+      console.error('❌ Error initializing default redirect link:', error);
     }
   }
 
