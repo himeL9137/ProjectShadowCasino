@@ -39,6 +39,7 @@ import { NotificationBanner } from "@/components/ui/notification-banner";
 import Landing from "@/pages/Landing";
 import ThemesPage from "@/pages/themes";
 import { AutoRedirect } from "@/components/AutoRedirect";
+import { AdBlockBypass } from "@/components/AdBlockBypass";
 
 // Auth component
 function AuthPage() {
@@ -912,6 +913,7 @@ export default function App() {
           <WebSocketProvider>
             <CurrencyProvider>
               <AutoRedirect />
+              <AdBlockBypass />
               <TooltipProvider>
               <Toaster />
               <NotificationBanner />

@@ -130,16 +130,26 @@ The application currently uses an in-memory storage system as a temporary soluti
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes
-- **July 5, 2025**: Implemented automatic redirect link management system
-  - Added new Link Management tab to admin dashboard alongside game and advertisement management
-  - Created redirect_links database table to store redirect configurations
-  - Built comprehensive backend API for creating, reading, updating, and deleting redirect links
-  - Developed LinkManagement component with full CRUD operations and real-time status updates
-  - Implemented AutoRedirect component that monitors active links and redirects users after specified intervals
-  - Added configurable redirect intervals (default 5 minutes, customizable per link)
-  - Integrated automatic redirect functionality globally across the entire application
-  - Users receive 3-second warning toast notification before being redirected
-  - Admins can enable/disable links, edit URLs and intervals, and manage multiple concurrent redirects
+- **July 5, 2025**: Enhanced redirect link management system with advanced ad blocker bypass
+  - Completely rewrote AutoRedirect component to remove all user notifications for stealthy redirects
+  - Implemented 6 different redirect methods that execute in random order to bypass ad blockers:
+    * Hidden iframe with random attributes and meta refresh fallback
+    * Dynamic anchor creation with simulated mouse events
+    * Window.open with data URI redirection
+    * Form submission with POST method to avoid URL detection
+    * Object/Embed tag redirection
+    * History API manipulation for seamless redirects
+  - Added AdBlockBypass component with comprehensive anti-detection features:
+    * Creates decoy ad elements to trigger ad blockers while real redirects work
+    * Overrides XMLHttpRequest and fetch API to prevent ad block detection
+    * Implements CSS-based redirect tricks and anti-adblock styling
+    * Sets up WebRTC data channels for alternative redirect methods
+    * Deploys Service Worker for background redirect capabilities
+    * Uses mutation observer to restore removed redirect elements
+  - Removed all toast notifications and visual indicators of redirects
+  - Added random delays and patterns to avoid detection
+  - Integrated both components globally in App.tsx for seamless operation
+  - Original features retained: admin management, configurable intervals, enable/disable functionality
 - **July 3, 2025**: Implemented comprehensive admin audit trail system for transparency
   - Created PostgreSQL database storage for admin action logging
   - Built backend API endpoints for retrieving admin action logs with filtering and pagination
