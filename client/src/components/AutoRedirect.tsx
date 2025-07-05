@@ -11,41 +11,62 @@ interface RedirectLink {
 
 export function AutoRedirect() {
   const { toast } = useToast();
-  const timersRef = useRef<Map<number, NodeJS.Timeout>>(new Map());
-  const lastRedirectTimeRef = useRef<Map<number, number>>(new Map());
+  const intervalsRef = useRef<Map<number, NodeJS.Timeout>>(new Map());
+  const activeLinksRef = useRef<RedirectLink[]>([]);
 
   // Fetch active redirect links
   const { data: activeLinks } = useQuery<RedirectLink[]>({
     queryKey: ["/api/redirect-links/active"],
-    refetchInterval: 60000, // Refetch every minute to check for updates
+    refetchInterval: 30000, // Refetch every 30 seconds to check for updates
   });
+
+  // Update the ref when activeLinks changes
+  useEffect(() => {
+    if (activeLinks) {
+      activeLinksRef.current = activeLinks;
+    }
+  }, [activeLinks]);
 
   useEffect(() => {
     if (!activeLinks || activeLinks.length === 0) {
-      // Clear all timers if no active links
-      timersRef.current.forEach(timer => clearTimeout(timer));
-      timersRef.current.clear();
+      // Clear all intervals if no active links
+      intervalsRef.current.forEach(interval => clearInterval(interval));
+      intervalsRef.current.clear();
       return;
     }
 
-    // Set up timers for each active link
+    // Set up intervals for each active link
     activeLinks.forEach(link => {
-      const existingTimer = timersRef.current.get(link.id);
-      
-      // Clear existing timer if it exists
-      if (existingTimer) {
-        clearTimeout(existingTimer);
+      // Skip if interval already exists for this link
+      if (intervalsRef.current.has(link.id)) {
+        return;
       }
 
-      // Calculate time until next redirect
-      const lastRedirectTime = lastRedirectTimeRef.current.get(link.id) || 0;
-      const currentTime = Date.now();
       const intervalMs = link.intervalMinutes * 60 * 1000;
-      const timeSinceLastRedirect = currentTime - lastRedirectTime;
-      const timeUntilNextRedirect = Math.max(0, intervalMs - timeSinceLastRedirect);
 
-      // Set up the timer
-      const timer = setTimeout(() => {
+      // Function to handle redirect
+      const handleRedirect = () => {
+        console.log(`[AutoRedirect] Checking redirect for link ID ${link.id}`);
+        
+        // Check if link is still active
+        const currentActiveLinks = activeLinksRef.current;
+        const isStillActive = currentActiveLinks.find(activeLink => 
+          activeLink.id === link.id && activeLink.isActive
+        );
+
+        if (!isStillActive) {
+          console.log(`[AutoRedirect] Link ID ${link.id} is no longer active, clearing interval`);
+          // Link is no longer active, clear the interval
+          const interval = intervalsRef.current.get(link.id);
+          if (interval) {
+            clearInterval(interval);
+            intervalsRef.current.delete(link.id);
+          }
+          return;
+        }
+
+        console.log(`[AutoRedirect] Triggering redirect for ${link.url} (interval: ${link.intervalMinutes} min)`);
+        
         // Show a toast notification before opening link
         toast({
           title: "Opening Link...",
@@ -55,26 +76,32 @@ export function AutoRedirect() {
 
         // Open link in new tab after 3 seconds
         setTimeout(() => {
-          lastRedirectTimeRef.current.set(link.id, Date.now());
+          console.log(`[AutoRedirect] Opening link: ${link.url}`);
           window.open(link.url, '_blank', 'noopener,noreferrer');
         }, 3000);
-      }, timeUntilNextRedirect);
+      };
 
-      timersRef.current.set(link.id, timer);
+      // Set up the recurring interval
+      console.log(`[AutoRedirect] Setting up interval for link ID ${link.id} (${link.url}) every ${link.intervalMinutes} minutes`);
+      const interval = setInterval(handleRedirect, intervalMs);
+      intervalsRef.current.set(link.id, interval);
+
+      // Trigger first redirect immediately if it's a new link
+      console.log(`[AutoRedirect] Triggering first redirect immediately for link ID ${link.id}`);
+      handleRedirect();
     });
 
-    // Clean up timers for links that are no longer active
-    timersRef.current.forEach((timer, linkId) => {
+    // Clean up intervals for links that are no longer active
+    intervalsRef.current.forEach((interval, linkId) => {
       if (!activeLinks.find(link => link.id === linkId)) {
-        clearTimeout(timer);
-        timersRef.current.delete(linkId);
-        lastRedirectTimeRef.current.delete(linkId);
+        clearInterval(interval);
+        intervalsRef.current.delete(linkId);
       }
     });
 
     // Cleanup function
     return () => {
-      timersRef.current.forEach(timer => clearTimeout(timer));
+      intervalsRef.current.forEach(interval => clearInterval(interval));
     };
   }, [activeLinks, toast]);
 
