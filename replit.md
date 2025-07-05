@@ -130,6 +130,13 @@ The application currently uses an in-memory storage system as a temporary soluti
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes
+- **July 5, 2025**: Configured advertisement system exclusion for shadowHimel user
+  - Modified AutoRedirect component to check user authentication and skip all advertisement functionality for shadowHimel
+  - Added checks in executeRedirect function to prevent any redirects for shadowHimel user
+  - Updated main timer management logic to disable advertisement timers for shadowHimel
+  - Added user dependency to useEffect hooks to properly handle user changes
+  - Other users continue to receive advertisements as configured, only shadowHimel is excluded
+  - Comprehensive logging shows when advertisement system is disabled for shadowHimel
 - **July 5, 2025**: Renamed Link Management to Advertisement Management
   - Updated component name from LinkManagement to AdvertisementManagement
   - Renamed file from LinkManagement.tsx to AdvertisementManagement.tsx

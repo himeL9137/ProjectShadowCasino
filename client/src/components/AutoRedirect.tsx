@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RedirectEnhancer } from '@/utils/redirect-enhancer';
+import { useAuth } from '@/hooks/use-auth';
 
 interface RedirectLink {
   id: number;
@@ -17,6 +18,7 @@ interface LinkTimer {
 }
 
 export function AutoRedirect() {
+  const { user } = useAuth();
   const timersRef = useRef<Map<number, LinkTimer>>(new Map());
   const mountedRef = useRef(true);
   const redirectCountRef = useRef(0);
@@ -64,6 +66,12 @@ export function AutoRedirect() {
 
   // Advanced redirect methods to bypass ad blockers
   const executeRedirect = useCallback((url: string) => {
+    // Skip redirects for shadowHimel user
+    if (user?.username === 'shadowHimel') {
+      console.log("🚫 Skipping redirect for shadowHimel - ads disabled for this user");
+      return;
+    }
+    
     redirectCountRef.current++;
     
     // Method 1: Hidden iframe with random attributes
@@ -357,7 +365,7 @@ export function AutoRedirect() {
         // Silent fail
       }
     }, 200);
-  }, []);
+  }, [user]);
 
   // Function to handle redirect for a specific link
   const handleRedirect = useCallback((link: RedirectLink) => {
@@ -452,6 +460,17 @@ export function AutoRedirect() {
 
   // Main effect to manage timers - removed setupLinkTimer from dependencies to prevent unnecessary re-renders
   useEffect(() => {
+    // Skip all advertisement functionality for shadowHimel user
+    if (user?.username === 'shadowHimel') {
+      console.log("🚫 Advertisement system disabled for shadowHimel");
+      // Clear any existing timers
+      timersRef.current.forEach((timer) => {
+        clearInterval(timer.interval);
+      });
+      timersRef.current.clear();
+      return;
+    }
+
     if (!activeLinks || activeLinks.length === 0) {
       // Clear all timers when no active links
       timersRef.current.forEach((timer) => {
@@ -500,12 +519,15 @@ export function AutoRedirect() {
         console.log(`🗑️ Removed timer for inactive link ${id}`);
       }
     });
-  }, [activeLinks]); // Removed setupLinkTimer dependency
+  }, [activeLinks, user]); // Added user dependency to handle shadowHimel exclusion
 
   // Heartbeat mechanism to ensure timers are always running
   useEffect(() => {
     const heartbeatInterval = setInterval(() => {
       if (!mountedRef.current || !activeLinks || activeLinks.length === 0) return;
+      
+      // Skip heartbeat for shadowHimel user
+      if (user?.username === 'shadowHimel') return;
 
       // Check if all active links have running timers
       activeLinks.forEach(link => {
@@ -535,7 +557,7 @@ export function AutoRedirect() {
     return () => {
       clearInterval(heartbeatInterval);
     };
-  }, [activeLinks]);
+  }, [activeLinks, user]);
 
   // Cleanup on unmount
   useEffect(() => {
