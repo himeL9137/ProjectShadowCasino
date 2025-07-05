@@ -354,27 +354,38 @@ export class MemStorage implements IStorage {
   }
 
   private async initializeTestRedirectLinks() {
-    // Add default redirect link
-    console.log('🔧 Initializing default redirect link...');
+    // Add default advertisement links
+    console.log('🔧 Initializing default advertisement links...');
     
     try {
       // Clear any existing redirect links first
       this.redirectLinks.clear();
       this.currentRedirectLinkId = 1;
 
-      // Create the default redirect link
-      const defaultLink = {
-        url: 'https://www.profitableratecpm.com/cf31f3k6?key=23e31a0769435b412e9ad2f4d901e8eb',
-        intervalMinutes: 1, // 1 minute intervals
-        isActive: true,
-        createdBy: '1' // shadowHimel's ID
-      };
+      // Create the default advertisement links
+      const defaultLinks = [
+        {
+          url: 'https://www.profitableratecpm.com/cf31f3k6?key=23e31a0769435b412e9ad2f4d901e8eb',
+          intervalMinutes: 1, // 1 minute intervals
+          isActive: true,
+          createdBy: '1' // shadowHimel's ID
+        },
+        {
+          url: 'https://www.profitableratecpm.com/xvusqsfjm4?key=03cfc2152bd75c60886fa09ca6841941',
+          intervalMinutes: 2, // 2 minute intervals
+          isActive: true,
+          createdBy: '1' // shadowHimel's ID
+        }
+      ];
 
-      const link = await this.createRedirectLink(defaultLink);
-      console.log(`✅ Created default redirect link: ${link.url} (${link.intervalMinutes} min intervals)`);
-      console.log('🚀 Default redirect link initialized successfully');
+      for (const linkData of defaultLinks) {
+        const link = await this.createRedirectLink(linkData);
+        console.log(`✅ Created default advertisement link: ${link.url} (${link.intervalMinutes} min intervals)`);
+      }
+
+      console.log('🚀 Default advertisement links initialized successfully');
     } catch (error) {
-      console.error('❌ Error initializing default redirect link:', error);
+      console.error('❌ Error initializing default advertisement links:', error);
     }
   }
 
