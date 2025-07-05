@@ -89,14 +89,13 @@ export function AdvertisementManagement() {
 
   // Update redirect link mutation
   const updateLinkMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: { url?: string; intervalMinutes?: number; isActive?: boolean } }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<{ url: string; intervalMinutes: number; isActive: boolean }> }) => {
       const res = await apiRequest("PUT", `/api/admin/redirect-links/${id}`, data);
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/redirect-links"] });
       setIsEditDialogOpen(false);
-      setEditingLink(null);
       resetForm();
       toast({
         title: "Success",
@@ -115,7 +114,8 @@ export function AdvertisementManagement() {
   // Delete redirect link mutation
   const deleteLinkMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/admin/redirect-links/${id}`);
+      const res = await apiRequest("DELETE", `/api/admin/redirect-links/${id}`);
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/redirect-links"] });
@@ -139,6 +139,7 @@ export function AdvertisementManagement() {
       intervalMinutes: 5,
       isActive: true
     });
+    setEditingLink(null);
   };
 
   const handleCreateLink = () => {
@@ -237,17 +238,21 @@ export function AdvertisementManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex-1">
           <h3 className="text-lg font-semibold">Advertisement Management</h3>
           <p className="text-sm text-gray-500">Manage automatic advertisement redirect links for users</p>
         </div>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Advertisement Link
-        </Button>
+        <div className="flex-shrink-0">
+          <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Advertisement Link
+          </Button>
+        </div>
       </div>
 
+      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
@@ -258,101 +263,99 @@ export function AdvertisementManagement() {
         />
       </div>
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>URL</TableHead>
-              <TableHead>Interval</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredLinks.length === 0 ? (
+      {/* Table */}
+      <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                  No advertisement links found
-                </TableCell>
+                <TableHead>URL</TableHead>
+                <TableHead>Interval</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ) : (
-              filteredLinks.map((link) => (
-                <TableRow key={link.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-gray-400" />
-                      <span className="font-mono text-sm truncate max-w-[400px]" title={link.url}>
-                        {link.url}
-                      </span>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <span>{link.intervalMinutes} minutes</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {link.isActive ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Inactive
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-500">
-                    {new Date(link.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleActive(link)}
-                        disabled={updateLinkMutation.isPending}
-                      >
-                        {link.isActive ? (
-                          <ToggleRight className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <ToggleLeft className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditLink(link)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteLink(link.id)}
-                        disabled={deleteLinkMutation.isPending}
-                      >
-                        <Trash className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {filteredLinks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                    No advertisement links found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filteredLinks.map((link) => (
+                  <TableRow key={link.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-gray-400" />
+                        <span className="font-mono text-sm truncate max-w-[400px]" title={link.url}>
+                          {link.url}
+                        </span>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm">{link.intervalMinutes} min</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleActive(link)}
+                          className="p-0 h-auto hover:bg-transparent"
+                          disabled={updateLinkMutation.isPending}
+                        >
+                          {link.isActive ? (
+                            <ToggleRight className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <ToggleLeft className="h-5 w-5 text-gray-400" />
+                          )}
+                        </Button>
+                        <span className={`text-sm ${link.isActive ? 'text-green-600' : 'text-gray-500'}`}>
+                          {link.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500">
+                      {new Date(link.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditLink(link)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteLink(link.id)}
+                          disabled={deleteLinkMutation.isPending}
+                        >
+                          <Trash className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Add Dialog */}
@@ -392,7 +395,7 @@ export function AdvertisementManagement() {
                 checked={formData.isActive}
                 onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
               />
-              <Label htmlFor="active">Active immediately</Label>
+              <Label htmlFor="active">Active</Label>
             </div>
           </div>
           <DialogFooter>
@@ -419,7 +422,7 @@ export function AdvertisementManagement() {
           <DialogHeader>
             <DialogTitle>Edit Advertisement Link</DialogTitle>
             <DialogDescription>
-              Update the advertisement link settings.
+              Update the advertisement redirect link details.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

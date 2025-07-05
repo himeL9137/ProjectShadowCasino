@@ -332,11 +332,10 @@ function UserManagementTab() {
               <TableHead>ID</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Raw Password</TableHead>
-              <TableHead>IP Address</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead>Balance</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Last Login</TableHead>
+              <TableHead>Last Seen</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -346,9 +345,16 @@ function UserManagementTab() {
                 <TableCell>{user.id}</TableCell>
                 <TableCell className="font-medium">{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell className="font-mono">{user.password || "••••••••"}</TableCell>
-                <TableCell>{user.ipAddress || "Unknown"}</TableCell>
-                <TableCell>{`${user.balance} ${user.currency}`}</TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    user.role === 'admin' 
+                      ? 'bg-purple-100 text-purple-800' 
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </span>
+                </TableCell>
+                <TableCell className="font-medium">{`${user.balance} ${user.currency}`}</TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1">
                     {user.isBanned ? (
@@ -373,7 +379,15 @@ function UserManagementTab() {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>{user.lastLogin || "Never"}</TableCell>
+                <TableCell>
+                  <span className="text-sm">
+                    {user.isOnline ? (
+                      <span className="text-green-600 font-medium">Online now</span>
+                    ) : (
+                      formatLastSeen(user.lastSeen)
+                    )}
+                  </span>
+                </TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
                     {user.isBanned ? (
