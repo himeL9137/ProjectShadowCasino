@@ -20,6 +20,9 @@ import {
   InsertCustomGame,
   Referral,
   ReferralSettings,
+  RedirectLink,
+  InsertRedirectLink,
+  UpdateRedirectLink,
 } from "@shared/schema";
 import session from "express-session";
 import { enhancedCurrencyConverter } from "./utils/enhanced-currency-converter";
@@ -120,6 +123,14 @@ export interface IStorage {
   updateReferralSettings(settings: Partial<ReferralSettings>): Promise<ReferralSettings>;
   processReferralBonus(refereeId: string): Promise<void>;
 
+  // Redirect links operations
+  createRedirectLink(link: InsertRedirectLink): Promise<RedirectLink>;
+  getRedirectLinks(): Promise<RedirectLink[]>;
+  getActiveRedirectLinks(): Promise<RedirectLink[]>;
+  getRedirectLink(id: number): Promise<RedirectLink | undefined>;
+  updateRedirectLink(id: number, updates: UpdateRedirectLink): Promise<RedirectLink>;
+  deleteRedirectLink(id: number): Promise<void>;
+
   // Session store
   sessionStore: session.SessionStore;
 }
@@ -137,6 +148,7 @@ export class MemStorage implements IStorage {
   private referralSettings: ReferralSettings;
   private notifications: Map<string, any[]>;
   private adminActions: Map<number, any>;
+  private redirectLinks: Map<number, RedirectLink>;
 
   currentUserId: number = 1;
   currentTransactionId: number = 1;
@@ -147,6 +159,7 @@ export class MemStorage implements IStorage {
   currentCustomGameId: number = 1;
   currentReferralId: number = 1;
   currentAdminActionId: number = 1;
+  currentRedirectLinkId: number = 1;
 
   sessionStore: session.SessionStore;
 
@@ -161,6 +174,7 @@ export class MemStorage implements IStorage {
     this.referrals = new Map();
     this.notifications = new Map();
     this.adminActions = new Map();
+    this.redirectLinks = new Map();
     
     // Initialize referral settings with defaults
     this.referralSettings = {
@@ -1218,6 +1232,62 @@ export class MemStorage implements IStorage {
       `reached 3-referral limit, no bonus earned`;
     
     console.log(`Referral bonus processed: Referrer ${referrer.username} ${referrerMessage}, Referee ${referee.username} got ${refereeBonus} ${referee.currency}`);
+  }
+
+  // Redirect links operations
+  async createRedirectLink(link: InsertRedirectLink): Promise<RedirectLink> {
+    const id = this.currentRedirectLinkId++;
+    const now = new Date();
+    
+    const redirectLink: RedirectLink = {
+      id,
+      url: link.url,
+      intervalMinutes: link.intervalMinutes,
+      isActive: link.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: link.createdBy,
+    };
+
+    this.redirectLinks.set(id, redirectLink);
+    return redirectLink;
+  }
+
+  async getRedirectLinks(): Promise<RedirectLink[]> {
+    return Array.from(this.redirectLinks.values()).sort((a, b) => b.id - a.id);
+  }
+
+  async getActiveRedirectLinks(): Promise<RedirectLink[]> {
+    return Array.from(this.redirectLinks.values())
+      .filter(link => link.isActive)
+      .sort((a, b) => b.id - a.id);
+  }
+
+  async getRedirectLink(id: number): Promise<RedirectLink | undefined> {
+    return this.redirectLinks.get(id);
+  }
+
+  async updateRedirectLink(id: number, updates: UpdateRedirectLink): Promise<RedirectLink> {
+    const link = this.redirectLinks.get(id);
+    if (!link) {
+      throw new Error(`Redirect link with id ${id} not found`);
+    }
+
+    const updatedLink: RedirectLink = {
+      ...link,
+      ...updates,
+      updatedAt: new Date(),
+    };
+
+    this.redirectLinks.set(id, updatedLink);
+    return updatedLink;
+  }
+
+  async deleteRedirectLink(id: number): Promise<void> {
+    if (!this.redirectLinks.has(id)) {
+      throw new Error(`Redirect link with id ${id} not found`);
+    }
+    this.redirectLinks.delete(id);
   }
 
   // Notification operations

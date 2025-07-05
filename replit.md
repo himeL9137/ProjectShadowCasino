@@ -130,6 +130,16 @@ The application currently uses an in-memory storage system as a temporary soluti
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes
+- **July 5, 2025**: Implemented automatic redirect link management system
+  - Added new Link Management tab to admin dashboard alongside game and advertisement management
+  - Created redirect_links database table to store redirect configurations
+  - Built comprehensive backend API for creating, reading, updating, and deleting redirect links
+  - Developed LinkManagement component with full CRUD operations and real-time status updates
+  - Implemented AutoRedirect component that monitors active links and redirects users after specified intervals
+  - Added configurable redirect intervals (default 5 minutes, customizable per link)
+  - Integrated automatic redirect functionality globally across the entire application
+  - Users receive 3-second warning toast notification before being redirected
+  - Admins can enable/disable links, edit URLs and intervals, and manage multiple concurrent redirects
 - **July 3, 2025**: Implemented comprehensive admin audit trail system for transparency
   - Created PostgreSQL database storage for admin action logging
   - Built backend API endpoints for retrieving admin action logs with filtering and pagination

@@ -478,6 +478,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Redirect links routes for admin
+  app.post("/api/admin/redirect-links", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const { url, intervalMinutes, isActive } = req.body;
+
+      // Validate required fields
+      if (!url) {
+        return res.status(400).json({ message: "URL is required" });
+      }
+
+      // Create the redirect link
+      const redirectLink = await storage.createRedirectLink({
+        url,
+        intervalMinutes: intervalMinutes || 5,
+        isActive: isActive ?? true,
+        createdBy: req.user.id,
+      });
+
+      // Log admin action
+      await storage.logAdminAction(
+        req.user.id,
+        AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
+        undefined,
+        { redirectLinkId: redirectLink.id, url, intervalMinutes }
+      );
+
+      res.status(201).json(redirectLink);
+    } catch (error: any) {
+      console.error("Error creating redirect link:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/admin/redirect-links", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const redirectLinks = await storage.getRedirectLinks();
+      res.status(200).json(redirectLinks);
+    } catch (error: any) {
+      console.error("Error fetching redirect links:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/redirect-links/active", async (req, res) => {
+    try {
+      const activeLinks = await storage.getActiveRedirectLinks();
+      res.status(200).json(activeLinks);
+    } catch (error: any) {
+      console.error("Error fetching active redirect links:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/admin/redirect-links/:id", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      const { url, intervalMinutes, isActive } = req.body;
+
+      const updatedLink = await storage.updateRedirectLink(linkId, {
+        url,
+        intervalMinutes,
+        isActive,
+      });
+
+      // Log admin action
+      await storage.logAdminAction(
+        req.user.id,
+        AdminActionType.MODIFY_GAME_SETTINGS, // Using existing enum for now
+        undefined,
+        { redirectLinkId: linkId, updates: { url, intervalMinutes, isActive } }
+      );
+
+      res.status(200).json(updatedLink);
+    } catch (error: any) {
+      console.error("Error updating redirect link:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/admin/redirect-links/:id", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      await storage.deleteRedirectLink(linkId);
+
+      // Log admin action
+      await storage.logAdminAction(
+        req.user.id,
+        AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
+        undefined,
+        { redirectLinkId: linkId, action: "delete" }
+      );
+
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting redirect link:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Profile picture upload endpoints
   app.post("/api/profile/upload-picture", authenticateJWT, profilePictureUpload.single('profilePicture'), async (req, res) => {
     try {

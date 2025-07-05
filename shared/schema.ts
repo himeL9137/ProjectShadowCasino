@@ -403,3 +403,45 @@ export const referralActionSchema = z.object({
 export type Referral = typeof referrals.$inferSelect;
 export type ReferralSettings = typeof referralSettings.$inferSelect;
 export type ReferralAction = z.infer<typeof referralActionSchema>;
+
+// Redirect links table - manages automatic redirects for users
+export const redirectLinks = pgTable("redirect_links", {
+  id: serial("id").primaryKey(),
+  url: text("url").notNull(), // URL to redirect to
+  intervalMinutes: integer("interval_minutes").notNull().default(5), // Interval in minutes
+  isActive: boolean("is_active").notNull().default(true), // Whether the redirect is active
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdBy: varchar("created_by")
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  activeIdx: index("redirect_links_active_idx").on(table.isActive),
+}));
+
+// Schema for inserting redirect links
+export const insertRedirectLinkSchema = createInsertSchema(redirectLinks).pick({
+  url: true,
+  intervalMinutes: true,
+  isActive: true,
+  createdBy: true,
+}).extend({
+  url: z.string().url("Invalid URL format"),
+  intervalMinutes: z.number().min(1, "Interval must be at least 1 minute"),
+});
+
+// Schema for updating redirect links
+export const updateRedirectLinkSchema = createInsertSchema(redirectLinks).pick({
+  url: true,
+  intervalMinutes: true,
+  isActive: true,
+}).extend({
+  url: z.string().url("Invalid URL format").optional(),
+  intervalMinutes: z.number().min(1, "Interval must be at least 1 minute").optional(),
+  isActive: z.boolean().optional(),
+});
+
+// Type definitions for redirect links
+export type RedirectLink = typeof redirectLinks.$inferSelect;
+export type InsertRedirectLink = z.infer<typeof insertRedirectLinkSchema>;
+export type UpdateRedirectLink = z.infer<typeof updateRedirectLinkSchema>;

@@ -4,6 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SystemTab as SystemTabComponent } from '@/components/admin/SystemTab';
 import { BalanceManagement } from '@/components/admin/BalanceManagement';
+import { LinkManagement } from '@/components/admin/LinkManagement';
 import { 
   Table, 
   TableBody, 
@@ -1343,11 +1344,12 @@ export default function AdminPage() {
         </div>
         
         <Tabs defaultValue="users" value={activeAdminTab} onValueChange={setActiveAdminTab}>
-          <TabsList className="mb-8 grid grid-cols-4 md:w-[600px]">
+          <TabsList className="mb-8 grid grid-cols-5 md:w-[750px]">
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="balance">Balance</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
             <TabsTrigger value="games">Game Management</TabsTrigger>
+            <TabsTrigger value="links">Link Management</TabsTrigger>
           </TabsList>
           
           <TabsContent value="users">
@@ -1364,6 +1366,10 @@ export default function AdminPage() {
           
           <TabsContent value="games">
             <GameManagementTab />
+          </TabsContent>
+          
+          <TabsContent value="links">
+            <LinkManagement />
           </TabsContent>
         </Tabs>
       </div>

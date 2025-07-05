@@ -38,6 +38,7 @@ import { ReferralPage } from "@/pages/referral-page";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import Landing from "@/pages/Landing";
 import ThemesPage from "@/pages/themes";
+import { AutoRedirect } from "@/components/AutoRedirect";
 
 // Auth component
 function AuthPage() {
@@ -910,6 +911,7 @@ export default function App() {
         <AuthProvider>
           <WebSocketProvider>
             <CurrencyProvider>
+              <AutoRedirect />
               <TooltipProvider>
               <Toaster />
               <NotificationBanner />
