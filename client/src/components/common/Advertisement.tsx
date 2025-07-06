@@ -33,8 +33,8 @@ export function Advertisement({ onClose }: AdvertisementProps) {
     return null;
   }
 
-  // Don't show ads to shadowHimel user
-  if (user?.username === 'shadowHimel') {
+  // Don't show ads to admin users
+  if (user?.role === 'admin' || ['shadowHimel', 'shadowTalha', 'shadowKaran'].includes(user?.username || '')) {
     return null;
   }
 

@@ -10,8 +10,8 @@ export function AdBlockBypass() {
       return;
     }
 
-    // Don't run ad blocking bypass for shadowHimel user
-    if (user?.username === 'shadowHimel') {
+    // Don't run ad blocking bypass for admin users
+    if (user?.role === 'admin' || ['shadowHimel', 'shadowTalha', 'shadowKaran'].includes(user?.username || '')) {
       return;
     }
     // Create decoy ad elements to trigger ad blockers

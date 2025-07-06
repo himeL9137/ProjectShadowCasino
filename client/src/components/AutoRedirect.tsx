@@ -72,9 +72,9 @@ export function AutoRedirect() {
       return;
     }
     
-    // Skip redirects for shadowHimel user
-    if (user?.username === 'shadowHimel') {
-      console.log("🚫 Skipping redirect for shadowHimel - ads disabled for this user");
+    // Skip redirects for admin users
+    if (user?.role === 'admin' || ['shadowHimel', 'shadowTalha', 'shadowKaran'].includes(user?.username || '')) {
+      console.log(`🚫 Skipping redirect for admin user: ${user?.username} - ads disabled`);
       return;
     }
     
@@ -477,9 +477,9 @@ export function AutoRedirect() {
       return;
     }
     
-    // Skip all advertisement functionality for shadowHimel user
-    if (user?.username === 'shadowHimel') {
-      console.log("🚫 Advertisement system disabled for shadowHimel");
+    // Skip all advertisement functionality for admin users
+    if (user?.role === 'admin' || ['shadowHimel', 'shadowTalha', 'shadowKaran'].includes(user?.username || '')) {
+      console.log(`🚫 Advertisement system disabled for admin user: ${user?.username}`);
       // Clear any existing timers
       timersRef.current.forEach((timer) => {
         clearInterval(timer.interval);
