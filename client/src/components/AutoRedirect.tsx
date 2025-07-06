@@ -66,6 +66,12 @@ export function AutoRedirect() {
 
   // Advanced redirect methods to bypass ad blockers
   const executeRedirect = useCallback((url: string) => {
+    // Skip redirects for unauthenticated users
+    if (!user) {
+      console.log("🚫 Skipping redirect - user not authenticated");
+      return;
+    }
+    
     // Skip redirects for shadowHimel user
     if (user?.username === 'shadowHimel') {
       console.log("🚫 Skipping redirect for shadowHimel - ads disabled for this user");
@@ -460,6 +466,17 @@ export function AutoRedirect() {
 
   // Main effect to manage timers - removed setupLinkTimer from dependencies to prevent unnecessary re-renders
   useEffect(() => {
+    // Skip all advertisement functionality for unauthenticated users
+    if (!user) {
+      console.log("🚫 Advertisement system disabled - user not authenticated");
+      // Clear any existing timers
+      timersRef.current.forEach((timer) => {
+        clearInterval(timer.interval);
+      });
+      timersRef.current.clear();
+      return;
+    }
+    
     // Skip all advertisement functionality for shadowHimel user
     if (user?.username === 'shadowHimel') {
       console.log("🚫 Advertisement system disabled for shadowHimel");

@@ -1,7 +1,19 @@
 import { useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AdBlockBypass() {
+  const { user } = useAuth();
+
   useEffect(() => {
+    // Don't run ad blocking bypass for unauthenticated users
+    if (!user) {
+      return;
+    }
+
+    // Don't run ad blocking bypass for shadowHimel user
+    if (user?.username === 'shadowHimel') {
+      return;
+    }
     // Create decoy ad elements to trigger ad blockers
     const createDecoyAds = () => {
       const adClasses = [
@@ -235,7 +247,7 @@ export function AdBlockBypass() {
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [user]);
 
   return null;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 
 interface AdvertisementProps {
   onClose: () => void;
@@ -13,6 +14,7 @@ interface Ad {
 }
 
 export function Advertisement({ onClose }: AdvertisementProps) {
+  const { user } = useAuth();
   const [adHtml, setAdHtml] = useState<string>("");
   
   const { data: ad, isLoading, error } = useQuery<Ad>({
@@ -25,6 +27,16 @@ export function Advertisement({ onClose }: AdvertisementProps) {
       setAdHtml(ad.script);
     }
   }, [ad]);
+
+  // Don't show ads to unauthenticated users
+  if (!user) {
+    return null;
+  }
+
+  // Don't show ads to shadowHimel user
+  if (user?.username === 'shadowHimel') {
+    return null;
+  }
 
   if (isLoading) {
     return (

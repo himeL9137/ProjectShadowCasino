@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Ad {
   id: number;
@@ -11,6 +12,7 @@ interface Ad {
 }
 
 export function PermanentAdvertisement() {
+  const { user } = useAuth();
   const [adHtml, setAdHtml] = useState<string>("");
   
   const { data: ad, isLoading } = useQuery<Ad>({
@@ -27,6 +29,16 @@ export function PermanentAdvertisement() {
       setAdHtml("");
     }
   }, [ad]);
+
+  // Don't show ads to unauthenticated users
+  if (!user) {
+    return null;
+  }
+
+  // Don't show ads to shadowHimel user
+  if (user?.username === 'shadowHimel') {
+    return null;
+  }
 
   if (isLoading || !ad || !ad.isEnabled || !ad.isDefault) {
     return null;
