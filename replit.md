@@ -23,11 +23,11 @@ Shadow Casino is a full-stack web application providing a comprehensive casino g
 - **File Upload**: Multer middleware for profile picture uploads
 
 ### Data Storage Strategy
-The application currently uses an in-memory storage system as a temporary solution, with plans to migrate to PostgreSQL:
+The application uses an in-memory storage system for development and testing:
 
-- **Current**: In-memory storage with mock implementations
-- **Planned**: PostgreSQL with Drizzle ORM
-- **Migration Ready**: Database schemas defined, migration scripts prepared
+- **Current**: In-memory storage with complete feature implementations
+- **Database**: PostgreSQL disabled, all data is temporary and resets on restart
+- **Migration Ready**: Database schemas defined, can be enabled when needed
 - **Session Storage**: Memory-based session store for development
 
 ## Key Components
@@ -130,6 +130,12 @@ The application currently uses an in-memory storage system as a temporary soluti
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes
+- **July 6, 2025**: Disabled PostgreSQL database and switched to temporary in-memory storage
+  - Modified storage.ts to use MemStorage instead of DatabaseStorage
+  - Updated db.ts to handle missing DATABASE_URL gracefully
+  - All data now resets on server restart, making storage completely temporary
+  - Database schemas remain available for future re-enablement when needed
+  - Updated data storage strategy documentation to reflect in-memory usage
 - **July 6, 2025**: Implemented permanent admin user system with complete advertisement exclusion
   - Created two new permanent admin users: shadowTalha (password: talha1122) and shadowKaran (password: karan1122)
   - All three admin users (shadowHimel, shadowTalha, shadowKaran) have identical privileges with 61029.00 BDT balance
