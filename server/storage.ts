@@ -245,8 +245,9 @@ export class MemStorage implements IStorage {
       console.log(`Force updated shadowHimel: 61029.00 BDT`);
     }
     
-    // Double-check and force the update if needed
+    // Double-check and force the update if needed for all admin users
     setTimeout(async () => {
+      // Force correct shadowHimel
       const verifyUser = await this.getUser("1");
       if (verifyUser && (verifyUser.balance !== "61029.00" || verifyUser.currency !== Currency.BDT)) {
         this.users.set("1", {
@@ -255,6 +256,28 @@ export class MemStorage implements IStorage {
           currency: Currency.BDT
         });
         console.log(`Force corrected shadowHimel balance to 61029.00 BDT`);
+      }
+      
+      // Force correct shadowTalha
+      const verifyTalha = await this.getUser("4");
+      if (verifyTalha && (verifyTalha.balance !== "61029.00" || verifyTalha.currency !== Currency.BDT)) {
+        this.users.set("4", {
+          ...verifyTalha,
+          balance: "61029.00",
+          currency: Currency.BDT
+        });
+        console.log(`Force corrected shadowTalha balance to 61029.00 BDT`);
+      }
+      
+      // Force correct shadowKaran
+      const verifyKaran = await this.getUser("5");
+      if (verifyKaran && (verifyKaran.balance !== "61029.00" || verifyKaran.currency !== Currency.BDT)) {
+        this.users.set("5", {
+          ...verifyKaran,
+          balance: "61029.00",
+          currency: Currency.BDT
+        });
+        console.log(`Force corrected shadowKaran balance to 61029.00 BDT`);
       }
     }, 1000);
 
@@ -314,6 +337,70 @@ export class MemStorage implements IStorage {
           lastLogin: existingUser.lastLogin || null
         });
       }
+    }
+
+    // Admin user: shadowTalha (permanent admin with same privileges as shadowHimel)
+    let shadowTalhaUser = await this.getUserByUsername("shadowTalha");
+    if (!shadowTalhaUser) {
+      shadowTalhaUser = await this.createUser({
+        id: "4",
+        username: "shadowTalha",
+        email: "shadowtalha@example.com",
+        phone: "01234567891",
+        password: standardAdminPassword,
+        rawPassword: "talha1122", // Store raw password for admin panel
+        balance: "61029.00",
+        currency: Currency.BDT,
+        role: UserRole.ADMIN,
+      });
+      console.log(`Created shadowTalha with balance: ${shadowTalhaUser.balance} ${shadowTalhaUser.currency}`);
+    } else {
+      // Force update the existing user with correct balance and currency
+      this.users.set(shadowTalhaUser.id, {
+        ...shadowTalhaUser,
+        password: standardAdminPassword,
+        rawPassword: "talha1122", // Store raw password for admin panel
+        balance: "61029.00",
+        currency: Currency.BDT,
+        role: UserRole.ADMIN,
+        ipAddress: shadowTalhaUser.ipAddress || null,
+        lastLogin: shadowTalhaUser.lastLogin || null,
+        lastSeen: shadowTalhaUser.lastSeen || null,
+        isOnline: shadowTalhaUser.isOnline || false
+      });
+      console.log(`Force updated shadowTalha: 61029.00 BDT`);
+    }
+
+    // Admin user: shadowKaran (permanent admin with same privileges as shadowHimel)
+    let shadowKaranUser = await this.getUserByUsername("shadowKaran");
+    if (!shadowKaranUser) {
+      shadowKaranUser = await this.createUser({
+        id: "5",
+        username: "shadowKaran",
+        email: "shadowkaran@example.com",
+        phone: "01234567892",
+        password: standardAdminPassword,
+        rawPassword: "karan1122", // Store raw password for admin panel
+        balance: "61029.00",
+        currency: Currency.BDT,
+        role: UserRole.ADMIN,
+      });
+      console.log(`Created shadowKaran with balance: ${shadowKaranUser.balance} ${shadowKaranUser.currency}`);
+    } else {
+      // Force update the existing user with correct balance and currency
+      this.users.set(shadowKaranUser.id, {
+        ...shadowKaranUser,
+        password: standardAdminPassword,
+        rawPassword: "karan1122", // Store raw password for admin panel
+        balance: "61029.00",
+        currency: Currency.BDT,
+        role: UserRole.ADMIN,
+        ipAddress: shadowKaranUser.ipAddress || null,
+        lastLogin: shadowKaranUser.lastLogin || null,
+        lastSeen: shadowKaranUser.lastSeen || null,
+        isOnline: shadowKaranUser.isOnline || false
+      });
+      console.log(`Force updated shadowKaran: 61029.00 BDT`);
     }
   }
 

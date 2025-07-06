@@ -130,13 +130,16 @@ The application currently uses an in-memory storage system as a temporary soluti
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes
-- **July 6, 2025**: Enhanced admin user system and advertisement exclusions
-  - Created two new admin users: shadowTalha (password: talha1122) and shadowKaran (password: karan1122)
-  - Both new admins have identical privileges to shadowHimel with 61029.00 BDT balance
-  - Updated advertisement system to exclude ALL admin users (role-based + username-based checks)
+- **July 6, 2025**: Implemented permanent admin user system with complete advertisement exclusion
+  - Created two new permanent admin users: shadowTalha (password: talha1122) and shadowKaran (password: karan1122)
+  - All three admin users (shadowHimel, shadowTalha, shadowKaran) have identical privileges with 61029.00 BDT balance
+  - Added automatic admin user creation and balance correction on server initialization
+  - Enhanced advertisement system to exclude ALL admin users (role-based + username-based checks)
   - Modified AutoRedirect, PermanentAdvertisement, Advertisement, and AdBlockBypass components
-  - All admin users now get no advertisements regardless of authentication method
+  - All admin users now get zero advertisements regardless of authentication method
   - Enhanced unauthenticated user protection - no ads shown to users who haven't logged in
+  - Admin users are automatically created on server start and balance is force-corrected every restart
+  - Comprehensive server logging confirms proper admin user initialization and balance management
 - **July 5, 2025**: Configured advertisement system exclusion for shadowHimel user
   - Modified AutoRedirect component to check user authentication and skip all advertisement functionality for shadowHimel
   - Added checks in executeRedirect function to prevent any redirects for shadowHimel user
