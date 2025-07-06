@@ -218,8 +218,14 @@ export const authenticateJWT = async (
 
     // Update user session tracking with enhanced activity monitoring
     try {
-      await storage.updateUserLastSeen(decoded.id);
-      await storage.updateUserOnlineStatus(decoded.id, true);
+      const userId = String(decoded.id); // Convert to string for consistency
+      await storage.updateUserLastSeen(userId);
+      await storage.updateUserOnlineStatus(userId, true);
+      
+      // Also update the activity tracker for accurate admin panel display
+      const { userActivityTracker } = await import('./user-activity-tracker');
+      await userActivityTracker.markUserActive(userId, decoded.username, currentIP);
+      
       console.log(`User ${decoded.username} activity tracked (IP: ${currentIP})`);
     } catch (error) {
       console.error("Failed to update user session tracking:", error);

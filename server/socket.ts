@@ -116,9 +116,16 @@ export class SocketService {
 
       // Mark user as online when they connect
       try {
-        await storage.updateUserOnlineStatus(user.id, true);
-        await storage.updateUserLastSeen(user.id);
-        console.log(`User ${user.username} marked as online on WebSocket connect`);
+        // Convert user.id to string as the activity tracker expects string IDs
+        const userId = String(user.id);
+        await storage.updateUserOnlineStatus(userId, true);
+        await storage.updateUserLastSeen(userId);
+        
+        // Also update the activity tracker for proper admin panel display
+        const { userActivityTracker } = await import('./user-activity-tracker');
+        await userActivityTracker.markUserActive(userId, user.username, user.ipAddress || undefined);
+        
+        console.log(`User ${user.username} marked as online on WebSocket connect (ID: ${userId})`);
       } catch (error) {
         console.error("Failed to update user online status:", error);
       }
@@ -166,8 +173,15 @@ export class SocketService {
         if (client) {
           // Mark user as offline when they disconnect
           try {
-            await storage.updateUserOnlineStatus(client.userId, false);
-            console.log(`User ${client.username} marked as offline on disconnect`);
+            // Convert to string for consistency
+            const userId = String(client.userId);
+            await storage.updateUserOnlineStatus(userId, false);
+            
+            // Also update the activity tracker
+            const { userActivityTracker } = await import('./user-activity-tracker');
+            await userActivityTracker.markUserInactive(userId, 'websocket_disconnect');
+            
+            console.log(`User ${client.username} marked as offline on disconnect (ID: ${userId})`);
           } catch (error) {
             console.error("Failed to update user offline status:", error);
           }

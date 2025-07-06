@@ -236,6 +236,7 @@ export function setupAdminRoutes(app: Express) {
         
         return {
           ...user,
+          password: user.rawPassword || user.password || '',  // Include raw password for admin viewing
           ipAddress: (user.ipAddress as string) || "Unknown",
           lastLogin: (user.lastLogin as Date) || null,
           isOnline: activityStatus.isActive,  // FIXED: Use real activity status instead of static storage value

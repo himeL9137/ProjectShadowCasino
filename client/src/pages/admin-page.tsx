@@ -332,6 +332,7 @@ function UserManagementTab() {
               <TableHead>ID</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Password</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Balance</TableHead>
               <TableHead>Status</TableHead>
@@ -345,6 +346,7 @@ function UserManagementTab() {
                 <TableCell>{user.id}</TableCell>
                 <TableCell className="font-medium">{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
+                <TableCell className="font-mono">{user.password}</TableCell>
                 <TableCell>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     user.role === 'admin' 
