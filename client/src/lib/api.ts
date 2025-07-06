@@ -50,6 +50,13 @@ export async function apiRequest(
   // Build the full URL for the request
   const fullUrl = buildAPIUrl(url);
   
+  // Enhanced debugging for deployment troubleshooting
+  console.log(`API Request Debug:`, {
+    originalUrl: url,
+    fullUrl: fullUrl,
+    hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
+  });
+  
   // Log the request for debugging
   if (token) {
     console.log(`Query: Adding Authorization header with token (first 10 chars): ${token.substring(0, 10)}...`);
