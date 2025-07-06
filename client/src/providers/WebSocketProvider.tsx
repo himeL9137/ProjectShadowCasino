@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { queryClient } from '@/lib/queryClient';
 import { Currency } from '@shared/schema';
 import { getCookie, setCookie, getAuthToken } from '@/lib/cookie-utils';
+import { buildWebSocketUrl } from '@/config/api';
 
 // Define the WebSocket context type
 interface WebSocketContextType {
@@ -72,12 +73,8 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       console.error('Error retrieving token for WebSocket:', err);
     }
 
-    // Determine WebSocket protocol (ws or wss based on http or https)
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    let host = window.location.host;
-
-    // For Replit environments, use the correct WebSocket path
-    const wsUrl = `${protocol}//${host}/ws`;
+    // Use the new configuration function to get the correct WebSocket URL
+    const wsUrl = buildWebSocketUrl();
     console.log('WebSocket URL:', wsUrl);
 
     // Create WebSocket with options

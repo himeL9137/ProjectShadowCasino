@@ -6,11 +6,18 @@ import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./auth";
 
 const app = express();
-// Use CORS with credentials support
+// Use CORS with credentials support for deployed domain
 app.use(
   cors({
-    origin: true, // Allow all origins during development
+    origin: [
+      'https://projectshadow.infy.uk',
+      'https://ddae7a2f-bbd5-46fe-93fa-dc73fce10ee0-00-3owymylj2hnbq.pike.replit.dev',
+      'http://localhost:5173', // For local development
+      true // Allow all origins as fallback
+    ],
     credentials: true, // Allow cookies in requests
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   }),
 );
 app.use(express.json());

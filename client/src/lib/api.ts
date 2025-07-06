@@ -1,5 +1,6 @@
 // Helper functions for API requests
 import { getAuthToken } from "./cookie-utils";
+import { buildAPIUrl } from "@/config/api";
 
 /**
  * Makes an authenticated API request
@@ -46,8 +47,16 @@ export async function apiRequest(
     credentials: 'include', // Always include credentials for cookies
   };
   
+  // Build the full URL for the request
+  const fullUrl = buildAPIUrl(url);
+  
+  // Log the request for debugging
+  if (token) {
+    console.log(`Query: Adding Authorization header with token (first 10 chars): ${token.substring(0, 10)}...`);
+  }
+  
   // Make the request
-  return fetch(url, requestOptions);
+  return fetch(fullUrl, requestOptions);
 }
 
 /**
