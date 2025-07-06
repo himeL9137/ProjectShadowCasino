@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Search, UserPlus, Edit, Trash2, Ban, AlertTriangle, DollarSign, Play, Gamepad2, Shield } from 'lucide-react';
+import { Loader2, Search, UserPlus, Edit, Trash2, Ban, AlertTriangle, DollarSign, Play, Gamepad2, Shield, RefreshCw } from 'lucide-react';
 import { Currency } from '@shared/schema';
 import { adminApiCall, get, post } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -170,6 +170,7 @@ function UserManagementTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [syncingUsers, setSyncingUsers] = useState(false);
   
 
   
@@ -288,6 +289,38 @@ function UserManagementTab() {
       console.error('Error unbanning user:', err);
     }
   };
+
+  // Handle user status sync
+  const handleSyncUserStatus = async () => {
+    try {
+      setSyncingUsers(true);
+      setError(null);
+      
+      const response = await adminApiCall<{message: string, summary: any}>('POST', '/api/admin/sync-user-status', {});
+      
+      // Refresh users list to show updated statuses
+      await fetchUsers();
+      
+      toast({
+        title: "User Status Sync",
+        description: response.message,
+      });
+      
+      console.log('User status sync completed:', response.summary);
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sync user status';
+      setError(errorMessage);
+      toast({
+        title: "Sync Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      console.error('Error syncing user status:', err);
+    } finally {
+      setSyncingUsers(false);
+    }
+  };
   
   if (loading) {
     return (
@@ -321,6 +354,19 @@ function UserManagementTab() {
         <Button variant="outline" size="sm">
           <UserPlus className="h-4 w-4 mr-2" />
           Add User
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleSyncUserStatus}
+          disabled={syncingUsers}
+        >
+          {syncingUsers ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Sync Status
         </Button>
       </div>
       

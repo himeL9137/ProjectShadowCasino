@@ -630,4 +630,27 @@ export function setupAdminRoutes(app: Express) {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Force sync user activity status (admin only) - FIX for incorrect active status
+  app.post("/api/admin/sync-user-status", adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      console.log(`Admin ${req.user?.username} triggered user status sync`);
+      
+      // Import and trigger the force sync
+      const { userActivityTracker } = await import('./user-activity-tracker');
+      await userActivityTracker.forceSyncAllUsers();
+      
+      // Get updated activity summary
+      const summary = userActivityTracker.getActivitySummary();
+      
+      res.json({
+        message: "User activity status sync completed successfully",
+        summary,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error syncing user status:", error);
+      res.status(500).json({ message: "Failed to sync user status" });
+    }
+  });
 }

@@ -16,12 +16,16 @@ interface ActivitySession {
 
 class UserActivityTracker {
   private activeSessions = new Map<string, ActivitySession>();
-  private readonly ACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
-  private readonly CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+  private readonly ACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds (more aggressive)
+  private readonly CLEANUP_INTERVAL = 1 * 60 * 1000; // 1 minute in milliseconds (more frequent)
   private cleanupTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.startCleanupProcess();
+    // Force sync on startup to correct any inconsistent user statuses
+    setTimeout(() => {
+      this.forceSyncAllUsers();
+    }, 2000); // Delay to allow storage to initialize
   }
 
   /**
@@ -214,6 +218,33 @@ class UserActivityTracker {
     
     this.activeSessions.clear();
     console.log('All user sessions cleaned up');
+  }
+
+  /**
+   * Force sync all users to correct status - marks all users without active sessions as offline
+   */
+  public async forceSyncAllUsers(): Promise<void> {
+    try {
+      console.log('🔄 Force syncing all user statuses...');
+      const allUsers = await storage.getAllUsers();
+      let correctedCount = 0;
+      
+      for (const user of allUsers) {
+        const hasActiveSession = this.activeSessions.has(user.id);
+        const activityStatus = this.getUserActivityStatus(user.id);
+        
+        // If user shows as online but has no active session or is not actually active
+        if (user.isOnline && (!hasActiveSession || !activityStatus.isActive)) {
+          await storage.updateUserOnlineStatus(user.id, false);
+          console.log(`✓ Corrected: marked ${user.username} as offline (no active session)`);
+          correctedCount++;
+        }
+      }
+      
+      console.log(`🔧 Force sync completed: corrected ${correctedCount} user statuses`);
+    } catch (error) {
+      console.error('Error in force sync:', error);
+    }
   }
 }
 
