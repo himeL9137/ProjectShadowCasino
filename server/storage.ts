@@ -1448,11 +1448,10 @@ export class MemStorage implements IStorage {
   }
 }
 
-// TEMPORARY: Use in-memory storage with enhanced user activity tracking
-// DATABASE DISABLED: Switched back to in-memory storage as requested
+// DATABASE ENABLED: Using PostgreSQL database storage
+import { DatabaseStorage } from "./database-storage";
 
-// Use the in-memory storage implementation with enhanced user activity tracking
-console.log("*** USING ENHANCED IN-MEMORY STORAGE - DATABASE DISABLED ***");
+console.log("*** USING POSTGRESQL DATABASE STORAGE ***");
 
-// Use in-memory storage instead of database
-export const storage = new MemStorage();
+// Use database storage implementation
+export const storage = new DatabaseStorage();

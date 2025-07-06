@@ -129,13 +129,16 @@ The application uses an in-memory storage system for development and testing:
 4. **Phase 3**: Switch storage implementation to database-backed
 5. **Phase 4**: Remove mock implementations
 
-## Recent Changes
-- **July 6, 2025**: Disabled PostgreSQL database and switched to temporary in-memory storage
-  - Modified storage.ts to use MemStorage instead of DatabaseStorage
-  - Updated db.ts to handle missing DATABASE_URL gracefully
-  - All data now resets on server restart, making storage completely temporary
-  - Database schemas remain available for future re-enablement when needed
-  - Updated data storage strategy documentation to reflect in-memory usage
+## Recent Changes  
+- **July 6, 2025**: Successfully migrated from in-memory storage to PostgreSQL database
+  - Created PostgreSQL database with all required tables and schemas
+  - Switched from MemStorage to DatabaseStorage for persistent data storage
+  - Database migration completed successfully using `npm run db:push`
+  - All admin users recreated in database: shadowHimel (ID: 1), shadowTalha (ID: 4), shadowKaran (ID: 5)
+  - All users have 61,029.00 BDT balance and admin privileges
+  - Data now persists across server restarts - no longer temporary storage
+  - Previous JWT tokens invalid due to ID changes - users need to re-login
+  - Backend properly connected to deployed frontend at https://projectshadow.infy.uk
 - **July 6, 2025**: Implemented permanent admin user system with complete advertisement exclusion
   - Created two new permanent admin users: shadowTalha (password: talha1122) and shadowKaran (password: karan1122)
   - All three admin users (shadowHimel, shadowTalha, shadowKaran) have identical privileges with 61029.00 BDT balance
