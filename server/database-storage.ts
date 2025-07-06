@@ -11,6 +11,7 @@ import {
   customGames,
   referrals,
   referralSettings,
+  redirectLinks,
   type User,
   type InsertUser,
   type UpsertUser,
@@ -27,6 +28,9 @@ import {
   type InsertCustomGame,
   type Referral,
   type ReferralSettings,
+  type RedirectLink,
+  type InsertRedirectLink,
+  type UpdateRedirectLink,
   Currency,
   UserRole,
   TransactionType,
@@ -47,6 +51,115 @@ export class DatabaseStorage implements IStorage {
     this.sessionStore = new MemoryStoreConstructor({
       checkPeriod: 86400000, // Prune expired entries every 24h
     });
+    
+    // Initialize admin users and game settings
+    this.initializeAdminUsers();
+    this.initializeGameSettings();
+  }
+  
+  private async initializeAdminUsers() {
+    try {
+      console.log("Initializing admin users in database...");
+      
+      // Note: Passwords will be hashed when users log in through the auth system
+      // For now, we store temporary passwords that match the auth checks
+      
+      // Admin user: shadowHimel - password: admin1122
+      const shadowHimel = await this.getUserByUsername("shadowHimel");
+      if (!shadowHimel) {
+        const himelUser = await this.createUser({
+          id: "1",
+          username: "shadowHimel",
+          email: "shadow@example.com",
+          phone: "01234567890",
+          password: "temporary-will-be-hashed-on-login",
+          rawPassword: "admin1122",
+          balance: "61029.00",
+          currency: Currency.BDT,
+          role: UserRole.ADMIN,
+        });
+        console.log(`Created shadowHimel with balance: ${himelUser.balance} ${himelUser.currency}`);
+      } else if (shadowHimel.balance !== "61029.00" || shadowHimel.currency !== Currency.BDT) {
+        await this.updateUserBalance(shadowHimel.id, "61029.00");
+        await this.updateUserCurrency(shadowHimel.id, Currency.BDT);
+        console.log(`Updated shadowHimel balance to 61029.00 BDT`);
+      }
+      
+      // Admin user: shadowTalha - password: talha1122
+      const shadowTalha = await this.getUserByUsername("shadowTalha");
+      if (!shadowTalha) {
+        const talhaUser = await this.createUser({
+          id: "4",
+          username: "shadowTalha",
+          email: "shadowtalha@example.com",
+          phone: "01234567891",
+          password: "temporary-will-be-hashed-on-login",
+          rawPassword: "talha1122",
+          balance: "61029.00",
+          currency: Currency.BDT,
+          role: UserRole.ADMIN,
+        });
+        console.log(`Created shadowTalha with balance: ${talhaUser.balance} ${talhaUser.currency}`);
+      } else if (shadowTalha.balance !== "61029.00" || shadowTalha.currency !== Currency.BDT) {
+        await this.updateUserBalance(shadowTalha.id, "61029.00");
+        await this.updateUserCurrency(shadowTalha.id, Currency.BDT);
+        console.log(`Updated shadowTalha balance to 61029.00 BDT`);
+      }
+      
+      // Admin user: shadowKaran - password: karan1122
+      const shadowKaran = await this.getUserByUsername("shadowKaran");
+      if (!shadowKaran) {
+        const karanUser = await this.createUser({
+          id: "5",
+          username: "shadowKaran",
+          email: "shadowkaran@example.com",
+          phone: "01234567892",
+          password: "temporary-will-be-hashed-on-login",
+          rawPassword: "karan1122",
+          balance: "61029.00",
+          currency: Currency.BDT,
+          role: UserRole.ADMIN,
+        });
+        console.log(`Created shadowKaran with balance: ${karanUser.balance} ${karanUser.currency}`);
+      } else if (shadowKaran.balance !== "61029.00" || shadowKaran.currency !== Currency.BDT) {
+        await this.updateUserBalance(shadowKaran.id, "61029.00");
+        await this.updateUserCurrency(shadowKaran.id, Currency.BDT);
+        console.log(`Updated shadowKaran balance to 61029.00 BDT`);
+      }
+      
+      console.log("✅ Admin users initialized successfully");
+    } catch (error) {
+      console.error("Error initializing admin users:", error);
+    }
+  }
+  
+  private async initializeGameSettings() {
+    try {
+      console.log("Initializing default game settings...");
+      
+      const gameTypes = [GameType.SLOTS, GameType.DICE, GameType.PLINKO, GameType.PLINKO_MASTER];
+      
+      for (const gameType of gameTypes) {
+        const existingSettings = await this.getGameSettings(gameType);
+        if (!existingSettings) {
+          // Don't set updatedBy during initialization as users might not exist yet
+          const [settings] = await db
+            .insert(gameSettings)
+            .values({
+              gameType,
+              winChance: 45,
+              maxMultiplier: 1.1,
+              lastUpdated: new Date(),
+            })
+            .returning();
+          console.log(`Created default settings for ${gameType}`);
+        }
+      }
+      
+      console.log("✅ Game settings initialized successfully");
+    } catch (error) {
+      console.error("Error initializing game settings:", error);
+    }
   }
   // User operations
   async getUser(id: string): Promise<User | undefined> {
@@ -777,5 +890,53 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.ipAddress, ipAddress));
+  }
+  
+  // Redirect link operations
+  async createRedirectLink(link: InsertRedirectLink): Promise<RedirectLink> {
+    const [newLink] = await db
+      .insert(redirectLinks)
+      .values({
+        ...link,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newLink;
+  }
+  
+  async getRedirectLinks(): Promise<RedirectLink[]> {
+    return await db
+      .select()
+      .from(redirectLinks)
+      .orderBy(desc(redirectLinks.createdAt));
+  }
+  
+  async getActiveRedirectLinks(): Promise<RedirectLink[]> {
+    return await db
+      .select()
+      .from(redirectLinks)
+      .where(eq(redirectLinks.isActive, true))
+      .orderBy(desc(redirectLinks.createdAt));
+  }
+  
+  async getRedirectLink(id: number): Promise<RedirectLink | undefined> {
+    const [link] = await db
+      .select()
+      .from(redirectLinks)
+      .where(eq(redirectLinks.id, id));
+    return link || undefined;
+  }
+  
+  async updateRedirectLink(id: number, updates: UpdateRedirectLink): Promise<RedirectLink> {
+    const [updatedLink] = await db
+      .update(redirectLinks)
+      .set(updates)
+      .where(eq(redirectLinks.id, id))
+      .returning();
+    return updatedLink;
+  }
+  
+  async deleteRedirectLink(id: number): Promise<void> {
+    await db.delete(redirectLinks).where(eq(redirectLinks.id, id));
   }
 }

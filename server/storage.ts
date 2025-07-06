@@ -1456,4 +1456,8 @@ export class MemStorage implements IStorage {
 
 // Use the in-memory storage implementation with enhanced user activity tracking
 console.log("*** USING ENHANCED IN-MEMORY STORAGE WITH USER ACTIVITY TRACKING ***");
-export const storage = new MemStorage();
+// Import the database storage instead of in-memory
+import { DatabaseStorage } from "./database-storage";
+
+// Use PostgreSQL database storage as specified in replit.md
+export const storage = new DatabaseStorage();

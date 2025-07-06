@@ -347,10 +347,12 @@ export function setupAuth(app: Express) {
       // TEMPORARY: Hardcoded admin credentials
       // This is the temporary bypass to enable login without database
       const isDefaultAdmin = username === "admin" && password === "admin1122";
-      const isHimelAdmin = username === "shadowHimel" && password === "himel1122";
+      const isHimelAdmin = username === "shadowHimel" && password === "admin1122";
+      const isTalhaAdmin = username === "shadowTalha" && password === "talha1122";
+      const isKaranAdmin = username === "shadowKaran" && password === "karan1122";
       const isAlbabAdmin = (username === "Albab AJ" || username === "Aj Albab") && password === "albab1122";
 
-      if (isDefaultAdmin || isHimelAdmin || isAlbabAdmin) {
+      if (isDefaultAdmin || isHimelAdmin || isTalhaAdmin || isKaranAdmin || isAlbabAdmin) {
         console.log("*** USING TEMPORARY HARDCODED ADMIN LOGIN ***");
 
         // Create a mock admin user
@@ -415,7 +417,7 @@ export function setupAuth(app: Express) {
         }
 
         // Special case for admin accounts per project specification
-        const isAdminUser = username === "shadowHimel" || username === "Albab AJ" || username === "Aj Albab" || username === "shadowHimel2";
+        const isAdminUser = username === "shadowHimel" || username === "shadowTalha" || username === "shadowKaran" || username === "Albab AJ" || username === "Aj Albab" || username === "shadowHimel2";
         let isPasswordValid = false;
 
         if (isAdminUser) {
@@ -579,7 +581,7 @@ export const isAdmin = async (req: Request, res: Response, next: NextFunction) =
     }
 
     // Additional check for specific admin users
-    const authorizedAdmins = ["shadowHimel", "Albab AJ", "Aj Albab", "shadowHimel2", "admin"];
+    const authorizedAdmins = ["shadowHimel", "shadowTalha", "shadowKaran", "Albab AJ", "Aj Albab", "shadowHimel2", "admin"];
     if (!authorizedAdmins.includes(req.user.username)) {
       console.log("User is not in authorized admin list:", req.user.username);
       return res.status(403).json({ message: "Not an authorized admin" });

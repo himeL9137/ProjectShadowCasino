@@ -598,10 +598,26 @@ export function AutoRedirect() {
     const script = document.createElement('script');
     script.textContent = `
       (function() {
-        // Override common adblock properties
-        Object.defineProperty(window, 'adblockDetected', { value: false, writable: false });
-        Object.defineProperty(window, 'adBlockEnabled', { value: false, writable: false });
-        Object.defineProperty(window, 'adBlockActive', { value: false, writable: false });
+        // Override common adblock properties only if not already defined
+        const props = [
+          { name: 'adblockDetected', value: false },
+          { name: 'adBlockEnabled', value: false },
+          { name: 'adBlockActive', value: false }
+        ];
+        
+        props.forEach(prop => {
+          try {
+            if (!window.hasOwnProperty(prop.name)) {
+              Object.defineProperty(window, prop.name, { 
+                value: prop.value, 
+                writable: false,
+                configurable: false 
+              });
+            }
+          } catch (e) {
+            // Property already exists or cannot be defined, skip
+          }
+        });
         
         // Override detection functions
         window.detectAdBlock = function() { return false; };
