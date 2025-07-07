@@ -205,13 +205,13 @@ function UserManagementTab() {
   // Handle user kick (temporary mute)
   const handleKickUser = async (userId: number, username: string) => {
     try {
-      const updatedUser = await adminApiCall<AdminUser>('POST', `/api/admin/users/${userId}/kick`, {
-        notification: `You have been temporarily kicked from Shadow Casino. If you have any issues, please contact our support team.`
+      const response = await adminApiCall<{user: AdminUser, message: string}>('POST', `/api/admin/users/${userId}/mute`, {
+        reason: `Temporarily kicked from Shadow Casino. If you have any issues, please contact our support team.`
       });
       
       // Update user in the list
       setUsers(users.map(user => 
-        user.id === updatedUser.id ? updatedUser : user
+        user.id === response.user.id ? response.user : user
       ));
       
       // Show success message
@@ -227,13 +227,13 @@ function UserManagementTab() {
   // Handle user ban (permanent block)
   const handleBanUser = async (userId: number, username: string) => {
     try {
-      const updatedUser = await adminApiCall<AdminUser>('POST', `/api/admin/users/${userId}/ban`, {
-        notification: `You have been permanently banned from Shadow Casino. If you have any issues, please contact our support team.`
+      const response = await adminApiCall<{user: AdminUser, message: string}>('POST', `/api/admin/users/${userId}/ban`, {
+        reason: `You have been permanently banned from Shadow Casino. If you have any issues, please contact our support team.`
       });
       
       // Update user in the list
       setUsers(users.map(user => 
-        user.id === updatedUser.id ? updatedUser : user
+        user.id === response.user.id ? response.user : user
       ));
       
       // Show success message
@@ -249,13 +249,13 @@ function UserManagementTab() {
   // Handle user unkick (remove temporary mute)
   const handleUnkickUser = async (userId: number, username: string) => {
     try {
-      const updatedUser = await adminApiCall<AdminUser>('POST', `/api/admin/users/${userId}/unkick`, {
-        notification: `Your kick has been lifted. Welcome back to Shadow Casino!`
+      const response = await adminApiCall<{user: AdminUser, message: string}>('POST', `/api/admin/users/${userId}/unmute`, {
+        reason: `Your kick has been lifted. Welcome back to Shadow Casino!`
       });
       
       // Update user in the list
       setUsers(users.map(user => 
-        user.id === updatedUser.id ? updatedUser : user
+        user.id === response.user.id ? response.user : user
       ));
       
       // Show success message
@@ -271,13 +271,13 @@ function UserManagementTab() {
   // Handle user unban (remove permanent block)
   const handleUnbanUser = async (userId: number, username: string) => {
     try {
-      const updatedUser = await adminApiCall<AdminUser>('POST', `/api/admin/users/${userId}/unban`, {
-        notification: `Your ban has been lifted. Welcome back to Shadow Casino!`
+      const response = await adminApiCall<{user: AdminUser, message: string}>('POST', `/api/admin/users/${userId}/unban`, {
+        reason: `Your ban has been lifted. Welcome back to Shadow Casino!`
       });
       
       // Update user in the list
       setUsers(users.map(user => 
-        user.id === updatedUser.id ? updatedUser : user
+        user.id === response.user.id ? response.user : user
       ));
       
       // Show success message

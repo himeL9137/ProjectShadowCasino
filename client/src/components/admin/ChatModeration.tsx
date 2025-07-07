@@ -33,14 +33,15 @@ export function ChatModeration() {
   
   const muteUserMutation = useMutation({
     mutationFn: async ({ userId, isMuted }: { userId: number; isMuted: boolean }) => {
-      await apiRequest("POST", `/api/admin/user/${userId}/mute`, { isMuted });
+      const endpoint = isMuted ? `/api/admin/users/${userId}/mute` : `/api/admin/users/${userId}/unmute`;
+      await apiRequest("POST", endpoint, { reason: isMuted ? "Chat moderation" : "Unmuted by admin" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setShowMuteDialog(false);
       toast({
         title: "Success",
-        description: `User ${selectedUser?.username} has been muted`,
+        description: `User ${selectedUser?.username} has been ${selectedUser ? 'muted' : 'unmuted'}`,
       });
     },
     onError: (error: Error) => {
@@ -54,14 +55,15 @@ export function ChatModeration() {
 
   const banUserMutation = useMutation({
     mutationFn: async ({ userId, isBanned }: { userId: number; isBanned: boolean }) => {
-      await apiRequest("POST", `/api/admin/user/${userId}/ban`, { isBanned });
+      const endpoint = isBanned ? `/api/admin/users/${userId}/ban` : `/api/admin/users/${userId}/unban`;
+      await apiRequest("POST", endpoint, { reason: isBanned ? "Chat moderation" : "Unbanned by admin" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setShowBanDialog(false);
       toast({
         title: "Success",
-        description: `User ${selectedUser?.username} has been banned`,
+        description: `User ${selectedUser?.username} has been ${selectedUser ? 'banned' : 'unbanned'}`,
       });
     },
     onError: (error: Error) => {
