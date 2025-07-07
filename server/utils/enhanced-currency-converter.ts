@@ -293,21 +293,22 @@ export function startExchangeRateUpdates(intervalMinutes: number = 30): () => vo
 
     // Initial update
     enhancedCurrencyConverter.updateRates()
-        .then(success => {
-            console.log(`Initial exchange rate update ${success ? 'successful' : 'failed'}`);
+        .then(() => {
+            console.log('Initial exchange rate update completed successfully');
         })
         .catch(error => {
-            console.error('Initial exchange rate update failed:', error);
+            console.error('Initial exchange rate update error:', error.message || error);
         });
 
     // Schedule periodic updates
     const intervalId = setInterval(() => {
         enhancedCurrencyConverter.updateRates()
-            .then(success => {
-                console.log(`Exchange rates updated successfully: ${enhancedCurrencyConverter.getSupportedCurrencies().length} currencies`);
+            .then(() => {
+                const currencyCount = enhancedCurrencyConverter.getSupportedCurrencies().length;
+                console.log(`Periodic exchange rate update completed: ${currencyCount} currencies available`);
             })
             .catch(error => {
-                console.error('Error during periodic exchange rate update:', error);
+                console.error('Periodic exchange rate update error:', error.message || error);
             });
     }, intervalMinutes * 60 * 1000);
 

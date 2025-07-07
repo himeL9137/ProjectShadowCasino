@@ -153,16 +153,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log('Logging in with:', data.username);
 
-      // Use fetch directly instead of the post helper to avoid json parsing issues
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(data),
-        credentials: 'include'
-      });
+      // Use post helper to properly handle API base URL
+      const response = await post('/api/login', data);
 
       if (!response.ok) {
         let errorText = 'Login failed';
