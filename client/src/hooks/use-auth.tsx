@@ -154,32 +154,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Logging in with:', data.username);
 
       // Use post helper to properly handle API base URL
-      const response = await post('/api/login', data);
-
-      if (!response.ok) {
-        let errorText = 'Login failed';
-        try {
-          const errorData = await response.json();
-          errorText = errorData.message || errorText;
-        } catch (e) {
-          // If response is not JSON, try to get text
-          try {
-            errorText = await response.text();
-          } catch (e2) {
-            // If all fails, use the default error message
-          }
-        }
-        throw new Error(errorText);
-      }
-
-      // Parse the response carefully to handle any potential issues
-      let responseData;
-      try {
-        responseData = await response.json();
-      } catch (e) {
-        console.error('Error parsing login response:', e);
-        throw new Error('Invalid response from server');
-      }
+      // The post helper already returns parsed JSON data
+      const responseData = await post('/api/login', data);
 
       const { user, token } = responseData;
       console.log('Login successful:', user);
