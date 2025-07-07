@@ -1451,7 +1451,8 @@ export class MemStorage implements IStorage {
 // DATABASE ENABLED: Using PostgreSQL database storage
 import { DatabaseStorage } from "./database-storage";
 
-console.log("*** USING POSTGRESQL DATABASE STORAGE ***");
+console.log("*** USING IN-MEMORY TEMPORARY DATABASE STORAGE ***");
 
 // Use database storage implementation
-export const storage = new DatabaseStorage();
+// Use in-memory storage for temporary database
+export const storage = new MemStorage();

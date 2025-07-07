@@ -22,7 +22,7 @@ export function Sidebar() {
   
   // Only allow specific admin users access to admin panel
   const isAdmin = user?.role === UserRole.ADMIN;
-  const isAuthorizedAdmin = isAdmin && (user?.username === "shadowHimel" || user?.username === "Albab AJ");
+  const isAuthorizedAdmin = isAdmin && (user?.username === "shadowHimel" || user?.username === "shadowTalha" || user?.username === "shadowKaran" || user?.username === "Albab AJ");
   const isRouteActive = (route: string) => {
     if (route === "/" && location === "/") return true;
     if (route !== "/" && location.startsWith(route)) return true;

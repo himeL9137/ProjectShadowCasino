@@ -1353,7 +1353,7 @@ export default function AdminPage() {
   
   // Check if user is admin
   const isAuthorizedAdmin = () => {
-    const allowedAdmins = ["shadowHimel", "Albab AJ", "Aj Albab", "shadowHimel2"];
+    const allowedAdmins = ["shadowHimel", "shadowTalha", "shadowKaran", "Albab AJ", "Aj Albab", "shadowHimel2"];
     
     if (!user) return false;
     if (user.role !== 'admin') return false;

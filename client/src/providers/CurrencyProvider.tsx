@@ -256,7 +256,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Error fetching exchange rates:", error);
         // Don't set to null if we already have rates - keep the old ones
-        if (!exchangeRates) {
+        // Only show toast if user is authenticated (not on auth page)
+        if (!exchangeRates && user) {
           toast({
             title: "Exchange Rate Error",
             description: "Unable to fetch current exchange rates. Using default values.",
