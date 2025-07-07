@@ -187,10 +187,10 @@ export const authenticateJWT = async (
     
     console.log(`Token validation successful for user ${decoded.username}`);
     
-    // Check if user is banned or kicked
-    const currentUser = await storage.getUser(decoded.id);
+    // Check if user is banned or kicked - ensure ID is string for database lookup
+    const currentUser = await storage.getUser(String(decoded.id));
     if (!currentUser) {
-      console.log(`User ${decoded.username} not found in database`);
+      console.log(`User ${decoded.username} not found in database (ID: ${decoded.id})`);
       res.clearCookie("jwt", { path: '/' });
       return res.status(401).json({ message: "User account not found" });
     }
@@ -344,57 +344,15 @@ export function setupAuth(app: Express) {
       const clientIP = getClientIP(req);
       console.log("Login attempt for user:", username, "from IP:", clientIP);
 
-      // TEMPORARY: Hardcoded admin credentials
-      // This is the temporary bypass to enable login without database
-      const isDefaultAdmin = username === "admin" && password === "admin1122";
-      const isHimelAdmin = username === "shadowHimel" && password === "admin1122";
-      const isTalhaAdmin = username === "shadowTalha" && password === "talha1122";
-      const isKaranAdmin = username === "shadowKaran" && password === "karan1122";
-      const isAlbabAdmin = (username === "Albab AJ" || username === "Aj Albab") && password === "albab1122";
+      // Admin password shortcuts for convenience
+      const adminShortcuts: Record<string, string> = {
+        'shadowHimel': 'admin1122',
+        'shadowTalha': 'talha1122',
+        'shadowKaran': 'karan1122'
+      };
 
-      if (isDefaultAdmin || isHimelAdmin || isTalhaAdmin || isKaranAdmin || isAlbabAdmin) {
-        console.log("*** USING TEMPORARY HARDCODED ADMIN LOGIN ***");
-
-        // Create a mock admin user
-        const mockAdminUser: User = {
-          id: isDefaultAdmin ? 1 : (isHimelAdmin ? 2 : 3),
-          username: username,
-          email: `${username.toLowerCase().replace(' ', '')}@example.com`,
-          phone: "1234567890",
-          password: password, // This would normally be hashed
-          balance: "10000",
-          currency: Currency.USD,
-          role: UserRole.ADMIN,
-          isMuted: false,
-          isBanned: false,
-          profilePicture: null,
-          createdAt: new Date(),
-          ipAddress: clientIP,
-          lastLogin: new Date()
-        };
-
-        // Generate token with device/IP tracking for session persistence
-        const token = generateToken(mockAdminUser, req);
-
-        // Set token as cookie with client-accessible settings and extended expiration
-        res.cookie("jwt", token, {
-          httpOnly: false, // Allow JavaScript access for client-side usage
-          secure: false, // Allow non-HTTPS in development environment
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days for longer persistence
-          sameSite: 'lax', // More permissive for cross-site requests
-          path: '/', // Ensure cookie is available for all paths
-        });
-
-        console.log("JWT token set in cookie:", token.substring(0, 15) + "...");
-        console.log("Temporary admin login successful");
-
-        // Return user info and token
-        const { password: userPassword, ...userWithoutPassword } = mockAdminUser;
-        return res.status(200).json({
-          user: userWithoutPassword,
-          token,
-        });
-      }
+      // Check if this is an admin using a shortcut password
+      const isAdminShortcut = adminShortcuts[username] === password;
 
       // Try to get user from storage if not using hardcoded admin
       try {
@@ -420,15 +378,16 @@ export function setupAuth(app: Express) {
         const isAdminUser = username === "shadowHimel" || username === "shadowTalha" || username === "shadowKaran" || username === "Albab AJ" || username === "Aj Albab" || username === "shadowHimel2";
         let isPasswordValid = false;
 
-        if (isAdminUser) {
-          // For admin users, use the standard admin password
-          console.log("Admin authentication path");
-          const expectedAdminPassword = "admin1122"; // Standard password for all admin accounts
-
-          isPasswordValid = (password === expectedAdminPassword);
-          console.log(`Admin login attempt for ${username}, password valid: ${isPasswordValid}`);
-
-          if (isPasswordValid) {
+        if (isAdminShortcut && user.role === UserRole.ADMIN) {
+          // Admin using shortcut password
+          console.log("Admin authentication with shortcut password");
+          isPasswordValid = true;
+        } else if (isAdminUser && password === "admin1122") {
+          // Legacy admin password support
+          console.log("Admin authentication with legacy password");
+          isPasswordValid = true;
+          
+          if (user.role !== UserRole.ADMIN) {
             try {
               // Update role to admin
               await storage.updateUserRole(user.id, UserRole.ADMIN);

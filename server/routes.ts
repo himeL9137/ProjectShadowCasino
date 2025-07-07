@@ -63,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -148,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const result = await GameController.playGame(req.user.id, gamePlay);
+      const result = await GameController.playGame(String(req.user.id), gamePlay);
 
       // Emit game result to all connected clients via WebSocket
       socketService.broadcastMessage({
@@ -174,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Wallet routes
   app.get("/api/wallet/balance", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -273,7 +273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       const { balance } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       const { isMuted } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -336,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       const { isBanned } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -584,7 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -613,7 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/profile/delete-picture", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -634,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/profile/picture-url", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -653,7 +653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/user/profile", authenticateJWT, async (req, res) => {
     try {
       const { email, phone, currentPassword, newPassword } = req.body;
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -678,10 +678,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (newPassword) updatedData.password = newPassword;
 
       if (Object.keys(updatedData).length > 0) {
-        await storage.updateUser(req.user.id, updatedData);
+        await storage.updateUser(String(req.user.id), updatedData);
       }
 
-      const updatedUser = await storage.getUser(req.user.id);
+      const updatedUser = await storage.getUser(String(req.user.id));
       res.status(200).json({ 
         message: "Profile updated successfully",
         user: updatedUser 
@@ -694,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user profile stats
   app.get("/api/user/profile-stats", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -812,7 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already has a referrer
-      const currentUser = await storage.getUser(req.user.id);
+      const currentUser = await storage.getUser(String(req.user.id));
       if (currentUser?.referredBy) {
         return res.status(400).json({ message: "You have already used a referral code" });
       }
@@ -901,7 +901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = req.user.id;
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -948,7 +948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For development/testing, auto-approve the deposit
       try {
         // Add funds directly to user's account
-        const user = await storage.getUser(req.user.id);
+        const user = await storage.getUser(String(req.user.id));
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
@@ -956,7 +956,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newBalance = (
           parseFloat(user.balance) + parseFloat(amount)
         ).toString();
-        await storage.updateUserBalance(req.user.id, newBalance);
+        await storage.updateUserBalance(String(req.user.id), newBalance);
 
         // Create deposit transaction
         await storage.createTransaction({
@@ -993,7 +993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1120,7 +1120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Prediction must be between 2 and 98" });
       }
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1319,7 +1319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get current user
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1329,7 +1329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBalance = currentBalance + depositAmount;
 
       // Update user balance
-      await storage.updateUserBalance(req.user.id, newBalance.toString());
+      await storage.updateUserBalance(String(req.user.id), newBalance.toString());
 
       // Create transaction record
       await storage.createTransaction({
@@ -1374,7 +1374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get current user
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1390,7 +1390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBalance = currentBalance - withdrawalAmount;
 
       // Update user balance
-      await storage.updateUserBalance(req.user.id, newBalance.toString());
+      await storage.updateUserBalance(String(req.user.id), newBalance.toString());
 
       // Create transaction record
       await storage.createTransaction({
@@ -1495,7 +1495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get user's current balance
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }

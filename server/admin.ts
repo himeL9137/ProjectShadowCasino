@@ -32,7 +32,7 @@ export function setupAdminRoutes(app: Express) {
       const userId = req.params.id;
       const currency = (req.query.currency as Currency) || Currency.USD;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -74,7 +74,7 @@ export function setupAdminRoutes(app: Express) {
         return res.status(400).json({ message: "Invalid input" });
       }
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -151,7 +151,7 @@ export function setupAdminRoutes(app: Express) {
         return res.status(400).json({ message: "Invalid input" });
       }
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -288,7 +288,7 @@ export function setupAdminRoutes(app: Express) {
       const { username, email, password, role } = req.body;
       
       // Get current user
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -345,7 +345,7 @@ export function setupAdminRoutes(app: Express) {
       const userId = req.params.id;
       const { reason } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -391,7 +391,7 @@ export function setupAdminRoutes(app: Express) {
       const userId = req.params.id;
       const { reason } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -432,7 +432,7 @@ export function setupAdminRoutes(app: Express) {
       const userId = req.params.id;
       const { reason } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -478,7 +478,7 @@ export function setupAdminRoutes(app: Express) {
       const userId = req.params.id;
       const { reason } = req.body;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -518,7 +518,7 @@ export function setupAdminRoutes(app: Express) {
     try {
       const userId = req.params.id;
 
-      const user = await storage.getUser(userId);
+      const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
