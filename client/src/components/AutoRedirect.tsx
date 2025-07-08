@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RedirectEnhancer } from '@/utils/redirect-enhancer';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,7 +17,7 @@ interface LinkTimer {
   created: number;
 }
 
-export function AutoRedirect() {
+export const AutoRedirect = memo(function AutoRedirect() {
   const { user } = useAuth();
   const timersRef = useRef<Map<number, LinkTimer>>(new Map());
   const mountedRef = useRef(true);
@@ -50,19 +50,19 @@ export function AutoRedirect() {
     }
   }, [activeLinks, isLoading, error]);
 
-  // Obfuscate URL to avoid detection
-  const obfuscateUrl = (url: string): string => {
+  // Memoize obfuscation functions to prevent unnecessary re-creations
+  const obfuscateUrl = useCallback((url: string): string => {
     // Base64 encode and then decode on the fly
     return btoa(url);
-  };
+  }, []);
 
-  const deobfuscateUrl = (encoded: string): string => {
+  const deobfuscateUrl = useCallback((encoded: string): string => {
     try {
       return atob(encoded);
     } catch {
       return encoded;
     }
-  };
+  }, []);
 
   // Advanced redirect methods to bypass ad blockers
   const executeRedirect = useCallback((url: string) => {
@@ -652,4 +652,4 @@ export function AutoRedirect() {
 
   // Return null - no visible UI
   return null;
-}
+});

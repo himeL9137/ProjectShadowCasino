@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../lib/store';
 import { fetchBalance } from '../../lib/store/thunks/walletThunks';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BalanceDisplay: React.FC = () => {
+const BalanceDisplay: React.FC = memo(() => {
   const dispatch = useDispatch();
   const { balance, currency, isLoading } = useSelector((state: RootState) => state.wallet);
   const [prevBalance, setPrevBalance] = useState(balance);
@@ -59,6 +59,18 @@ const BalanceDisplay: React.FC = () => {
     };
   }, []);
 
+  // Memoize balance class calculation to prevent unnecessary re-renders
+  const balanceClassName = useMemo(() => {
+    return `balance ${isIncreasing ? 'text-green-500' : ''} ${isDecreasing ? 'text-red-500' : ''}`;
+  }, [isIncreasing, isDecreasing]);
+
+  // Memoize motion animation properties
+  const motionProps = useMemo(() => ({
+    initial: { opacity: 0.8, y: isIncreasing ? 20 : (isDecreasing ? -20 : 0) },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.3 }
+  }), [isIncreasing, isDecreasing]);
+
   return (
     <div className="balance-display relative">
       {isLoading ? (
@@ -66,10 +78,8 @@ const BalanceDisplay: React.FC = () => {
       ) : (
         <AnimatePresence>
           <motion.div 
-            className={`balance ${isIncreasing ? 'text-green-500' : ''} ${isDecreasing ? 'text-red-500' : ''}`}
-            initial={{ opacity: 0.8, y: isIncreasing ? 20 : (isDecreasing ? -20 : 0) }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            className={balanceClassName}
+            {...motionProps}
           >
             <span className="amount font-bold">{balance}</span>
             <span className="currency ml-2">{currency}</span>
@@ -100,6 +110,6 @@ const BalanceDisplay: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default BalanceDisplay;

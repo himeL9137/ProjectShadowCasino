@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useMemo, useCallback } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -8,8 +8,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/providers/LanguageProvider";
 
 // Moving Stars Background Component with interaction-based disappearing
-function MovingStarsBackground() {
+// Optimized with React.memo to prevent unnecessary re-renders
+const MovingStarsBackground = memo(function MovingStarsBackground() {
   const [starsVisible, setStarsVisible] = useState(true);
+
+  // Memoize the event handler to prevent unnecessary re-creations
+  const handleUserInteraction = useCallback(() => {
+    setTimeout(() => {
+      setStarsVisible(false);
+    }, 5000); // Hide after 5 seconds
+  }, []);
+
+  // Memoize the events array
+  const interactionEvents = useMemo(() => 
+    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'], 
+    []
+  );
 
   useEffect(() => {
     const stars: HTMLDivElement[] = [];
@@ -31,16 +45,8 @@ function MovingStarsBackground() {
       }
     }
 
-    // Function to handle user interactions and hide stars after 5 seconds
-    const handleUserInteraction = () => {
-      setTimeout(() => {
-        setStarsVisible(false);
-      }, 5000); // Hide after 5 seconds
-    };
-
     // Add event listeners for various user interactions
-    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
-    events.forEach(event => {
+    interactionEvents.forEach(event => {
       document.addEventListener(event, handleUserInteraction, { once: true });
     });
 
@@ -49,16 +55,47 @@ function MovingStarsBackground() {
       stars.forEach(star => star.remove());
       
       // Remove event listeners
-      events.forEach(event => {
+      interactionEvents.forEach(event => {
         document.removeEventListener(event, handleUserInteraction);
       });
     };
-  }, [starsVisible]);
+  }, [starsVisible, handleUserInteraction, interactionEvents]);
+
+  // Memoize the CSS styles to prevent recalculation
+  const starStyles = useMemo(() => ({
+    __html: `
+      .home-star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        opacity: 0.6;
+        animation: twinkle 10s infinite, float 20s infinite;
+      }
+      
+      @keyframes twinkle {
+        0%, 100% { opacity: 0.2; }
+        50% { opacity: 1; }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+      
+      .home-star:nth-child(3n) { animation-duration: 15s, 25s; }
+      .home-star:nth-child(3n+1) { animation-duration: 8s, 18s; }
+      .home-star:nth-child(3n+2) { animation-duration: 12s, 22s; }
+    `
+  }), []);
 
   if (!starsVisible) return null;
 
-  return <div className="home-stars-container fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0" />;
-}
+  return (
+    <div className="home-stars-container fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+      <style dangerouslySetInnerHTML={starStyles} />
+    </div>
+  );
+});
 
 export default function HomePage() {
   const { user } = useAuth();

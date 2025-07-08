@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, memo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatCurrency, getCurrencySymbol } from "@/lib/currency-utils";
@@ -14,12 +14,13 @@ interface BalanceDisplayProps {
 /**
  * Displays the user's balance with proper animation effects for changes
  * Automatically updates when the balance or currency changes
+ * Optimized with React.memo to prevent unnecessary re-renders
  */
-export function BalanceDisplay({ 
+export const BalanceDisplay = memo(function BalanceDisplay({ 
   compact = false, 
   showCurrency = false,
   className = ""
-}: BalanceDisplayProps = {}) {
+}: BalanceDisplayProps) {
   const { user } = useAuth();
   const { 
     currency, 
@@ -115,10 +116,24 @@ export function BalanceDisplay({
     );
   }
   
-  // Format balance with the new utility
-  const formattedBalance = !isBalanceRefreshing
-    ? formatCurrency(displayAmount || "0", currency)
-    : "Loading...";
+  // Memoize expensive calculations to prevent unnecessary re-computations
+  const formattedBalance = useMemo(() => {
+    if (isBalanceRefreshing) return "Loading...";
+    return formatCurrency(displayAmount || "0", currency);
+  }, [displayAmount, currency, isBalanceRefreshing]);
+
+  const displayClasses = useMemo(() => {
+    return cn(
+      compact ? "text-base" : "text-2xl", 
+      "font-bold", 
+      animationClass,
+      className
+    );
+  }, [compact, animationClass, className]);
+
+  const showCurrencyText = useMemo(() => {
+    return showCurrency && !formattedBalance.includes(currency) && ` (${currency})`;
+  }, [showCurrency, formattedBalance, currency]);
   
   // Show currency loading state
   if (isChangingCurrency) {
@@ -131,14 +146,9 @@ export function BalanceDisplay({
   }
   
   return (
-    <div className={cn(
-      compact ? "text-base" : "text-2xl", 
-      "font-bold", 
-      animationClass,
-      className
-    )}>
+    <div className={displayClasses}>
       {formattedBalance}
-      {showCurrency && !formattedBalance.includes(currency) && ` (${currency})`}
+      {showCurrencyText}
     </div>
   );
-}
+});
