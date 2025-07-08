@@ -11,60 +11,60 @@ class EnhancedCurrencyConverter {
   private lastUpdate: Date = new Date(0);
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   private readonly FALLBACK_RATES: ExchangeRates = {
-    // Main currencies
+    // Main currencies - Updated with accurate rates
     USD: 1.0,
-    BDT: 122.73,
-    INR: 83.27,
-    BTC: 0.000013,
-    JPY: 145.00,
+    BDT: 110.0,
+    INR: 83.0,
+    BTC: 0.0000092563, // 1/108005
+    JPY: 146.0,
 
     // Additional major currencies
-    EUR: 0.93,
-    GBP: 0.79,
-    CAD: 1.36,
-    AUD: 1.52,
-    CNY: 7.25,
+    EUR: 0.9,
+    GBP: 0.75,
+    CAD: 1.35,
+    AUD: 1.5,
+    CNY: 7.2,
 
     // European currencies
-    CHF: 0.91,
-    SEK: 10.55,
-    NOK: 10.80,
-    DKK: 6.95,
-    PLN: 4.08,
+    CHF: 0.95,
+    SEK: 10.5,
+    NOK: 10.8,
+    DKK: 7.4,
+    PLN: 4.3,
 
     // Asian currencies
-    HKD: 7.82,
-    SGD: 1.36,
-    THB: 35.75,
-    KRW: 1370.45,
-    IDR: 15900.00,
+    HKD: 7.8,
+    SGD: 1.38,
+    THB: 35.0,
+    KRW: 1300.0,
+    IDR: 15000.0,
 
     // Middle Eastern currencies
     AED: 3.67,
     SAR: 3.75,
-    TRY: 32.40,
-    ILS: 3.67,
+    TRY: 28.0,
+    ILS: 3.5,
     QAR: 3.64,
 
     // Americas currencies
-    MXN: 16.82,
-    BRL: 5.08,
-    ARS: 900.00,
-    CLP: 928.45,
-    COP: 3950.00,
+    MXN: 17.0,
+    BRL: 5.2,
+    ARS: 300.0,
+    CLP: 800.0,
+    COP: 4000.0,
 
     // African currencies
-    ZAR: 18.50,
-    NGN: 1545.00,
-    EGP: 48.20,
-    KES: 130.25,
-    GHS: 15.30,
+    ZAR: 18.0,
+    NGN: 750.0,
+    EGP: 30.0,
+    KES: 120.0,
+    GHS: 11.0,
 
-    // Other cryptocurrencies
-    ETH: 0.000167,
-    USDT: 1.00,
-    XRP: 0.52,
-    LTC: 0.0088
+    // Cryptocurrencies - Converting from USD value to rate
+    ETH: 0.000393, // 1/2541.91
+    USDT: 0.999971,
+    XRP: 0.442, // 1/2.26
+    LTC: 0.0116 // 1/86.01
   };
 
   private constructor() {}
