@@ -30,17 +30,17 @@ export function Sidebar() {
   };
 
   const isCollapsed = state === "collapsed";
+  
+  // Debug log to check state
+  console.log('Sidebar state:', { state, open, isCollapsed });
 
   return (
     <div 
       className={`bg-background-darker min-h-screen flex flex-col border-r border-border transition-all duration-300 ease-in-out relative z-50 ${
         isCollapsed 
-          ? "w-16 lg:w-16 fixed lg:static -translate-x-full lg:translate-x-0" 
-          : "w-64 lg:w-64 fixed lg:static translate-x-0"
+          ? "w-16 lg:static lg:translate-x-0" 
+          : "w-64 lg:static lg:translate-x-0"
       }`}
-      style={{
-        width: isCollapsed ? '4rem' : '16rem'
-      }}
     >
       {/* Toggle Button */}
       <div className="absolute -right-3 top-4 sidebar-toggle-button z-10">
