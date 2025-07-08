@@ -523,6 +523,139 @@ input[type="number"]::-webkit-inner-spin-button {
     animation: slot-jackpot 1s ease-in-out;
   }
 
+  /* DEBUG MODE - Strip all visual effects for maximum performance */
+  body.debug-mode *,
+  html.debug-mode * {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+    background-gradient: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    text-shadow: none !important;
+    border-radius: 4px !important; /* Simple rounded corners only */
+    transform: none !important;
+    opacity: 1 !important;
+    will-change: auto !important;
+  }
+
+  /* Debug mode: Strip all fancy backgrounds and gradients */
+  body.debug-mode .bg-gradient-to-r,
+  body.debug-mode .bg-gradient-to-l,
+  body.debug-mode .bg-gradient-to-t,
+  body.debug-mode .bg-gradient-to-b,
+  body.debug-mode .bg-gradient-to-br,
+  body.debug-mode .bg-gradient-to-bl,
+  body.debug-mode .bg-gradient-to-tr,
+  body.debug-mode .bg-gradient-to-tl,
+  html.debug-mode .bg-gradient-to-r,
+  html.debug-mode .bg-gradient-to-l,
+  html.debug-mode .bg-gradient-to-t,
+  html.debug-mode .bg-gradient-to-b,
+  html.debug-mode .bg-gradient-to-br,
+  html.debug-mode .bg-gradient-to-bl,
+  html.debug-mode .bg-gradient-to-tr,
+  html.debug-mode .bg-gradient-to-tl {
+    background: hsl(var(--card)) !important;
+  }
+
+  /* Debug mode: Remove blur effects */
+  body.debug-mode .blur-sm,
+  body.debug-mode .blur-md,
+  body.debug-mode .blur-lg,
+  body.debug-mode .blur-xl,
+  body.debug-mode .backdrop-blur,
+  html.debug-mode .blur-sm,
+  html.debug-mode .blur-md,
+  html.debug-mode .blur-lg,
+  html.debug-mode .blur-xl,
+  html.debug-mode .backdrop-blur {
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Debug mode: Simplify borders */
+  body.debug-mode *,
+  html.debug-mode * {
+    border-width: 1px !important;
+  }
+
+  /* Debug mode: Remove hover effects */
+  body.debug-mode *:hover,
+  html.debug-mode *:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    scale: 1 !important;
+  }
+
+  /* Debug mode: Disable all keyframe animations */
+  body.debug-mode .animate-spin,
+  body.debug-mode .animate-pulse,
+  body.debug-mode .animate-bounce,
+  body.debug-mode .animate-ping,
+  body.debug-mode .animate-fadeIn,
+  body.debug-mode .animate-slideUp,
+  body.debug-mode .animate-shimmer,
+  body.debug-mode .animate-dice-roll,
+  body.debug-mode .animate-plinko-drop,
+  body.debug-mode .animate-slot-spin,
+  body.debug-mode .animate-win-glow,
+  body.debug-mode .animate-slot-jackpot,
+  body.debug-mode .animate-balance-increase,
+  body.debug-mode .animate-balance-decrease,
+  body.debug-mode .animate-currency-change,
+  body.debug-mode .animate-float,
+  html.debug-mode .animate-spin,
+  html.debug-mode .animate-pulse,
+  html.debug-mode .animate-bounce,
+  html.debug-mode .animate-ping,
+  html.debug-mode .animate-fadeIn,
+  html.debug-mode .animate-slideUp,
+  html.debug-mode .animate-shimmer,
+  html.debug-mode .animate-dice-roll,
+  html.debug-mode .animate-plinko-drop,
+  html.debug-mode .animate-slot-spin,
+  html.debug-mode .animate-win-glow,
+  html.debug-mode .animate-slot-jackpot,
+  html.debug-mode .animate-balance-increase,
+  html.debug-mode .animate-balance-decrease,
+  html.debug-mode .animate-currency-change,
+  html.debug-mode .animate-float {
+    animation: none !important;
+  }
+
+  /* Debug mode: Disable theme transitions */
+  body.debug-mode.theme-transitioning,
+  body.debug-mode.theme-transitioning *,
+  html.debug-mode.theme-transitioning,
+  html.debug-mode.theme-transitioning * {
+    transition: none !important;
+  }
+
+  /* Debug mode: Remove glow effects */
+  body.debug-mode .glow-effect::after,
+  html.debug-mode .glow-effect::after {
+    display: none !important;
+  }
+
+  /* Debug mode: Simplify shadows */
+  body.debug-mode .shadow-sm,
+  body.debug-mode .shadow-md,
+  body.debug-mode .shadow-lg,
+  body.debug-mode .shadow-xl,
+  body.debug-mode .shadow-2xl,
+  body.debug-mode .drop-shadow,
+  html.debug-mode .shadow-sm,
+  html.debug-mode .shadow-md,
+  html.debug-mode .shadow-lg,
+  html.debug-mode .shadow-xl,
+  html.debug-mode .shadow-2xl,
+  html.debug-mode .drop-shadow {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  }
+
   /* Custom balance animation classes */
   .animate-balance-increase {
     animation: balanceIncrease 1.5s ease-out;

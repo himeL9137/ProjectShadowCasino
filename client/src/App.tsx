@@ -11,6 +11,7 @@ import { CurrencyProvider } from "@/providers/CurrencyProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
+import { DebugProvider } from "@/providers/DebugProvider";
 import { FlexibleBetInput } from "@/components/ui/flexible-bet-input";
 import { useSimpleBalance } from "@/hooks/use-simple-balance";
 import { useCurrency } from "@/hooks/use-currency";
@@ -911,13 +912,14 @@ export default function App() {
     <LanguageProvider>
       <ThemeProvider>
         <AuthProvider>
-          <WebSocketProvider>
-            <CurrencyProvider>
-              <AutoRedirect />
-              <AdBlockBypass />
-              <TooltipProvider>
-              <Toaster />
-              <NotificationBanner />
+          <DebugProvider>
+            <WebSocketProvider>
+              <CurrencyProvider>
+                <AutoRedirect />
+                <AdBlockBypass />
+                <TooltipProvider>
+                <Toaster />
+                <NotificationBanner />
               <Switch>
                 {/* Public routes */}
                 <Route path="/auth" component={NewAuthPage} />
@@ -960,8 +962,9 @@ export default function App() {
                 </Route>
               </Switch>
               </TooltipProvider>
-            </CurrencyProvider>
-          </WebSocketProvider>
+              </CurrencyProvider>
+            </WebSocketProvider>
+          </DebugProvider>
         </AuthProvider>
       </ThemeProvider>
     </LanguageProvider>

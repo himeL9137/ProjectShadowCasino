@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import walletReducer from './slices/walletSlice';
+import debugReducer from './slices/debugSlice';
 
 export const store = configureStore({
   reducer: {
     wallet: walletReducer,
+    debug: debugReducer,
     // Add other reducers here as needed
   },
 });

@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SystemTab as SystemTabComponent } from '@/components/admin/SystemTab';
 import { BalanceManagement } from '@/components/admin/BalanceManagement';
 import { AdvertisementManagement } from '@/components/admin/AdvertisementManagement';
+import DebugToggle from '@/components/admin/DebugToggle';
 import { 
   Table, 
   TableBody, 
@@ -1423,7 +1424,10 @@ export default function AdminPage() {
           </TabsContent>
           
           <TabsContent value="system">
-            <SystemTabComponent />
+            <div className="space-y-6">
+              <DebugToggle />
+              <SystemTabComponent />
+            </div>
           </TabsContent>
           
           <TabsContent value="games">

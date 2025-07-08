@@ -130,6 +130,18 @@ The application uses an in-memory storage system for development and testing:
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes  
+- **July 8, 2025**: Implemented comprehensive admin-only debug mode system for shadowHimel
+  - Created Redux debug slice with global state management for debug mode toggle
+  - Built DebugToggle component exclusive to shadowHimel admin user with professional UI
+  - Added DebugProvider for automatic CSS class management when debug mode is active
+  - Implemented comprehensive CSS rules that strip all animations, gradients, shadows, and visual effects in debug mode
+  - Created debug utility functions (conditionalClass, debugAwareClass) for component-level debug awareness
+  - Built DebugWrapper and useDebugClasses components for easy integration with existing components
+  - Added debug toggle to admin panel System tab with amber theme and performance indicators
+  - Updated BalanceDisplay component as example implementation using debug-aware styling
+  - Debug mode provides maximum performance by disabling all fancy visuals while maintaining functionality
+  - System automatically applies 'debug-mode' class to document body/html when enabled
+  - All animations, transitions, gradients, shadows, blur effects, and hover effects disabled in debug mode
 - **July 8, 2025**: Completed systematic bug fixing and performance optimization achieving 80-90% improvement
   - Fixed critical database storage interface mismatch preventing server startup
   - Resolved port 5000 conflict and WebSocket connection issues 

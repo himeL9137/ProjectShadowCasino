@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatCurrency, getCurrencySymbol } from "@/lib/currency-utils";
+import { useDebugClasses } from "@/components/ui/debug-wrapper";
 import "./balance-display.css";
 import { cn } from "@/lib/utils";
 
@@ -122,14 +123,20 @@ export const BalanceDisplay = React.memo(function BalanceDisplay({
     return formatCurrency(displayAmount || "0", currency);
   }, [displayAmount, currency, isBalanceRefreshing]);
 
-  const displayClasses = useMemo(() => {
-    return cn(
-      compact ? "text-base" : "text-2xl", 
-      "font-bold", 
-      animationClass,
-      className
-    );
-  }, [compact, animationClass, className]);
+  // Apply debug-aware styling - animations and effects are stripped in debug mode
+  const baseClasses = cn(
+    compact ? "text-base" : "text-2xl",
+    "font-bold",
+    className
+  );
+  
+  const fancyClasses = cn(
+    animationClass,
+    "transition-all duration-300 ease-in-out",
+    "text-shadow-sm"
+  );
+  
+  const displayClasses = useDebugClasses(baseClasses, fancyClasses);
 
   const showCurrencyText = useMemo(() => {
     return showCurrency && !formattedBalance.includes(currency) && ` (${currency})`;
