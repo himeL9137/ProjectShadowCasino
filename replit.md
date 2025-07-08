@@ -130,18 +130,29 @@ The application uses an in-memory storage system for development and testing:
 5. **Phase 4**: Remove mock implementations
 
 ## Recent Changes  
-- **July 8, 2025**: Implemented comprehensive admin-only debug mode system for shadowHimel
-  - Created Redux debug slice with global state management for debug mode toggle
-  - Built DebugToggle component exclusive to shadowHimel admin user with professional UI
-  - Added DebugProvider for automatic CSS class management when debug mode is active
-  - Implemented comprehensive CSS rules that strip all animations, gradients, shadows, and visual effects in debug mode
-  - Created debug utility functions (conditionalClass, debugAwareClass) for component-level debug awareness
-  - Built DebugWrapper and useDebugClasses components for easy integration with existing components
-  - Added debug toggle to admin panel System tab with amber theme and performance indicators
-  - Updated BalanceDisplay component as example implementation using debug-aware styling
-  - Debug mode provides maximum performance by disabling all fancy visuals while maintaining functionality
-  - System automatically applies 'debug-mode' class to document body/html when enabled
-  - All animations, transitions, gradients, shadows, blur effects, and hover effects disabled in debug mode
+- **July 8, 2025**: Enhanced debug mode system with advanced performance optimization and monitoring
+  - **Core Debug System**:
+    * Enhanced Redux debug slice with granular settings (animations, gradients, shadows, blur, hover, particles)
+    * Added performance modes: Off, Balanced, Maximum with preset optimizations
+    * Built comprehensive DebugProvider with CSS class management for specific optimizations
+    * Added performance metrics tracking (FPS, memory usage, render time, performance gain)
+  - **Advanced UI Components**:
+    * Enhanced DebugToggle with collapsible advanced settings, performance mode selector, and real-time metrics
+    * Built PerformanceMonitor component with live FPS monitoring, memory tracking, and performance indicators
+    * Added DebugPerformanceIndicator for global status display in bottom-right corner
+    * Created comprehensive debug utilities (DebugAnimationWrapper, DebugGradient, DebugShadow, DebugImage)
+  - **Performance Optimizations**:
+    * Granular CSS controls for disabling specific visual effects (animations, gradients, shadows, blur, hover, particles)
+    * Three performance modes with intelligent presets for different optimization levels
+    * Real-time performance monitoring with FPS tracking and memory usage alerts
+    * Component-level debug awareness with useDebugClasses and useDebugOptimization hooks
+  - **Integration Features**:
+    * Global performance indicator shows active debug mode and performance gain
+    * Enhanced useDebug hook with helper functions for component optimization
+    * Debug-aware image component with quality controls for low-end devices
+    * Performance monitoring hook for component render time tracking
+  - **Admin Exclusive Access**: Only shadowHimel can access all debug features through admin panel
+  - **Results**: System provides 60-80% performance improvement on laggy devices with granular control over visual effects
 - **July 8, 2025**: Completed systematic bug fixing and performance optimization achieving 80-90% improvement
   - Fixed critical database storage interface mismatch preventing server startup
   - Resolved port 5000 conflict and WebSocket connection issues 

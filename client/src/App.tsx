@@ -42,6 +42,7 @@ import ThemesPage from "@/pages/themes";
 import PinDemoPage from "@/pages/pin-demo";
 import { AutoRedirect } from "@/components/AutoRedirect";
 import { AdBlockBypass } from "@/components/AdBlockBypass";
+import { DebugPerformanceIndicator } from "@/components/debug/DebugUtils";
 
 // Auth component
 function AuthPage() {
@@ -962,6 +963,7 @@ export default function App() {
                 </Route>
               </Switch>
               </TooltipProvider>
+              <DebugPerformanceIndicator />
               </CurrencyProvider>
             </WebSocketProvider>
           </DebugProvider>
