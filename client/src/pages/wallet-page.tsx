@@ -122,25 +122,25 @@ export default function WalletPage() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-background to-background-darker">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-background to-background-darker overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 w-full">
+          <div className="max-w-6xl mx-auto">
             
             {/* Header */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-6 sm:mb-8">
               <div className="flex items-center justify-center mb-4">
-                <div className="bg-primary/10 p-3 rounded-full">
-                  <Wallet className="h-8 w-8 text-primary" />
+                <div className="bg-primary/10 p-2 sm:p-3 rounded-full">
+                  <Wallet className="h-6 sm:h-8 w-6 sm:w-8 text-primary" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold mb-2">Your Wallet</h1>
-              <p className="text-gray-400">Manage your funds with 80+ payment methods</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Your Wallet</h1>
+              <p className="text-gray-400 text-sm sm:text-base">Manage your funds with 80+ payment methods</p>
             </div>
 
             {/* Main Wallet Card */}
-            <div className="bg-card rounded-lg shadow-lg p-6 mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Account Balance</h2>
+            <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold">Account Balance</h2>
                 <button
                   onClick={refreshBalance}
                   disabled={isLoading}
@@ -150,17 +150,17 @@ export default function WalletPage() {
                 </button>
               </div>
               
-              <div className="text-center py-8">
-                <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg p-6 mb-6">
+              <div className="text-center py-4 sm:py-8">
+                <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
                   <div className="flex items-center justify-center mb-2">
-                    <DollarSign className="h-6 w-6 text-primary mr-2" />
-                    <span className="text-sm font-medium text-gray-400">Available Balance</span>
+                    <DollarSign className="h-5 sm:h-6 w-5 sm:w-6 text-primary mr-2" />
+                    <span className="text-xs sm:text-sm font-medium text-gray-400">Available Balance</span>
                   </div>
-                  <div className="text-4xl font-bold text-primary mb-1">
-                    <span className="text-3xl">{getCurrencySymbol(currency)}</span>
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-1">
+                    <span className="text-xl sm:text-2xl lg:text-3xl">{getCurrencySymbol(currency)}</span>
                     <span className="ml-1">
                       {isLoading ? (
-                        <div className="inline-block animate-pulse bg-gray-300 rounded h-8 w-32"></div>
+                        <div className="inline-block animate-pulse bg-gray-300 rounded h-6 sm:h-8 w-24 sm:w-32"></div>
                       ) : (
                         formatAmount(balance)
                       )}
@@ -168,7 +168,7 @@ export default function WalletPage() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <button
                     onClick={() => setLocation('/deposit-withdrawal')}
                     className="flex items-center justify-center p-4 bg-green-600/10 text-green-500 rounded-lg hover:bg-green-600/20 transition-colors"

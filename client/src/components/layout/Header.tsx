@@ -121,39 +121,39 @@ export function Header() {
   const isCollapsed = state === "collapsed";
 
   return (
-    <header className="h-16 bg-background-darker border-b border-border flex items-center justify-between px-6 transition-all duration-300 ease-in-out">
-      <div className="flex-1 flex items-center">
+    <header className="h-16 bg-background-darker border-b border-border flex items-center justify-between px-4 sm:px-6 transition-all duration-300 ease-in-out">
+      <div className="flex-1 flex items-center min-w-0">
         <Link href="/">
-          <div className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <div className="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 transition-opacity">
             <img 
               src={projectShadowLogo} 
               alt="Project Shadow" 
-              className="h-10 w-auto"
+              className="h-8 sm:h-10 w-auto flex-shrink-0"
             />
-            <div className="flex flex-col">
-              <span className="text-white font-bold text-lg">PROJECT SHADOW</span>
-              <span className="text-gray-400 text-xs">Gaming Platform</span>
+            <div className="flex flex-col min-w-0 hidden sm:block">
+              <span className="text-white font-bold text-sm sm:text-lg truncate">PROJECT SHADOW</span>
+              <span className="text-gray-400 text-xs hidden md:block">Gaming Platform</span>
             </div>
           </div>
         </Link>
       </div>
       
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
         {/* Real-time Balance Display */}
         <div className="flex items-center">
-          <div className="px-4 py-2 bg-background rounded-md border border-border flex items-center">
-            <BalanceDisplay compact={true} showCurrency={true} className="text-white" />
+          <div className="px-2 sm:px-4 py-2 bg-background rounded-md border border-border flex items-center">
+            <BalanceDisplay compact={true} showCurrency={true} className="text-white text-sm sm:text-base" />
           </div>
         </div>
         
         {/* Currency Dropdown - Combined with Currency Switcher */}
-        <div className="relative" ref={currencyMenuRef}>
+        <div className="relative hidden sm:block" ref={currencyMenuRef}>
           <button 
             onClick={(e) => {
               e.stopPropagation();
               setCurrencyMenuOpen(!isCurrencyMenuOpen);
             }}
-            className="px-3 py-2 bg-background rounded-md border border-border flex items-center"
+            className="px-2 sm:px-3 py-2 bg-background rounded-md border border-border flex items-center text-sm sm:text-base"
           >
             <DollarSign className="mr-2 h-4 w-4" />
             <span>{userCurrency}</span>

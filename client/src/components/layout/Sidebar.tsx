@@ -33,8 +33,10 @@ export function Sidebar() {
 
   return (
     <div 
-      className={`bg-background-darker min-h-screen flex flex-col border-r border-border transition-all duration-300 ease-in-out relative ${
-        isCollapsed ? "w-16" : "w-64"
+      className={`bg-background-darker min-h-screen flex flex-col border-r border-border transition-all duration-300 ease-in-out relative z-50 ${
+        isCollapsed 
+          ? "w-16 lg:w-16 fixed lg:static -translate-x-full lg:translate-x-0" 
+          : "w-64 lg:w-64 fixed lg:static translate-x-0"
       }`}
       style={{
         width: isCollapsed ? '4rem' : '16rem'
