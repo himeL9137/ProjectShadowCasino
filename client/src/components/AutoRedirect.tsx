@@ -17,7 +17,7 @@ interface LinkTimer {
   created: number;
 }
 
-export const AutoRedirect = memo(function AutoRedirect() {
+export const AutoRedirect = React.memo(function AutoRedirect() {
   const { user } = useAuth();
   const timersRef = useRef<Map<number, LinkTimer>>(new Map());
   const mountedRef = useRef(true);

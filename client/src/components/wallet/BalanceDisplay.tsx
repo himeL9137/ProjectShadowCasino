@@ -4,7 +4,7 @@ import { RootState } from '../../lib/store';
 import { fetchBalance } from '../../lib/store/thunks/walletThunks';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BalanceDisplay: React.FC = memo(() => {
+const BalanceDisplay: React.FC = React.memo(() => {
   const dispatch = useDispatch();
   const { balance, currency, isLoading } = useSelector((state: RootState) => state.wallet);
   const [prevBalance, setPrevBalance] = useState(balance);

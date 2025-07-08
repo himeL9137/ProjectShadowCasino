@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode, useMemo, useCallback } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { PermanentAdvertisement } from "../common/PermanentAdvertisement";
@@ -8,9 +8,15 @@ interface MainLayoutProps {
   children: ReactNode;
 }
 
-function MainLayoutContent({ children }: MainLayoutProps) {
+const MainLayoutContent = React.memo(function MainLayoutContent({ children }: MainLayoutProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  // Memoize className calculation
+  const contentClasses = useMemo(() => 
+    `flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-0' : 'ml-0'}`,
+    [isCollapsed]
+  );
 
   return (
     <div className="flex min-h-screen">
@@ -18,7 +24,7 @@ function MainLayoutContent({ children }: MainLayoutProps) {
       <Sidebar />
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-0' : 'ml-0'}`}>
+      <div className={contentClasses}>
         {/* Header */}
         <Header />
         
@@ -32,12 +38,12 @@ function MainLayoutContent({ children }: MainLayoutProps) {
       <PermanentAdvertisement />
     </div>
   );
-}
+});
 
-export function MainLayout({ children }: MainLayoutProps) {
+export const MainLayout = React.memo(function MainLayout({ children }: MainLayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <MainLayoutContent>{children}</MainLayoutContent>
     </SidebarProvider>
   );
-}
+});

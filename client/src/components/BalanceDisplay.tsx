@@ -16,7 +16,7 @@ interface BalanceDisplayProps {
  * Automatically updates when the balance or currency changes
  * Optimized with React.memo to prevent unnecessary re-renders
  */
-export const BalanceDisplay = memo(function BalanceDisplay({ 
+export const BalanceDisplay = React.memo(function BalanceDisplay({ 
   compact = false, 
   showCurrency = false,
   className = ""

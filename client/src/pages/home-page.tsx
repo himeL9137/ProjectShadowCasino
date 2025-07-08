@@ -1,4 +1,5 @@
-import { useState, useEffect, memo, useMemo, useCallback } from "react";
+import React, { useState, useEffect, memo, useMemo, useCallback } from "react";
+import { FastBalanceDisplay } from "@/components/optimized/FastBalanceDisplay";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -9,7 +10,7 @@ import { useLanguage } from "@/providers/LanguageProvider";
 
 // Moving Stars Background Component with interaction-based disappearing
 // Optimized with React.memo to prevent unnecessary re-renders
-const MovingStarsBackground = memo(function MovingStarsBackground() {
+const MovingStarsBackground = React.memo(function MovingStarsBackground() {
   const [starsVisible, setStarsVisible] = useState(true);
 
   // Memoize the event handler to prevent unnecessary re-creations
@@ -97,7 +98,7 @@ const MovingStarsBackground = memo(function MovingStarsBackground() {
   );
 });
 
-export default function HomePage() {
+const HomePage = React.memo(function HomePage() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const [winners, setWinners] = useState<any[]>([]);
@@ -106,12 +107,12 @@ export default function HomePage() {
   const [isDepositing, setIsDepositing] = useState(false);
   const { toast } = useToast();
 
-  // Translation function for homepage with ALL languages
-  const getText = (key: string) => {
+  // Memoized translation function to prevent object recreation on every render
+  const getText = useMemo(() => {
     const translations: { [key: string]: { [lang: string]: string } } = {
       welcomeBack: { 
         en: 'Welcome back', bn: 'ফিরে আসার জন্য স্বাগতম', es: 'Bienvenido de vuelta', fr: 'Bon retour', de: 'Willkommen zurück', 
-        zh: '欢迎回来', ja: 'おかえりなさい', ko: '환영합니다', ar: 'مرحباً بعودتك', hi: 'वापसी पर स्वागत है', ru: 'Добро пожаловать', 
+        zh: '欢迎回来', ja: 'おかえりなさい', ko: '환영합니다', ar: 'مرحباً بعودتك', hi: 'वापसী पর স্বাগত है', ru: 'Добро пожаловать', 
         pt: 'Bem-vindo de volta', it: 'Bentornato', tr: 'Tekrar hoş geldiniz', nl: 'Welkom terug', th: 'ยินดีต้อนรับกลับ', 
         vi: 'Chào mừng trở lại', id: 'Selamat datang kembali', ms: 'Selamat kembali', pl: 'Witamy ponownie' 
       },
@@ -190,11 +191,12 @@ export default function HomePage() {
         pl: 'Doświadcz emocji naszych gier kasynowych premium z nowoczesnym designem i ekscytującymi nagrodami.'
       }
     };
-    return translations[key]?.[language] || translations[key]?.['en'] || key;
-  };
+    
+    return (key: string) => translations[key]?.[language] || translations[key]?.['en'] || key;
+  }, [language]);
 
-  // Get currency symbol based on user's selected currency
-  const getCurrencySymbol = (currency: string = 'USD') => {
+  // Memoized currency symbol function
+  const getCurrencySymbol = useCallback((currency: string = 'USD') => {
     switch(currency) {
       case 'USD': return '$';
       case 'BDT': return '৳';
@@ -202,16 +204,16 @@ export default function HomePage() {
       case 'BTC': return '₿';
       default: return '$';
     }
-  };
+  }, []);
 
-  // Format money values
-  const formatMoney = (amount: number | string) => {
+  // Memoized format money function
+  const formatMoney = useCallback((amount: number | string) => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(numAmount);
-  };
+  }, []);
 
   // Load recent winners data
   useEffect(() => {
@@ -487,4 +489,6 @@ export default function HomePage() {
     </MainLayout>
     </>
   );
-}
+});
+
+export default HomePage;

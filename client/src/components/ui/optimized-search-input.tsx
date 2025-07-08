@@ -1,4 +1,4 @@
-import { useState, memo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Input } from './input';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Search, X } from 'lucide-react';
@@ -17,7 +17,7 @@ interface OptimizedSearchInputProps {
  * Optimized search input with debouncing to prevent excessive API calls
  * Uses React.memo to prevent unnecessary re-renders
  */
-export const OptimizedSearchInput = memo(function OptimizedSearchInput({
+export const OptimizedSearchInput = React.memo(function OptimizedSearchInput({
   onSearchChange,
   placeholder = "Search...",
   delay = 300,

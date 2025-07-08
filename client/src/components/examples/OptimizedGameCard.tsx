@@ -1,102 +1,114 @@
-import { memo, useMemo, useCallback, useRef, useState, useEffect } from 'react';
+import React, { memo, useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Star, Users, TrendingUp } from 'lucide-react';
-import { useDebounce } from '@/hooks/use-debounce';
-import { useIntersectionObserver } from '@/utils/performance-optimizations';
+import { useSimpleDebounce } from '@/hooks/use-debounce';
+import { useRenderTime } from '@/hooks/use-performance';
 import { cn } from '@/lib/utils';
 
-interface GameCardProps {
+interface OptimizedGameCardProps {
   id: string;
   title: string;
   description: string;
-  thumbnail: string;
-  playerCount: number;
-  rating: number;
+  image?: string;
   category: string;
-  isPopular?: boolean;
+  playerCount?: number;
+  rating?: number;
   isNew?: boolean;
   onPlay: (gameId: string) => void;
-  onFavorite: (gameId: string) => void;
+  onFavorite?: (gameId: string) => void;
   className?: string;
 }
 
 /**
- * Optimized Game Card component demonstrating all performance optimization techniques:
- * - React.memo to prevent unnecessary re-renders
+ * Ultra-optimized game card component demonstrating all React performance techniques
+ * - React.memo with custom comparison function
  * - useMemo for expensive calculations
- * - useCallback for stable function references
- * - useDebounce for input handling
- * - Intersection Observer for lazy loading
- * - Performance monitoring in development
+ * - useCallback for stable event handlers
+ * - Debounced hover effects
+ * - Performance monitoring
+ * - Lazy loading for images
+ * - Intersection observer for viewport detection
  */
-export const OptimizedGameCard = memo(function OptimizedGameCard({
+export const OptimizedGameCard = React.memo(function OptimizedGameCard({
   id,
   title,
   description,
-  thumbnail,
-  playerCount,
-  rating,
+  image,
   category,
-  isPopular = false,
+  playerCount = 0,
+  rating = 0,
   isNew = false,
   onPlay,
   onFavorite,
   className = ""
-}: GameCardProps) {
+}: OptimizedGameCardProps) {
   
-  const cardRef = useRef<HTMLDivElement>(null);
-  const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 });
+  // Performance monitoring in development
+  const renderCount = useRenderTime('OptimizedGameCard');
   
-  // Memoize expensive calculations
-  const formattedPlayerCount = useMemo(() => {
-    if (playerCount < 1000) return playerCount.toString();
-    if (playerCount < 1000000) return `${(playerCount / 1000).toFixed(1)}K`;
-    return `${(playerCount / 1000000).toFixed(1)}M`;
-  }, [playerCount]);
-  
-  const ratingStars = useMemo(() => {
-    return Math.round(rating * 2) / 2; // Round to nearest 0.5
-  }, [rating]);
-  
-  const truncatedDescription = useMemo(() => {
-    return description.length > 120 ? `${description.substring(0, 120)}...` : description;
-  }, [description]);
-  
-  // Memoize CSS classes to prevent recalculation
-  const cardClasses = useMemo(() => {
-    return cn(
-      "group relative overflow-hidden transition-all duration-300 hover:shadow-xl",
-      "hover:scale-[1.02] cursor-pointer",
-      {
-        "ring-2 ring-yellow-400": isPopular,
-        "ring-2 ring-green-400": isNew,
-      },
-      className
-    );
-  }, [isPopular, isNew, className]);
-  
-  const badgeVariant = useMemo(() => {
-    if (isPopular) return "default";
-    if (isNew) return "secondary";
-    return "outline";
-  }, [isPopular, isNew]);
-  
-  // Stable callback references to prevent child re-renders
-  const handlePlay = useCallback(() => {
-    onPlay(id);
-  }, [id, onPlay]);
-  
-  const handleFavorite = useCallback(() => {
-    onFavorite(id);
-  }, [id, onFavorite]);
-  
-  // Debounced hover effect for better performance
+  // State for hover effects
   const [isHovered, setIsHovered] = useState(false);
-  const debouncedHover = useDebounce(isHovered, 100);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
+  // Refs for intersection observer
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Debounced hover state to prevent excessive animations
+  const debouncedHover = useSimpleDebounce(isHovered, 150);
+  
+  // Intersection observer for lazy loading
+  useEffect(() => {
+    if (!cardRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+    
+    observer.observe(cardRef.current);
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Memoized calculations
+  const formattedRating = useMemo(() => 
+    rating > 0 ? `${rating.toFixed(1)} ⭐` : 'New',
+    [rating]
+  );
+  
+  const playerCountText = useMemo(() => 
+    playerCount > 0 ? `${playerCount.toLocaleString()} players` : 'Single player',
+    [playerCount]
+  );
+  
+  const truncatedDescription = useMemo(() => 
+    description.length > 100 ? `${description.substring(0, 97)}...` : description,
+    [description]
+  );
+  
+  // Memoized CSS classes
+  const cardClasses = useMemo(() => cn(
+    "relative overflow-hidden transition-all duration-300 cursor-pointer",
+    "hover:shadow-lg hover:scale-[1.02]",
+    debouncedHover && "ring-2 ring-primary/20",
+    className
+  ), [debouncedHover, className]);
+  
+  const imageClasses = useMemo(() => cn(
+    "w-full h-48 object-cover transition-all duration-300",
+    debouncedHover && "scale-110",
+    !imageLoaded && "bg-muted animate-pulse"
+  ), [debouncedHover, imageLoaded]);
+  
+  // Stable event handlers
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
   }, []);
@@ -105,122 +117,136 @@ export const OptimizedGameCard = memo(function OptimizedGameCard({
     setIsHovered(false);
   }, []);
   
-  // Performance monitoring in development
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const renderTime = performance.now();
-      console.log(`🎮 GameCard ${id} rendered in ${renderTime.toFixed(2)}ms`);
-    }
-  });
+  const handlePlay = useCallback(() => {
+    onPlay(id);
+  }, [id, onPlay]);
   
-  // Lazy loading: only render full content when visible
+  const handleFavorite = useCallback(() => {
+    onFavorite?.(id);
+  }, [id, onFavorite]);
+  
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+  }, []);
+  
+  const handleImageError = useCallback(() => {
+    setImageLoaded(false);
+  }, []);
+  
+  // Animation variants
+  const cardVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.4, ease: "easeOut" }
+    }
+  }), []);
+  
+  // Don't render until visible (intersection observer)
   if (!isVisible) {
-    return (
-      <div 
-        ref={cardRef}
-        className={cn("h-80 bg-muted animate-pulse rounded-lg", className)}
-        style={{ minHeight: '320px' }}
-      />
-    );
+    return <div ref={cardRef} className="h-64 bg-muted rounded-lg animate-pulse" />;
   }
   
   return (
     <motion.div
       ref={cardRef}
-      className={cardClasses}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
     >
-      <Card className="h-full border-0 shadow-none">
-        <CardHeader className="p-0">
-          <div className="relative aspect-video overflow-hidden rounded-t-lg">
+      <Card className={cardClasses}>
+        {/* Performance indicator for development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="absolute top-2 left-2 z-10 text-xs bg-black/50 text-white px-1 rounded">
+            R:{renderCount}
+          </div>
+        )}
+        
+        {/* New badge */}
+        {isNew && (
+          <Badge className="absolute top-2 right-2 z-10" variant="secondary">
+            New
+          </Badge>
+        )}
+        
+        {/* Image with lazy loading */}
+        <div className="relative overflow-hidden">
+          {image && (
             <img
-              src={thumbnail}
+              src={image}
               alt={title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className={imageClasses}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
               loading="lazy"
             />
-            
-            {/* Overlay with play button */}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <Button
-                onClick={handlePlay}
-                size="lg"
-                className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm"
-              >
-                <Play className="w-6 h-6 mr-2" />
-                Play Now
-              </Button>
-            </div>
-            
-            {/* Badges */}
-            <div className="absolute top-2 left-2 flex gap-1">
-              {isPopular && (
-                <Badge variant={badgeVariant} className="bg-yellow-500 text-black">
-                  <Star className="w-3 h-3 mr-1" />
-                  Popular
-                </Badge>
-              )}
-              {isNew && (
-                <Badge variant={badgeVariant} className="bg-green-500 text-white">
-                  New
-                </Badge>
-              )}
-            </div>
-            
-            {/* Rating */}
-            <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-sm font-medium">
-              {ratingStars}★
-            </div>
+          )}
+          
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          
+          {/* Category badge */}
+          <Badge 
+            className="absolute bottom-2 left-2" 
+            variant="outline"
+          >
+            {category}
+          </Badge>
+        </div>
+        
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold line-clamp-1">
+            {title}
+          </CardTitle>
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>{formattedRating}</span>
+            <span>{playerCountText}</span>
           </div>
         </CardHeader>
         
-        <CardContent className="p-4 space-y-3">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-bold truncate">{title}</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleFavorite}
-                className="shrink-0 ml-2"
-              >
-                <Star className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <p className="text-sm text-muted-foreground">
-              {truncatedDescription}
-            </p>
-          </div>
+        <CardContent className="pt-0">
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+            {truncatedDescription}
+          </p>
           
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4" />
-                {formattedPlayerCount}
-              </div>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="w-4 h-4" />
-                {category}
-              </div>
-            </div>
-            
-            <Button
-              onClick={handlePlay}
-              size="sm"
-              className="shrink-0"
+          <div className="flex gap-2">
+            <Button 
+              onClick={handlePlay} 
+              size="sm" 
+              className="flex-1"
             >
-              Play
+              Play Now
             </Button>
+            
+            {onFavorite && (
+              <Button 
+                onClick={handleFavorite} 
+                variant="outline" 
+                size="sm"
+              >
+                ♡
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
     </motion.div>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  // Only re-render if essential props change
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.title === nextProps.title &&
+    prevProps.image === nextProps.image &&
+    prevProps.playerCount === nextProps.playerCount &&
+    prevProps.rating === nextProps.rating &&
+    prevProps.isNew === nextProps.isNew &&
+    prevProps.category === nextProps.category &&
+    prevProps.onPlay === nextProps.onPlay &&
+    prevProps.onFavorite === nextProps.onFavorite
   );
 });

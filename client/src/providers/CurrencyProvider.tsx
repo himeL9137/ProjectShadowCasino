@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -37,14 +37,21 @@ interface CurrencyContextType {
 
 export const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-export function CurrencyProvider({ children }: { children: ReactNode }) {
+export const CurrencyProvider = React.memo(function CurrencyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isConnected } = useWebSocket();
   
-  // Default to USD or user's currency if available
-  const initialCurrency = user?.currency as Currency || Currency.USD;
-  const savedCurrency = getUserCurrencyPreference();
+  // Memoize initial values to prevent unnecessary recalculations
+  const initialCurrency = useMemo(() => 
+    user?.currency as Currency || Currency.USD, 
+    [user?.currency]
+  );
+  
+  const savedCurrency = useMemo(() => 
+    getUserCurrencyPreference(), 
+    []
+  );
   
   const [currency, setCurrencyState] = useState<Currency>(initialCurrency);
   const [balance, setBalance] = useState<string>(user?.balance || "0");
@@ -381,7 +388,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       {children}
     </CurrencyContext.Provider>
   );
-}
+});
 
 export function useCurrency() {
   const context = useContext(CurrencyContext);

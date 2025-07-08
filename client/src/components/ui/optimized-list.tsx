@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
 interface OptimizedListProps<T> {
@@ -16,7 +16,7 @@ interface OptimizedListProps<T> {
  * Optimized list component with React.memo and virtualization-ready structure
  * Prevents unnecessary re-renders of list items
  */
-export const OptimizedList = memo(function OptimizedList<T>({
+export const OptimizedList = React.memo(function OptimizedList<T>({
   items,
   renderItem,
   keyExtractor,
@@ -92,7 +92,7 @@ interface OptimizedListItemProps {
   isDisabled?: boolean;
 }
 
-export const OptimizedListItem = memo(function OptimizedListItem({
+export const OptimizedListItem = React.memo(function OptimizedListItem({
   children,
   className = "",
   onClick,
