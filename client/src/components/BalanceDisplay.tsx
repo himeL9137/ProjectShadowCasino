@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo, memo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatCurrency, getCurrencySymbol } from "@/lib/currency-utils";

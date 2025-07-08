@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../lib/store';
 import { fetchBalance } from '../../lib/store/thunks/walletThunks';
