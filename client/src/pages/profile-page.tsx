@@ -43,12 +43,14 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Fetch current profile picture
+  // Fetch current profile picture with better caching
   const { data: profileData, refetch: refetchProfilePicture } = useQuery({
     queryKey: ['/api/profile/picture-url'],
     enabled: !!user,
-    staleTime: 0,
-    cacheTime: 0
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    retry: 1,
+    retryDelay: 1000
   });
 
   // Fetch user profile statistics

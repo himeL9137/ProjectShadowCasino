@@ -12,11 +12,11 @@ const BalanceDisplay: React.FC = React.memo(() => {
   const [isDecreasing, setIsDecreasing] = useState(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Poll for balance updates - fallback mechanism
+  // Poll for balance updates - optimized fallback mechanism (reduced frequency)
   useEffect(() => {
     const pollInterval = setInterval(() => {
       dispatch(fetchBalance());
-    }, 10000); // Poll every 10 seconds as a backup
+    }, 60000); // Poll every 60 seconds as a backup (reduced from 10s to prevent excessive calls)
 
     return () => clearInterval(pollInterval);
   }, [dispatch]);

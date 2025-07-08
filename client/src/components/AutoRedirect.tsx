@@ -30,13 +30,14 @@ export const AutoRedirect = React.memo(function AutoRedirect() {
     enhancerRef.current.injectBypassScript();
   }, []);
 
-  // Fetch active redirect links with more frequent updates to ensure timers stay current
+  // Fetch active redirect links with optimized polling to reduce excessive API calls
   const { data: activeLinks, isLoading, error } = useQuery<RedirectLink[]>({
     queryKey: ["/api/redirect-links/active"],
-    refetchInterval: 15000, // Refetch every 15 seconds to check for updates
-    refetchIntervalInBackground: true, // Continue refetching even when tab is not focused
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: 60000, // Refetch every 60 seconds (reduced from 15s to prevent spam)
+    refetchIntervalInBackground: false, // Don't refetch when tab is not focused
+    refetchOnWindowFocus: false, // Don't refetch on window focus to prevent spam
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Debug logging for query state

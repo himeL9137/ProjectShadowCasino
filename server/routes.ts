@@ -917,9 +917,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           password: 'himel1122', // Raw password for admin
         };
 
-        // Update in storage
-        storage.users.set(userId, updatedUser);
-        console.log(`User ${user.username} promoted to admin with raw password`);
+        // Update in storage using proper interface
+        await storage.updateUserRole(String(userId), UserRole.ADMIN);
+        console.log(`User ${user.username} promoted to admin`);
 
         res.status(200).json({ 
           success: true,

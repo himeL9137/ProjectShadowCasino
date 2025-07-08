@@ -218,12 +218,27 @@ export const WebSocketProvider = React.memo(function WebSocketProvider({ childre
         break;
       case 'chat_message':
         // Handle chat messages
+        queryClient.invalidateQueries({ queryKey: ['/api/chat/messages'] });
         break;
       case 'game_update':
         // Handle game updates
+        queryClient.invalidateQueries({ queryKey: ['/api/games'] });
         break;
       case 'user_muted':
         // Handle user muted notification
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        break;
+      case 'user_joined':
+        // Handle user joined notification
+        queryClient.invalidateQueries({ queryKey: ['/api/users/online'] });
+        break;
+      case 'chat_history':
+        // Handle chat history
+        queryClient.invalidateQueries({ queryKey: ['/api/chat/messages'] });
+        break;
+      case 'currency_rates_refresh':
+        // Handle exchange rate updates
+        queryClient.invalidateQueries({ queryKey: ['/api/exchange-rates'] });
         break;
       case 'connected':
         console.log('Connected to WebSocket server as:', payload.username);
