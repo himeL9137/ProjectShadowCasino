@@ -280,6 +280,10 @@ class EnhancedCurrencyConverter {
     }
     return rates[toCurrency] / rates[fromCurrency];
   }
+
+  getSupportedCurrencies(): string[] {
+    return Object.keys(this.rates);
+  }
 }
 
 export const enhancedCurrencyConverter = EnhancedCurrencyConverter.getInstance();

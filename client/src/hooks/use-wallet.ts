@@ -14,6 +14,11 @@ export function useWallet() {
   const { data, isLoading, error, refetch } = useQuery<WalletData>({
     queryKey: ['/api/wallet/balance'],
     enabled: !!user,
+    staleTime: 30000, // Cache for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchInterval: false, // Disable automatic refetching
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    retry: 1,
   });
 
   const refetchBalance = async () => {
