@@ -1,7 +1,6 @@
 import {
   User,
   InsertUser,
-  UpsertUser,
   Currency,
   UserRole,
   Transaction,
@@ -29,12 +28,11 @@ import { enhancedCurrencyConverter } from "./utils/enhanced-currency-converter";
 
 // Interface for storage operations
 export interface IStorage {
-  // User operations (updated for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  upsertUser(user: UpsertUser): Promise<User>; // New method for Replit Auth
   updateUser(userId: string, userData: Partial<User>): Promise<User>;
   updateUserRole(userId: string, role: UserRole): Promise<User>;
   updateUserBalance(userId: string, newBalance: string): Promise<User>;

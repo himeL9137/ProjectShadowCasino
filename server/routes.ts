@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth as setupReplitAuth, isAuthenticated } from "./replitAuth";
+
 import { setupAuth, authenticateJWT, isAdmin } from "./auth";
 import { setupWalletRoutes } from "./wallet";
 import { setupAdminRoutes } from "./admin";
@@ -56,22 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Make the stop function available globally if needed
   (global as any).stopSessionCleanup = stopSessionCleanup;
 
-  // Setup Replit authentication routes
-  await setupReplitAuth(app);
-  
-  // Add auth route for Replit users
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(String(userId));
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-  
-  // Setup legacy authentication routes (for backward compatibility)
+  // Setup authentication routes
   setupAuth(app);
 
   // Add enhanced activity tracking middleware for all authenticated API routes

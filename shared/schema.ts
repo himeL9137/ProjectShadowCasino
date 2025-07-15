@@ -124,25 +124,14 @@ export enum AdminActionType {
   LOGIN_AS_USER = "login_as_user",
 }
 
-// Session storage table for Replit Auth
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
-// Users table - updated for Replit Auth
+// Users table
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(), // Replit user ID (string)
+  id: varchar("id").primaryKey().notNull(), // User ID (string)
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  // Legacy fields for backward compatibility with existing casino system
+  // Casino system fields
   username: text("username").unique(),
   phone: text("phone"),
   password: text("password"),
@@ -308,8 +297,7 @@ export const fundAdjustmentSchema = z.object({
   confirmed: z.boolean().default(false),
 });
 
-// User types for Replit Auth and legacy compatibility
-export type UpsertUser = typeof users.$inferInsert;
+// User types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type LoginData = z.infer<typeof loginSchema>;

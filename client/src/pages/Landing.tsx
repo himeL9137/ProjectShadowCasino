@@ -92,11 +92,11 @@ export default function Landing() {
             The ultimate gaming experience with real-time features and multi-currency support
           </p>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/auth'}
             size="lg"
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg"
           >
-            Sign In with Replit
+            Sign In / Register
           </Button>
         </header>
 
@@ -155,10 +155,10 @@ export default function Landing() {
             Ready to Start Playing?
           </h2>
           <p className="text-gray-300 mb-6">
-            Sign in with your Replit account to access all features
+            Create an account or sign in to access all features
           </p>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/auth'}
             size="lg"
             variant="outline"
             className="border-white/30 text-white hover:bg-white/10"

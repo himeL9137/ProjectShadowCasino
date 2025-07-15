@@ -14,7 +14,6 @@ import {
   redirectLinks,
   type User,
   type InsertUser,
-  type UpsertUser,
   type Transaction,
   type InsertTransaction,
   type GameHistory,
@@ -190,27 +189,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(user: UpsertUser): Promise<User> {
-    const [upsertedUser] = await db
-      .insert(users)
-      .values({
-        ...user,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return upsertedUser;
-  }
+
 
   async updateUser(userId: string, userData: Partial<User>): Promise<User> {
     const [updatedUser] = await db
