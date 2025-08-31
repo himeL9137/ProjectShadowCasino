@@ -13,7 +13,7 @@ import { GameController } from "./games";
 import { startExchangeRateUpdates } from "./utils/enhanced-currency-converter";
 import { startSessionCleanup, updateUserActivity } from "./session-middleware";
 import { userActivityTracker, trackUserActivity } from "./user-activity-tracker";
-import { profilePictureUpload, deleteOldProfilePicture, getProfilePictureUrl, DEFAULT_AVATAR_URL } from "./upload-middleware";
+import { profilePictureUpload, deleteOldProfilePicture, getProfilePictureUrl, DEFAULT_AVATAR_URL, gameFileUpload, gameAssetUpload, getGameAssetUrl } from "./upload-middleware";
 import {
   Currency,
   GameType,
@@ -24,6 +24,7 @@ import {
 import cookieParser from "cookie-parser";
 import express from "express";
 import path from "path";
+import fs from "fs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
@@ -31,6 +32,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
+  
+  // Serve uploaded games and assets
+  app.use('/uploaded_games', express.static(path.join(process.cwd(), 'uploaded_games')));
+  app.use('/uploaded_assets', express.static(path.join(process.cwd(), 'uploaded_assets')));
   
   // Add health check endpoint
   app.get('/health', (req, res) => {
@@ -1258,6 +1263,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve game files with proper content types
+  app.get("/api/games/play/:gameId", async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.gameId);
+      const game = await storage.getCustomGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      if (!game.isApproved) {
+        return res.status(403).json({ message: "Game not approved for play" });
+      }
+
+      // If it's an HTML game, serve the HTML content directly
+      if (game.type === 'html' && game.htmlContent) {
+        res.setHeader('Content-Type', 'text/html');
+        res.send(game.htmlContent);
+        return;
+      }
+
+      // If it's a file-based game, serve the file
+      if (game.filePath) {
+        const filePath = path.join(process.cwd(), 'uploaded_games', game.filePath);
+        const extension = path.extname(game.filePath).toLowerCase();
+        
+        // Set appropriate content type
+        switch (extension) {
+          case '.html':
+          case '.htm':
+            res.setHeader('Content-Type', 'text/html');
+            break;
+          case '.js':
+            res.setHeader('Content-Type', 'application/javascript');
+            break;
+          case '.css':
+            res.setHeader('Content-Type', 'text/css');
+            break;
+          case '.json':
+            res.setHeader('Content-Type', 'application/json');
+            break;
+          default:
+            res.setHeader('Content-Type', 'text/plain');
+        }
+        
+        res.sendFile(filePath);
+        return;
+      }
+
+      res.status(404).json({ message: "Game content not found" });
+    } catch (error: any) {
+      console.error("Error serving game:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/admin/games", authenticateJWT, isAdmin, async (req, res) => {
     try {
       const customGames = await storage.getCustomGames();
@@ -1285,6 +1346,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(customGames);
     } catch (error: any) {
       console.error("Error fetching games:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // File upload route for game files
+  app.post("/api/admin/games/upload", authenticateJWT, isAdmin, gameFileUpload.array('gameFiles'), async (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      const { name, category, description, instructions, winChance, maxMultiplier, minBet, maxBet, tags } = req.body;
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+      
+      if (!name) {
+        return res.status(400).json({ message: "Game name is required" });
+      }
+
+      // Process uploaded files
+      const mainFile = files[0]; // Primary game file
+      const additionalFiles = files.slice(1); // Supporting files
+      
+      // Read the main file content
+      const gameUploadDir = path.join(process.cwd(), 'uploaded_games');
+      const mainFilePath = path.join(gameUploadDir, mainFile.filename);
+      const gameCode = fs.readFileSync(mainFilePath, 'utf8');
+      
+      // Determine game type from file extension
+      const gameType = path.extname(mainFile.originalname).toLowerCase().substring(1) || 'html';
+      
+      // Store additional files info
+      const additionalFilesInfo = additionalFiles.map(file => ({
+        filename: file.filename,
+        originalName: file.originalname,
+        path: path.join(gameUploadDir, file.filename)
+      }));
+
+      // Create the custom game with file information
+      const customGame = await storage.createCustomGame({
+        name,
+        type: gameType,
+        htmlContent: gameType === 'html' ? gameCode : null,
+        filePath: mainFile.filename,
+        originalFileName: mainFile.originalname,
+        fileExtension: path.extname(mainFile.originalname).toLowerCase(),
+        gameCode: gameCode,
+        category: category || "casino",
+        tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
+        winChance: winChance ? parseFloat(winChance) : 50,
+        maxMultiplier: maxMultiplier ? parseFloat(maxMultiplier) : 2.0,
+        minBet: minBet || "1",
+        maxBet: maxBet || "1000",
+        description,
+        instructions,
+        createdBy: req.user.id,
+      });
+
+      // Log admin action
+      await storage.logAdminAction(
+        req.user.id,
+        AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
+        undefined,
+        { 
+          gameId: customGame.id, 
+          gameName: name, 
+          fileType: gameType,
+          filesCount: files.length
+        }
+      );
+
+      res.status(201).json({
+        game: customGame,
+        uploadedFiles: files.map(f => f.filename),
+        additionalFiles: additionalFilesInfo
+      });
+    } catch (error: any) {
+      console.error("Error uploading game files:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Upload thumbnail for game
+  app.post("/api/admin/games/:id/thumbnail", authenticateJWT, isAdmin, gameAssetUpload.single('thumbnail'), async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const file = req.file;
+      
+      if (!file) {
+        return res.status(400).json({ message: "No thumbnail file uploaded" });
+      }
+
+      // Update game with thumbnail URL
+      const updatedGame = await storage.updateCustomGame(gameId, {
+        thumbnailUrl: getGameAssetUrl(file.filename)
+      });
+
+      res.status(200).json({
+        thumbnailUrl: updatedGame.thumbnailUrl,
+        message: "Thumbnail uploaded successfully"
+      });
+    } catch (error: any) {
+      console.error("Error uploading thumbnail:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Approve a game
+  app.post("/api/admin/games/:id/approve", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const approvedGame = await storage.approveGame(gameId);
+      
+      // Log admin action
+      await storage.logAdminAction(
+        req.user.id,
+        AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
+        undefined,
+        { gameId, action: "approved" }
+      );
+
+      res.status(200).json(approvedGame);
+    } catch (error: any) {
+      console.error("Error approving game:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Search games
+  app.get("/api/admin/games/search", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      
+      const games = await storage.searchGames(q);
+      res.status(200).json(games);
+    } catch (error: any) {
+      console.error("Error searching games:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get games by category
+  app.get("/api/admin/games/category/:category", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const { category } = req.params;
+      const games = await storage.getGamesByCategory(category);
+      res.status(200).json(games);
+    } catch (error: any) {
+      console.error("Error fetching games by category:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Delete a game
+  app.delete("/api/admin/games/:id", authenticateJWT, isAdmin, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      await storage.deleteCustomGame(gameId);
+      
+      // Log admin action
+      await storage.logAdminAction(
+        req.user.id,
+        AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
+        undefined,
+        { gameId, action: "deleted" }
+      );
+
+      res.status(200).json({ message: "Game deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting game:", error);
       res.status(500).json({ message: error.message });
     }
   });

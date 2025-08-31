@@ -109,6 +109,10 @@ export interface IStorage {
   getCustomGame(id: number): Promise<CustomGame | undefined>;
   updateCustomGame(id: number, updates: Partial<CustomGame>): Promise<CustomGame>;
   deleteCustomGame(id: number): Promise<void>;
+  approveGame(id: number): Promise<CustomGame>;
+  getGamesByCategory(category: string): Promise<CustomGame[]>;
+  searchGames(query: string): Promise<CustomGame[]>;
+  incrementPlayCount(id: number): Promise<void>;
 
   // Referral system operations
   generateReferralCode(userId: string): Promise<string>;
@@ -1059,14 +1063,28 @@ export class MemStorage implements IStorage {
       id: this.currentCustomGameId++,
       name: game.name,
       type: game.type || "html",
-      htmlContent: game.htmlContent,
+      htmlContent: game.htmlContent || null,
+      filePath: game.filePath || null,
+      originalFileName: game.originalFileName || null,
+      fileExtension: game.fileExtension || null,
+      gameCode: game.gameCode || null,
+      thumbnailUrl: game.thumbnailUrl || null,
+      category: game.category || "casino",
+      tags: game.tags || [],
       winChance: game.winChance || 50,
       maxMultiplier: game.maxMultiplier || 2.0,
       minBet: game.minBet || "1",
       maxBet: game.maxBet || "1000",
       description: game.description || null,
+      instructions: game.instructions || null,
       isActive: true,
+      isApproved: game.type === "html" ? true : false, // Auto-approve HTML games, require approval for uploaded files
+      installationStatus: "installed",
+      errorLog: null,
+      playCount: 0,
+      lastPlayed: null,
       createdAt: new Date(),
+      updatedAt: new Date(),
       createdBy: game.createdBy,
     };
 
@@ -1098,6 +1116,51 @@ export class MemStorage implements IStorage {
     if (game) {
       // Soft delete by setting isActive to false
       this.customGames.set(id, { ...game, isActive: false });
+    }
+  }
+
+  async approveGame(id: number): Promise<CustomGame> {
+    const game = this.customGames.get(id);
+    if (!game) {
+      throw new Error("Custom game not found");
+    }
+
+    const approvedGame = { 
+      ...game, 
+      isApproved: true, 
+      installationStatus: "installed",
+      updatedAt: new Date()
+    };
+    this.customGames.set(id, approvedGame);
+    return approvedGame;
+  }
+
+  async getGamesByCategory(category: string): Promise<CustomGame[]> {
+    return Array.from(this.customGames.values())
+      .filter(game => game.isActive && game.category === category);
+  }
+
+  async searchGames(query: string): Promise<CustomGame[]> {
+    const searchTerm = query.toLowerCase();
+    return Array.from(this.customGames.values())
+      .filter(game => 
+        game.isActive && (
+          game.name.toLowerCase().includes(searchTerm) ||
+          (game.description && game.description.toLowerCase().includes(searchTerm)) ||
+          (game.tags && game.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+        )
+      );
+  }
+
+  async incrementPlayCount(id: number): Promise<void> {
+    const game = this.customGames.get(id);
+    if (game) {
+      this.customGames.set(id, { 
+        ...game, 
+        playCount: game.playCount + 1,
+        lastPlayed: new Date(),
+        updatedAt: new Date()
+      });
     }
   }
 

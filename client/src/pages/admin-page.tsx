@@ -35,6 +35,7 @@ import { adminApiCall, get, post } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { CreateGameDialog } from '@/components/CreateGameDialog';
 import { GameCodeViewer } from '@/components/GameCodeViewer';
+import { ImprovedGameManagement } from '@/components/ImprovedGameManagement';
 
 // Error Boundary Component
 class ErrorBoundary extends Component<
@@ -1431,7 +1432,9 @@ export default function AdminPage() {
           </TabsContent>
           
           <TabsContent value="games">
-            <GameManagementTab />
+            <ErrorBoundary fallback={<GameManagementFallback />}>
+              <ImprovedGameManagement />
+            </ErrorBoundary>
           </TabsContent>
           
           <TabsContent value="links" className="w-full overflow-hidden">

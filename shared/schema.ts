@@ -316,19 +316,33 @@ export type InsertAdvertisement = z.infer<typeof insertAdvertisementSchema>;
 
 export type GameSetting = typeof gameSettings.$inferSelect;
 
-// Custom games table for HTML games
+// Custom games table for all types of games
 export const customGames = pgTable("custom_games", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  type: text("type").notNull().default("html"),
-  htmlContent: text("html_content").notNull(),
+  type: text("type").notNull().default("html"), // html, tsx, js, react, etc.
+  htmlContent: text("html_content"), // For HTML games
+  filePath: text("file_path"), // For uploaded file-based games
+  originalFileName: text("original_file_name"), // Original uploaded file name
+  fileExtension: text("file_extension"), // .tsx, .js, .html, etc.
+  gameCode: text("game_code"), // Processed/compiled game code
+  thumbnailUrl: text("thumbnail_url"), // Preview image
+  category: text("category").notNull().default("casino"), // casino, card, puzzle, arcade
+  tags: text("tags").array().default([]), // searchable tags
   winChance: real("win_chance").notNull().default(50),
   maxMultiplier: real("max_multiplier").notNull().default(2.0),
   minBet: numeric("min_bet").notNull().default("1"),
   maxBet: numeric("max_bet").notNull().default("1000"),
   description: text("description"),
+  instructions: text("instructions"), // How to play instructions
   isActive: boolean("is_active").notNull().default(true),
+  isApproved: boolean("is_approved").notNull().default(false), // Admin approval required
+  installationStatus: text("installation_status").notNull().default("pending"), // pending, processing, installed, failed
+  errorLog: text("error_log"), // Installation/compilation errors
+  playCount: integer("play_count").notNull().default(0), // Track popularity
+  lastPlayed: timestamp("last_played"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   createdBy: varchar("created_by")
     .notNull()
     .references(() => users.id),
@@ -339,17 +353,39 @@ export const insertCustomGameSchema = createInsertSchema(customGames).pick({
   name: true,
   type: true,
   htmlContent: true,
+  filePath: true,
+  originalFileName: true,
+  fileExtension: true,
+  gameCode: true,
+  thumbnailUrl: true,
+  category: true,
+  tags: true,
   winChance: true,
   maxMultiplier: true,
   minBet: true,
   maxBet: true,
   description: true,
+  instructions: true,
   createdBy: true,
+});
+
+// Schema for uploading game files
+export const gameFileUploadSchema = z.object({
+  name: z.string().min(1, "Game name is required"),
+  category: z.string().default("casino"),
+  description: z.string().optional(),
+  instructions: z.string().optional(),
+  winChance: z.number().min(1).max(99).default(50),
+  maxMultiplier: z.number().min(1).max(100).default(2.0),
+  minBet: z.string().default("1"),
+  maxBet: z.string().default("1000"),
+  tags: z.array(z.string()).default([]),
 });
 
 // Type definitions for custom games
 export type CustomGame = typeof customGames.$inferSelect;
 export type InsertCustomGame = z.infer<typeof insertCustomGameSchema>;
+export type GameFileUpload = z.infer<typeof gameFileUploadSchema>;
 
 // Referrals table - tracks individual referral relationships and bonuses
 export const referrals = pgTable("referrals", {
