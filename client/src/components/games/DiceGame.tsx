@@ -160,7 +160,7 @@ export function DiceGame() {
 
   return (
     <div className="bg-neutral-900 rounded-xl overflow-hidden border border-neutral-700 max-w-4xl mx-auto">
-      <div className="p-6">
+      <div className="p-6"> 
         {/* Top Controls Row */}
         <div className="flex items-center justify-between mb-6">
           {/* Left side - Bet controls */}
