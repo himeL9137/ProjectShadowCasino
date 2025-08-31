@@ -113,8 +113,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Game routes
   app.post("/api/games/play", authenticateJWT, async (req, res) => {
     try {
-      const { gameType, betAmount, currency, prediction, rollOver, clientSeed, nonce } = req.body;
-      console.log("Game play request:", { gameType, betAmount, currency, prediction, rollOver, gameTypeType: typeof gameType });
+      const { gameType, betAmount, currency, prediction, rollOver, clientSeed, nonce, mineCount, selectedTiles, action } = req.body;
+      console.log("Game play request:", { gameType, betAmount, currency, prediction, rollOver, mineCount, selectedTiles, action, gameTypeType: typeof gameType });
 
       if (!gameType || !betAmount || !currency) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -135,7 +135,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prediction,
         rollOver,
         clientSeed,
-        nonce
+        nonce,
+        mineCount,
+        selectedTiles,
+        action
       };
 
       if (!req.user) {
