@@ -418,6 +418,56 @@ const HomePage = React.memo(function HomePage() {
               </div>
             </div>
 
+            {/* Mines Card */}
+            <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-zinc-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
+                {/* Mine grid pattern background */}
+                <div className="absolute inset-0 opacity-20">
+                  {Array.from({ length: 25 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="absolute w-3 h-3 border border-gray-600 rounded"
+                      style={{
+                        left: `${(index % 5) * 16 + 10}%`,
+                        top: `${Math.floor(index / 5) * 16 + 10}%`,
+                        animation: `pulse ${1 + (index % 3)}s infinite`
+                      }}
+                    >
+                      {index % 8 === 0 && <div className="w-1 h-1 bg-red-500 rounded-full m-auto mt-1 animate-pulse"></div>}
+                      {index % 7 === 0 && index % 8 !== 0 && <div className="w-1 h-1 bg-green-500 rounded-full m-auto mt-1 animate-pulse"></div>}
+                    </div>
+                  ))}
+                </div>
+                {/* Mines visual */}
+                <div className="relative z-10">
+                  <div className="text-6xl mb-2">💣</div>
+                  <div className="flex justify-center space-x-1">
+                    <div className="w-6 h-6 bg-gray-700 border border-gray-500 rounded flex items-center justify-center">
+                      <span className="text-green-400 text-xs">💎</span>
+                    </div>
+                    <div className="w-6 h-6 bg-gray-700 border border-gray-500 rounded flex items-center justify-center">
+                      <span className="text-red-500 text-xs">💣</span>
+                    </div>
+                    <div className="w-6 h-6 bg-gray-700 border border-gray-500 rounded flex items-center justify-center">
+                      <span className="text-green-400 text-xs">💎</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute top-4 right-4 bg-red-500/30 text-red-200 rounded-md px-2">
+                  <span className="text-sm font-medium">Risk</span>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-bold">Mines</h3>
+                <p className="text-gray-400 text-sm mt-1 mb-3">Find gems while avoiding mines. High risk, high reward!</p>
+                <Link href="/mines">
+                  <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
+                    Play Now
+                  </button>
+                </Link>
+              </div>
+            </div>
+
             {/* Plinko Master Card */}
             <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
               <div className="bg-gradient-to-br from-purple-900 via-indigo-800 to-violet-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">

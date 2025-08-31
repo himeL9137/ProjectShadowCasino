@@ -131,6 +131,16 @@ export function Sidebar() {
                 </div>
               </Link>
               
+              <Link href="/mines">
+                <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
+                  isRouteActive("/mines")
+                    ? "bg-background-light text-primary"
+                    : "text-gray-300 hover:bg-background-light hover:text-primary"
+                } transition-colors cursor-pointer`}>
+                  <span>Mines</span>
+                </div>
+              </Link>
+              
               {/* Admin-only games */}
               {isAdmin && (
                 <>
