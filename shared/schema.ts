@@ -85,6 +85,7 @@ export enum GameType {
   DICE = "dice",
   PLINKO = "plinko",
   PLINKO_MASTER = "plinko_master",
+  MINES = "mines",
   HTML = "html",
 }
 

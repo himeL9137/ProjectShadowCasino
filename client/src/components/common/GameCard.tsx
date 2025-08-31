@@ -113,6 +113,30 @@ export function PlinkoCard() {
   );
 }
 
+export function MinesCard() {
+  return (
+    <GameCard
+      type={GameType.MINES}
+      title="Shadow Mines"
+      description="Find gems while avoiding mines in this 5x5 grid!"
+      backgroundClass="bg-gradient-to-br from-orange-600 to-red-800"
+      icon={
+        <div className="relative w-32 h-32">
+          <div className="grid grid-cols-5 gap-1">
+            {[...Array(25)].map((_, i) => (
+              <div key={i} className="w-4 h-4 rounded bg-neutral-700 border border-neutral-600 flex items-center justify-center">
+                {i === 7 && <span className="text-red-400 text-xs">💣</span>}
+                {i === 12 && <span className="text-green-400 text-xs">💎</span>}
+                {i === 18 && <span className="text-green-400 text-xs">💎</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+    />
+  );
+}
+
 export function PlinkoMasterCard() {
   return (
     <GameCard

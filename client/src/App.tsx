@@ -34,6 +34,7 @@ import AdminAuditPage from "@/pages/AdminAuditPage";
 import NewAuthPage from "@/pages/new-auth-page";
 import GamesPage from "@/pages/games-page";
 import DicePage from "@/pages/dice-page";
+import MinesPage from "@/pages/mines-page";
 import HtmlGamePage from "@/pages/html-game-page";
 import DepositWithdrawalPage from "@/pages/deposit-withdrawal-page";
 import { ReferralPage } from "@/pages/referral-page";
@@ -931,6 +932,7 @@ export default function App() {
                 {/* Game Routes */}
                 <ProtectedRoute path="/slots" component={SlotsGamePage} />
                 <ProtectedRoute path="/dice" component={() => <DicePage />} />
+                <ProtectedRoute path="/mines" component={() => <MinesPage />} />
                 <ProtectedRoute path="/plinko_master" component={PlinkoMasterGamePage} />
                 <ProtectedRoute path="/games" component={GamesPage} />
 

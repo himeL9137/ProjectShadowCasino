@@ -106,6 +106,15 @@ export class GameController {
       case 'PLINKO_MASTER':
         result = GameController.processPlinkoMasterGame(isWin, betAmount);
         break;
+      case 'MINES':
+        result = GameController.processMinesGame(isWin, betAmount, {
+          mineCount: gamePlay.mineCount,
+          selectedTiles: gamePlay.selectedTiles,
+          action: gamePlay.action, // 'reveal' or 'cashout'
+          clientSeed: gamePlay.clientSeed,
+          nonce: gamePlay.nonce
+        });
+        break;
       default:
         throw new Error(`Invalid game type: ${gameType}`);
     }
@@ -348,5 +357,118 @@ export class GameController {
         multiplier: gameResult.multiplier
       }
     };
+  }
+
+  // Process mines game
+  private static processMinesGame(isWin: boolean, betAmount: number, params: {
+    mineCount: number;
+    selectedTiles: number[];
+    action: 'reveal' | 'cashout';
+    clientSeed?: string;
+    nonce?: number;
+  }): GameResult {
+    const { mineCount, selectedTiles, action } = params;
+    
+    // Generate 5x5 grid (25 tiles total)
+    const totalTiles = 25;
+    const safeTiles = totalTiles - mineCount;
+    
+    // Generate mine positions (random placement)
+    const minePositions = new Set<number>();
+    while (minePositions.size < mineCount) {
+      minePositions.add(Math.floor(Math.random() * totalTiles));
+    }
+    
+    // Create grid state
+    const grid = Array(totalTiles).fill(0).map((_, index) => ({
+      position: index,
+      isMine: minePositions.has(index),
+      isRevealed: selectedTiles.includes(index),
+      isGem: !minePositions.has(index)
+    }));
+    
+    // Calculate current multiplier based on gems found
+    const gemsFound = selectedTiles.filter(pos => !minePositions.has(pos)).length;
+    const multiplier = this.calculateMinesMultiplier(mineCount, gemsFound, safeTiles);
+    
+    if (action === 'cashout') {
+      // Player chose to cash out - they win their current amount
+      const winAmount = betAmount * multiplier;
+      return {
+        isWin: true,
+        winAmount: winAmount,
+        multiplier: multiplier,
+        gameData: {
+          grid: grid,
+          minePositions: Array.from(minePositions),
+          gemsFound: gemsFound,
+          action: 'cashout',
+          multiplier: multiplier,
+          currentWin: winAmount
+        }
+      };
+    } else {
+      // Player chose to reveal a tile
+      const lastSelectedTile = selectedTiles[selectedTiles.length - 1];
+      const hitMine = minePositions.has(lastSelectedTile);
+      
+      if (hitMine) {
+        // Hit a mine - game over, lose everything
+        return {
+          isWin: false,
+          winAmount: 0,
+          multiplier: 0,
+          gameData: {
+            grid: grid.map(tile => ({ ...tile, isRevealed: true })), // Reveal all tiles
+            minePositions: Array.from(minePositions),
+            gemsFound: gemsFound - 1, // Subtract the mine hit
+            action: 'reveal',
+            hitMine: true,
+            explodedMine: lastSelectedTile,
+            multiplier: 0
+          }
+        };
+      } else {
+        // Found a gem - continue game with updated multiplier
+        const winAmount = betAmount * multiplier;
+        return {
+          isWin: false, // Not over yet, just continuing
+          winAmount: 0, // No payout until cashout
+          multiplier: multiplier,
+          gameData: {
+            grid: grid,
+            minePositions: Array.from(minePositions),
+            gemsFound: gemsFound,
+            action: 'reveal',
+            hitMine: false,
+            foundGem: lastSelectedTile,
+            multiplier: multiplier,
+            currentWin: winAmount
+          }
+        };
+      }
+    }
+  }
+  
+  // Calculate mines multiplier based on stake.com formula (99% RTP)
+  private static calculateMinesMultiplier(mineCount: number, gemsFound: number, safeTiles: number): number {
+    if (gemsFound === 0) return 1.0;
+    
+    // Stake.com uses combination probability for multiplier calculation
+    // Multiplier = 0.99 / (probability of getting this many gems without hitting mines)
+    let multiplier = 1.0;
+    
+    for (let i = 0; i < gemsFound; i++) {
+      const remainingSafeTiles = safeTiles - i;
+      const remainingTiles = 25 - i;
+      const probability = remainingSafeTiles / remainingTiles;
+      multiplier /= probability;
+    }
+    
+    // Apply 99% RTP
+    multiplier *= 0.99;
+    
+    // Round to 2 decimal places
+    return Math.round(multiplier * 100) / 100;
   }
 }
