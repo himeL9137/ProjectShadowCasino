@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { formatCurrency } from "@/lib/utils";
-import { Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { GameType } from "@shared/schema";
@@ -159,106 +159,146 @@ export function DiceGame() {
   };
 
   return (
-    <div className="bg-neutral-900 rounded-xl overflow-hidden border border-neutral-700">
+    <div className="bg-neutral-900 rounded-xl overflow-hidden border border-neutral-700 max-w-4xl mx-auto">
       <div className="p-6">
-        {/* Game Area */}
-        <div className="mb-6 flex flex-col bg-neutral-800 rounded-xl p-6 border border-neutral-700">
-          
-          {/* Bet Amount and Auto Button Row */}
-          <div className="flex items-center justify-between mb-6">
-            {/* Left side - Bet Amount */}
-            <div className="flex items-center space-x-4">
-              <div className="bg-neutral-700 rounded-lg px-4 py-2">
-                <span className="text-xs text-neutral-400 block">Bet Amount</span>
-                <div className="flex items-center">
-                  <Input
-                    type="number"
-                    value={betAmount}
-                    onChange={(e) => handleBetAmountChange(e.target.value)}
-                    className="bg-transparent border-none text-white text-sm p-0 h-auto w-24"
-                    disabled={isRolling}
-                    step="0.01"
-                    min="0.01"
-                  />
-                  <span className="text-white text-sm ml-1">{currentCurrency}</span>
-                </div>
-              </div>
-              
-              {/* Bet Controls */}
-              <div className="flex space-x-1">
-                <Button 
-                  variant="outline" 
-                  size="sm"
+        {/* Top Controls Row */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Left side - Bet controls */}
+          <div className="flex items-center space-x-3">
+            <div className="bg-neutral-800 rounded-lg px-3 py-2 border border-neutral-700">
+              <div className="text-xs text-neutral-400 mb-1">Bet Amount ({currentCurrency})</div>
+              <div className="flex items-center">
+                <button 
                   onClick={handleHalfBet}
                   disabled={isRolling}
-                  className="bg-neutral-700 border-neutral-600 text-white hover:bg-neutral-600 h-8 px-3 text-xs"
+                  className="text-neutral-400 hover:text-white text-lg font-bold px-2"
                 >
-                  1/2
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
+                  -
+                </button>
+                <Input
+                  type="number"
+                  value={betAmount}
+                  onChange={(e) => handleBetAmountChange(e.target.value)}
+                  className="bg-transparent border-none text-white text-center w-20 p-0 h-auto"
+                  disabled={isRolling}
+                  step="0.01"
+                  min="0.01"
+                />
+                <button 
                   onClick={handleDoubleBet}
                   disabled={isRolling}
-                  className="bg-neutral-700 border-neutral-600 text-white hover:bg-neutral-600 h-8 px-3 text-xs"
+                  className="text-neutral-400 hover:text-white text-lg font-bold px-2"
                 >
-                  2x
-                </Button>
+                  +
+                </button>
               </div>
             </div>
-
-            {/* Right side - Auto Button */}
-            <Button
-              variant="outline"
-              className="bg-neutral-700 border-neutral-600 text-white hover:bg-neutral-600"
-              disabled
-            >
-              Auto
-            </Button>
+            
+            <div className="flex space-x-1">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleHalfBet}
+                disabled={isRolling}
+                className="bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700"
+              >
+                1/2
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleDoubleBet}
+                disabled={isRolling}
+                className="bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700"
+              >
+                2x
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setBetAmount("0.01")}
+                disabled={isRolling}
+                className="bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700"
+              >
+                Min
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setBetAmount("100.00")}
+                disabled={isRolling}
+                className="bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700"
+              >
+                Max
+              </Button>
+            </div>
           </div>
 
-          {/* Dice Result Display */}
-          <div className="text-center mb-6">
-            <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg text-white text-2xl font-bold mb-2"
-              animate={isRolling ? {
-                scale: [1, 1.1, 1],
-                rotate: [0, 180, 360]
-              } : {}}
-              transition={{
-                duration: 1.5,
-                ease: "easeInOut"
-              }}
-            >
-              {isRolling ? "?" : (lastRoll || "0")}
-            </motion.div>
-            {lastRoll !== null && (
-              <div className="text-neutral-400 text-sm">
-                Last Result: {lastRoll}
-              </div>
-            )}
+          {/* Right side - Auto button */}
+          <Button
+            variant="outline"
+            className="bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700"
+            disabled
+          >
+            Auto
+          </Button>
+        </div>
+
+        {/* Main Game Area */}
+        <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
+          
+          {/* Result Display */}
+          <div className="text-center mb-8">
+            <div className="inline-block">
+              <div className="text-sm text-neutral-400 mb-2">Result</div>
+              <motion.div
+                className="w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl border-4 border-white"
+                animate={isRolling ? {
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 180, 360]
+                } : {}}
+                transition={{
+                  duration: 1.5,
+                  ease: "easeInOut"
+                }}
+              >
+                <div className="text-center">
+                  <div className="text-white text-4xl font-bold">
+                    {isRolling ? "?" : (lastRoll !== null ? lastRoll : "0")}
+                  </div>
+                  {lastRoll !== null && !isRolling && (
+                    <div className="text-white text-xs opacity-80 mt-1">
+                      {history[0]?.isWin ? "YOU WIN" : "YOU LOST"}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
           </div>
 
           {/* Prediction Slider */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-neutral-400 text-sm">Roll {rollOver ? 'Over' : 'Under'}</span>
-              <span className="text-white font-semibold text-lg">{currentPrediction}</span>
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-white text-lg font-semibold">
+                Roll {rollOver ? 'Over' : 'Under'}
+              </div>
+              <div className="text-white text-2xl font-bold">
+                {currentPrediction}
+              </div>
             </div>
             
-            {/* Slider with scale */}
-            <div className="relative">
+            <div className="relative mb-4">
               <Slider
                 value={prediction}
                 onValueChange={setPrediction}
                 min={2}
                 max={98}
                 step={1}
-                className="w-full mb-2"
+                className="w-full"
                 disabled={isRolling}
               />
               {/* Scale markers */}
-              <div className="flex justify-between text-xs text-neutral-500 px-1">
+              <div className="flex justify-between text-xs text-neutral-500 mt-2 px-1">
                 <span>0</span>
                 <span>25</span>
                 <span>50</span>
@@ -268,48 +308,64 @@ export function DiceGame() {
             </div>
           </div>
 
-          {/* Roll Over/Under and Stats */}
+          {/* Roll Over/Under Controls and Stats */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             {/* Roll Under */}
-            <div className="bg-neutral-700 rounded-lg p-3 text-center">
+            <div className="text-center">
               <Button
-                variant={!rollOver ? "default" : "ghost"}
+                variant={!rollOver ? "default" : "outline"}
                 onClick={() => setRollOver(false)}
                 disabled={isRolling}
-                className={`w-full mb-2 ${!rollOver ? 'bg-purple-500 text-white hover:bg-purple-400' : 'text-neutral-400 hover:text-white'}`}
+                className={`w-full mb-3 py-3 ${!rollOver ? 'bg-red-500 text-white hover:bg-red-400' : 'bg-neutral-700 border-neutral-600 text-white hover:bg-neutral-600'}`}
               >
                 Roll Under
               </Button>
-              <div className="text-xs text-neutral-400">Multiplier</div>
-              <div className="text-white font-semibold">
-                {!rollOver ? multiplier.toFixed(4) + 'x' : (99 / (currentPrediction - 1)).toFixed(4) + 'x'}
-              </div>
-            </div>
-
-            {/* Roll Over */}
-            <div className="bg-neutral-700 rounded-lg p-3 text-center">
-              <Button
-                variant={rollOver ? "default" : "ghost"}
-                onClick={() => setRollOver(true)}
-                disabled={isRolling}
-                className={`w-full mb-2 ${rollOver ? 'bg-purple-500 text-white hover:bg-purple-400' : 'text-neutral-400 hover:text-white'}`}
-              >
-                Roll Over
-              </Button>
-              <div className="text-xs text-neutral-400">Multiplier</div>
-              <div className="text-white font-semibold">
-                {rollOver ? multiplier.toFixed(4) + 'x' : (99 / (100 - currentPrediction)).toFixed(4) + 'x'}
+              <div className="bg-neutral-700 rounded-lg p-3">
+                <div className="text-xs text-neutral-400 mb-1">Multiplier</div>
+                <div className="text-white font-semibold">
+                  {!rollOver ? multiplier.toFixed(4) + 'x' : (99 / (currentPrediction - 1)).toFixed(4) + 'x'}
+                </div>
               </div>
             </div>
 
             {/* Win Chance */}
-            <div className="bg-neutral-700 rounded-lg p-3 text-center">
-              <div className="text-xs text-neutral-400 mb-2">Win Chance</div>
-              <div className="text-white font-semibold text-lg">
-                {winChance.toFixed(2)}%
+            <div className="text-center">
+              <div className="mb-3 py-3">
+                <div className="text-neutral-400 text-sm">Win Chance</div>
               </div>
-              <div className="text-xs text-neutral-400 mt-1">
-                Payout: {formatCurrency(possibleWin, currentCurrency)}
+              <div className="bg-neutral-700 rounded-lg p-3">
+                <div className="text-xs text-neutral-400 mb-1">Win Chance</div>
+                <div className="text-white font-semibold text-lg">
+                  {winChance.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+
+            {/* Roll Over */}
+            <div className="text-center">
+              <Button
+                variant={rollOver ? "default" : "outline"}
+                onClick={() => setRollOver(true)}
+                disabled={isRolling}
+                className={`w-full mb-3 py-3 ${rollOver ? 'bg-green-500 text-white hover:bg-green-400' : 'bg-neutral-700 border-neutral-600 text-white hover:bg-neutral-600'}`}
+              >
+                Roll Over
+              </Button>
+              <div className="bg-neutral-700 rounded-lg p-3">
+                <div className="text-xs text-neutral-400 mb-1">Multiplier</div>
+                <div className="text-white font-semibold">
+                  {rollOver ? multiplier.toFixed(4) + 'x' : (99 / (100 - currentPrediction)).toFixed(4) + 'x'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payout Display */}
+          <div className="text-center mb-6">
+            <div className="bg-neutral-700 rounded-lg p-4">
+              <div className="text-sm text-neutral-400 mb-1">Payout on Win</div>
+              <div className="text-white text-xl font-bold">
+                {formatCurrency(possibleWin, currentCurrency)}
               </div>
             </div>
           </div>
@@ -317,7 +373,7 @@ export function DiceGame() {
           {/* Roll Button */}
           <Button 
             variant="default" 
-            className="w-full py-4 rounded-lg bg-green-500 text-black font-bold text-lg hover:bg-green-400 transition duration-200"
+            className="w-full py-4 rounded-lg bg-purple-500 text-white font-bold text-xl hover:bg-purple-400 transition duration-200"
             onClick={handleRoll}
             disabled={isRolling || rollMutation.isPending}
           >
@@ -327,7 +383,7 @@ export function DiceGame() {
                 Rolling...
               </span>
             ) : (
-              "Roll"
+              "ROLL"
             )}
           </Button>
         </div>
