@@ -29,6 +29,7 @@ interface GameResult {
 }
 
 export function DiceGame() {
+  // FORCE RELOAD - UPDATED AT 21:34:00
   const { user } = useAuth();
   const { currency: currentCurrency, getCurrencySymbol, formatAmount } = useCurrency();
   const currencySymbol = getCurrencySymbol(currentCurrency);
