@@ -98,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         base: "USD",
         rates: ratesOnly, // This ensures rates is an object with just the currency rates
         lastUpdated: new Date().toISOString(),
-        ageInMinutes: lastUpdate ? Math.floor((Date.now() - lastUpdate.getTime()) / 60000) : 0
+        ageInMinutes: lastUpdate ? Math.floor((Date.now() - (lastUpdate as Date).getTime()) / 60000) : 0
       };
 
       res.status(200).json(response);
@@ -123,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is trying to access admin-only games
       const adminOnlyGames = ['dice', 'DICE', 'plinko', 'PLINKO', 'plinko_master', 'PLINKO_MASTER'];
       if (adminOnlyGames.includes(gameType)) {
-        if (!req.user || req.user.role !== 'admin') {
+        if (!req.user || req.user!.role !== 'admin') {
           return res.status(403).json({ message: "Access denied. Admin privileges required for this game." });
         }
       }
@@ -145,13 +145,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const result = await GameController.playGame(String(req.user.id), gamePlay);
+      const result = await GameController.playGame(req.user!.id, gamePlay);
 
       // Emit game result to all connected clients via WebSocket
       socketService.broadcastMessage({
         type: "game_result",
         payload: {
-          username: req.user.username,
+          username: req.user!.username,
           gameType,
           betAmount,
           currency,
@@ -171,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Wallet routes
   app.get("/api/wallet/balance", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -198,9 +198,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid currency" });
       }
 
-      console.log(`Changing currency for user ${req.user.id} to ${currency}`);
+      console.log(`Changing currency for user ${req.user!.id} to ${currency}`);
       const updatedUser = await storage.updateUserCurrency(
-        req.user.id,
+        req.user!.id,
         currency,
       );
 
@@ -216,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/wallet/transactions", authenticateJWT, async (req, res) => {
     try {
-      const transactions = await storage.getUserTransactions(req.user.id);
+      const transactions = await storage.getUserTransactions(req.user!.id);
       res.status(200).json(transactions);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Game history routes
   app.get("/api/games/history", authenticateJWT, async (req, res) => {
     try {
-      const history = await storage.getUserGameHistory(req.user.id);
+      const history = await storage.getUserGameHistory(req.user!.id);
       res.status(200).json(history);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -276,15 +276,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedUser = await storage.updateUserBalance(
-        userId,
+        String(userId),
         balance.toString(),
       );
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.EDIT_BALANCE,
-        userId,
+        String(userId),
         { oldBalance: user.balance, newBalance: balance },
       );
 
@@ -308,9 +308,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.MUTE_USER,
-        userId,
+        String(userId),
         { isMuted },
       );
 
@@ -342,9 +342,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.BAN_USER,
-        userId,
+        String(userId),
         { isBanned },
       );
 
@@ -378,12 +378,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gameType,
         parseFloat(winChance),
         parseFloat(maxMultiplier),
-        req.user.id,
+        req.user!.id,
       );
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.EDIT_GAME_ODDS,
         undefined,
         { gameType, winChance, maxMultiplier },
@@ -439,12 +439,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const newAd = await storage.createAdvertisement({
         script,
-        createdBy: req.user.id,
+        createdBy: req.user!.id,
       });
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT,
         undefined,
         { adId: newAd.id },
@@ -490,12 +490,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url,
         intervalMinutes: intervalMinutes || 5,
         isActive: isActive ?? true,
-        createdBy: req.user.id,
+        createdBy: req.user!.id,
       });
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { redirectLinkId: redirectLink.id, url, intervalMinutes }
@@ -541,8 +541,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
-        AdminActionType.MODIFY_GAME_SETTINGS, // Using existing enum for now
+        req.user!.id,
+        AdminActionType.EDIT_GAME, // Using existing enum for game modifications
         undefined,
         { redirectLinkId: linkId, updates: { url, intervalMinutes, isActive } }
       );
@@ -561,7 +561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { redirectLinkId: linkId, action: "delete" }
@@ -581,7 +581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -592,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update user with new profile picture filename
-      const updatedUser = await storage.updateUserProfilePicture(req.user.id, req.file.filename);
+      const updatedUser = await storage.updateUserProfilePicture(req.user!.id, req.file.filename);
 
       res.status(200).json({
         message: "Profile picture uploaded successfully",
@@ -610,14 +610,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/profile/delete-picture", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       if (user.profilePicture) {
         deleteOldProfilePicture(user.profilePicture);
-        await storage.updateUserProfilePicture(req.user.id, null);
+        await storage.updateUserProfilePicture(req.user!.id, null);
       }
 
       res.status(200).json({
@@ -631,7 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/profile/picture-url", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -650,7 +650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/user/profile", authenticateJWT, async (req, res) => {
     try {
       const { email, phone, currentPassword, newPassword } = req.body;
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -675,10 +675,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (newPassword) updatedData.password = newPassword;
 
       if (Object.keys(updatedData).length > 0) {
-        await storage.updateUser(String(req.user.id), updatedData);
+        await storage.updateUser(String(req.user!.id), updatedData);
       }
 
-      const updatedUser = await storage.getUser(String(req.user.id));
+      const updatedUser = await storage.getUser(String(req.user!.id));
       res.status(200).json({ 
         message: "Profile updated successfully",
         user: updatedUser 
@@ -691,14 +691,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user profile stats
   app.get("/api/user/profile-stats", authenticateJWT, async (req, res) => {
     try {
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       // Get user statistics
-      const transactions = await storage.getUserTransactions(req.user.id);
-      const gameHistory = await storage.getUserGameHistory(req.user.id);
+      const transactions = await storage.getUserTransactions(req.user!.id);
+      const gameHistory = await storage.getUserGameHistory(req.user!.id);
       
       const totalDeposits = transactions
         .filter(t => t.type === 'deposit')
@@ -717,7 +717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
       // Get accurate referral statistics
-      const userReferrals = await storage.getUserReferrals(req.user.id);
+      const userReferrals = await storage.getUserReferrals(req.user!.id);
       const activeReferrals = userReferrals.filter(ref => ref.status === "active" || ref.status === "rewarded").length;
       const rewardedReferrals = userReferrals.filter(ref => ref.status === "rewarded").length;
       const actualReferralEarnings = userReferrals.reduce((sum, ref) => sum + parseFloat(ref.totalEarnings || "0"), 0);
@@ -766,7 +766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Referral system routes
   app.post("/api/referrals/generate-code", authenticateJWT, async (req, res) => {
     try {
-      const referralCode = await storage.generateReferralCode(req.user.id);
+      const referralCode = await storage.generateReferralCode(req.user!.id);
       res.json({ referralCode });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -775,7 +775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/referrals/my-referrals", authenticateJWT, async (req, res) => {
     try {
-      const referrals = await storage.getUserReferrals(req.user.id);
+      const referrals = await storage.getUserReferrals(req.user!.id);
       res.json(referrals);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -804,12 +804,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Invalid referral code" });
       }
 
-      if (referrer.id === req.user.id) {
+      if (referrer.id === req.user!.id) {
         return res.status(400).json({ message: "Cannot use your own referral code" });
       }
 
       // Check if user already has a referrer
-      const currentUser = await storage.getUser(String(req.user.id));
+      const currentUser = await storage.getUser(String(req.user!.id));
       if (currentUser?.referredBy) {
         return res.status(400).json({ message: "You have already used a referral code" });
       }
@@ -825,10 +825,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create referral relationship
-      const referral = await storage.createReferral(referrer.id, req.user.id, referralCode);
+      const referral = await storage.createReferral(referrer.id, req.user!.id, referralCode);
       
       // Process the referral bonus immediately
-      await storage.processReferralBonus(req.user.id);
+      await storage.processReferralBonus(req.user!.id);
 
       res.json({ 
         message: "Referral code applied successfully! Both you and your referrer have received 30 BDT bonus.",
@@ -841,7 +841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/referrals/my-referrals", authenticateJWT, async (req, res) => {
     try {
-      const referrals = await storage.getUserReferrals(req.user.id);
+      const referrals = await storage.getUserReferrals(req.user!.id);
       res.json(referrals);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -873,7 +873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User notification routes
   app.get("/api/user/notifications", authenticateJWT, async (req, res) => {
     try {
-      const notifications = await storage.getUserNotifications(req.user.id);
+      const notifications = await storage.getUserNotifications(req.user!.id);
       res.json(notifications);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -883,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/notifications/:id/read", authenticateJWT, async (req, res) => {
     try {
       const notificationId = parseInt(req.params.id);
-      await storage.markNotificationAsRead(req.user.id, notificationId);
+      await storage.markNotificationAsRead(req.user!.id, notificationId);
       res.json({ message: "Notification marked as read" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -897,7 +897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const user = await storage.getUser(String(userId));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -945,7 +945,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For development/testing, auto-approve the deposit
       try {
         // Add funds directly to user's account
-        const user = await storage.getUser(String(req.user.id));
+        const user = await storage.getUser(String(req.user!.id));
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
@@ -953,11 +953,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newBalance = (
           parseFloat(user.balance) + parseFloat(amount)
         ).toString();
-        await storage.updateUserBalance(String(req.user.id), newBalance);
+        await storage.updateUserBalance(String(req.user!.id), newBalance);
 
         // Create deposit transaction
         await storage.createTransaction({
-          userId: req.user.id,
+          userId: req.user!.id,
           amount: amount.toString(),
           type: TransactionType.DEPOSIT,
           currency,
@@ -975,7 +975,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If auto-deposit fails, fall back to WhatsApp info
       res.status(200).json({
         whatsappNumber: "01989379895",
-        message: `I want to deposit ${amount} ${currency}. My username is ${req.user.username}.`,
+        message: `I want to deposit ${amount} ${currency}. My username is ${req.user!.username}.`,
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -990,7 +990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1005,7 +1005,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For this implementation, we'll just return WhatsApp info
       res.status(200).json({
         whatsappNumber: "01989379895",
-        message: `I want to withdraw ${amount} ${currency}. My username is ${req.user.username}.`,
+        message: `I want to withdraw ${amount} ${currency}. My username is ${req.user!.username}.`,
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -1032,7 +1032,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.APPROVE_DEPOSIT,
         parseInt(userId),
         { amount, currency },
@@ -1076,7 +1076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.APPROVE_WITHDRAWAL,
         parseInt(userId),
         { amount, currency },
@@ -1101,12 +1101,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dice/roll", authenticateJWT, async (req, res) => {
     try {
       // Check if user is admin
-      if (!req.user || req.user.role !== 'admin') {
+      if (!req.user || req.user!.role !== 'admin') {
         return res.status(403).json({ message: "Access denied. Admin privileges required." });
       }
 
       const { bet, prediction, rollOver, clientSeed, nonce } = req.body;
-      const userId = req.user.id;
+      const userId = req.user!.id;
       
       // Validate input
       if (!bet || bet <= 0) {
@@ -1185,12 +1185,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gameType as GameType,
         winChance,
         maxMultiplier,
-        req.user.id
+        req.user!.id
       );
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.EDIT_GAME_ODDS,
         undefined,
         { gameType, winChance, maxMultiplier }
@@ -1224,12 +1224,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         minBet: minBet || "1",
         maxBet: maxBet || "1000",
         description,
-        createdBy: req.user.id,
+        createdBy: req.user!.id,
       });
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { gameId: customGame.id, gameName: name }
@@ -1407,12 +1407,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maxBet: maxBet || "1000",
         description,
         instructions,
-        createdBy: req.user.id,
+        createdBy: req.user!.id,
       });
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { 
@@ -1467,7 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { gameId, action: "approved" }
@@ -1516,7 +1516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { gameId, action: "deleted" }
@@ -1544,7 +1544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get current user
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1554,11 +1554,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBalance = currentBalance + depositAmount;
 
       // Update user balance
-      await storage.updateUserBalance(String(req.user.id), newBalance.toString());
+      await storage.updateUserBalance(String(req.user!.id), newBalance.toString());
 
       // Create transaction record
       await storage.createTransaction({
-        userId: req.user.id,
+        userId: req.user!.id,
         type: "deposit" as any,
         amount: depositAmount.toString(),
         currency: user.currency,
@@ -1599,7 +1599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get current user
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(String(req.user!.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1615,11 +1615,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBalance = currentBalance - withdrawalAmount;
 
       // Update user balance
-      await storage.updateUserBalance(String(req.user.id), newBalance.toString());
+      await storage.updateUserBalance(String(req.user!.id), newBalance.toString());
 
       // Create transaction record
       await storage.createTransaction({
-        userId: req.user.id,
+        userId: req.user!.id,
         type: "withdrawal" as any,
         amount: withdrawalAmount.toString(),
         currency: user.currency,
@@ -1669,7 +1669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.logAdminAction(
-        req.user.id,
+        req.user!.id,
         AdminActionType.ADD_ADVERTISEMENT, // Using existing enum for now
         undefined,
         { gameId, action: "delete" }
@@ -1791,7 +1791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             betAmount: betAmount,
             currency: user.currency
           },
-          userId,
+          String(userId),
           true,
           winAmount.toString(),
           multiplier,
@@ -1805,7 +1805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             betAmount: betAmount,
             currency: user.currency
           },
-          userId,
+          String(userId),
           false,
           "0",
           0,

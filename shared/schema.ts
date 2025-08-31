@@ -261,11 +261,20 @@ export interface GamePlay {
   currency: Currency;
   sessionId?: string;
   ipAddress?: string;
+  // Mines game specific properties
+  mineCount?: number;
+  selectedTiles?: number[];
+  action?: string;
+  // Dice game specific properties
+  prediction?: number;
+  rollOver?: boolean;
+  clientSeed?: string;
+  nonce?: number;
 }
 
 // Schema for game play
 export const gamePlaySchema = z.object({
-  gameType: z.enum([GameType.SLOTS, GameType.DICE, GameType.PLINKO]),
+  gameType: z.enum([GameType.SLOTS, GameType.DICE, GameType.PLINKO, GameType.MINES]),
   betAmount: z.number().positive(),
   currency: z.enum([Currency.USD, Currency.BDT, Currency.INR, Currency.BTC, Currency.JPY]),
 });

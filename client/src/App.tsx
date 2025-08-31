@@ -435,7 +435,7 @@ function SlotsGamePage() {
                     {gameResult.isWin && (
                       <div className="text-center">
                         <span className="text-green-400 font-medium">
-                          {getCurrencySymbol(user?.currency || 'USD')}{formatMoney(gameResult.winAmount)}
+                          {getCurrencySymbol((user?.currency as Currency) || Currency.USD)}{formatMoney(gameResult.winAmount)}
                         </span>
                       </div>
                     )}
@@ -625,7 +625,7 @@ function DiceGamePage() {
                     {gameResult.isWin && (
                       <div className="text-center">
                         <span className="text-green-400 font-medium">
-                          {getCurrencySymbol(user?.currency || 'USD')}{formatMoney(gameResult.winAmount)}
+                          {getCurrencySymbol((user?.currency as Currency) || Currency.USD)}{formatMoney(gameResult.winAmount)}
                         </span>
                       </div>
                     )}
@@ -927,12 +927,12 @@ export default function App() {
                 {/* Public routes */}
                 <Route path="/auth" component={NewAuthPage} />
                 {/* Casino Dashboard - Main page after login */}
-                <ProtectedRoute path="/" component={HomePage} />
+                <ProtectedRoute path="/" component={() => <HomePage />} />
 
                 {/* Game Routes */}
                 <ProtectedRoute path="/slots" component={SlotsGamePage} />
-                <ProtectedRoute path="/dice" component={() => <DicePage />} />
-                <ProtectedRoute path="/mines" component={() => <MinesPage />} />
+                <ProtectedRoute path="/dice" component={DicePage} />
+                <ProtectedRoute path="/mines" component={MinesPage} />
                 <ProtectedRoute path="/plinko_master" component={PlinkoMasterGamePage} />
                 <ProtectedRoute path="/games" component={GamesPage} />
 
