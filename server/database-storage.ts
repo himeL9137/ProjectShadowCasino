@@ -42,7 +42,7 @@ import MemoryStore from "memorystore";
 import session from "express-session";
 
 export class DatabaseStorage implements IStorage {
-  public sessionStore: session.SessionStore;
+  public sessionStore: session.Store;
 
   constructor() {
     // Initialize memory store for sessions
@@ -258,20 +258,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
-  async updateUserLogin(userId: string, ipAddress: string): Promise<void> {
-    await db
-      .update(users)
-      .set({ 
-        lastLogin: new Date(),
-        ipAddress,
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, userId));
-  }
 
-  async getUsersByIP(ipAddress: string): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.ipAddress, ipAddress));
-  }
 
   // Transaction operations
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
@@ -407,7 +394,7 @@ export class DatabaseStorage implements IStorage {
         gameType,
         winChance,
         maxMultiplier,
-        updatedBy: parseInt(updatedBy),
+        updatedBy: updatedBy,
         lastUpdated: new Date(),
       })
       .onConflictDoUpdate({
@@ -415,7 +402,7 @@ export class DatabaseStorage implements IStorage {
         set: {
           winChance,
           maxMultiplier,
-          updatedBy: parseInt(updatedBy),
+          updatedBy: updatedBy,
           lastUpdated: new Date(),
         },
       })
@@ -638,8 +625,8 @@ export class DatabaseStorage implements IStorage {
     const [referral] = await db
       .insert(referrals)
       .values({
-        referrerId: parseInt(referrerId),
-        refereeId: parseInt(refereeId),
+        referrerId: referrerId,
+        refereeId: refereeId,
         referralCode,
         bonusAmount: referralSettings.signupBonus,
         commissionRate: referralSettings.commissionRate,
@@ -661,7 +648,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(referrals)
-      .where(eq(referrals.referrerId, parseInt(userId)));
+      .where(eq(referrals.referrerId, userId));
   }
 
   async updateReferralStatus(referralId: number, status: string): Promise<Referral> {
@@ -739,8 +726,8 @@ export class DatabaseStorage implements IStorage {
       .from(referrals)
       .where(
         and(
-          eq(referrals.refereeId, parseInt(refereeId)),
-          eq(referrals.referrerId, parseInt(referee.referredBy))
+          eq(referrals.refereeId, refereeId),
+          eq(referrals.referrerId, referee.referredBy)
         )
       )
       .limit(1);
@@ -772,7 +759,7 @@ export class DatabaseStorage implements IStorage {
         .from(referrals)
         .where(
           and(
-            eq(referrals.referrerId, parseInt(referee.referredBy)),
+            eq(referrals.referrerId, referee.referredBy),
             eq(referrals.status, "rewarded")
           )
         );
@@ -917,5 +904,43 @@ export class DatabaseStorage implements IStorage {
   
   async deleteRedirectLink(id: number): Promise<void> {
     await db.delete(redirectLinks).where(eq(redirectLinks.id, id));
+  }
+
+  // Missing interface methods
+  async approveGame(id: number): Promise<CustomGame> {
+    const [approvedGame] = await db
+      .update(customGames)
+      .set({ isApproved: true, updatedAt: new Date() })
+      .where(eq(customGames.id, id))
+      .returning();
+    return approvedGame;
+  }
+
+  async getGamesByCategory(category: string): Promise<CustomGame[]> {
+    return await db
+      .select()
+      .from(customGames)
+      .where(eq(customGames.category, category))
+      .orderBy(desc(customGames.createdAt));
+  }
+
+  async searchGames(query: string): Promise<CustomGame[]> {
+    return await db
+      .select()
+      .from(customGames)
+      .where(
+        sql`${customGames.name} ILIKE ${'%' + query + '%'} OR ${customGames.description} ILIKE ${'%' + query + '%'}`
+      )
+      .orderBy(desc(customGames.createdAt));
+  }
+
+  async incrementPlayCount(id: number): Promise<void> {
+    await db
+      .update(customGames)
+      .set({ 
+        playCount: sql`${customGames.playCount} + 1`,
+        lastPlayed: new Date()
+      })
+      .where(eq(customGames.id, id));
   }
 }

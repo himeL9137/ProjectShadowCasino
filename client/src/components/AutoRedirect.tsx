@@ -37,7 +37,7 @@ export const AutoRedirect = React.memo(function AutoRedirect() {
     refetchIntervalInBackground: false, // Don't refetch when tab is not focused
     refetchOnWindowFocus: false, // Don't refetch on window focus to prevent spam
     staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Debug logging for query state

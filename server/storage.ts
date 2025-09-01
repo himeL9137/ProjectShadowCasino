@@ -134,7 +134,7 @@ export interface IStorage {
   deleteRedirectLink(id: number): Promise<void>;
 
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
 // In-memory storage implementation
@@ -163,7 +163,7 @@ export class MemStorage implements IStorage {
   currentAdminActionId: number = 1;
   currentRedirectLinkId: number = 1;
 
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 
   constructor() {
     this.users = new Map();
@@ -479,7 +479,7 @@ export class MemStorage implements IStorage {
   }
 
   // Replit Auth upsert method
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async upsertUser(userData: InsertUser): Promise<User> {
     const existingUser = this.users.get(userData.id);
     
     if (existingUser) {
@@ -925,7 +925,7 @@ export class MemStorage implements IStorage {
       winChance,
       maxMultiplier,
       lastUpdated: new Date(),
-      updatedBy: parseInt(updatedBy),
+      updatedBy: updatedBy,
     };
 
     this.gameSettings.set(gameType, updatedSettings);
@@ -1211,8 +1211,8 @@ export class MemStorage implements IStorage {
   async createReferral(referrerId: string, refereeId: string, referralCode: string): Promise<Referral> {
     const referral: Referral = {
       id: this.currentReferralId++,
-      referrerId: parseInt(referrerId),
-      refereeId: parseInt(refereeId),
+      referrerId: referrerId,
+      refereeId: refereeId,
       referralCode,
       bonusAmount: this.referralSettings.signupBonus,
       commissionRate: this.referralSettings.commissionRate,
@@ -1236,7 +1236,7 @@ export class MemStorage implements IStorage {
 
   async getUserReferrals(userId: string): Promise<Referral[]> {
     return Array.from(this.referrals.values()).filter(
-      (referral) => referral.referrerId === parseInt(userId)
+      (referral) => referral.referrerId === userId
     );
   }
 
@@ -1271,7 +1271,7 @@ export class MemStorage implements IStorage {
         ...referrer, 
         referralEarnings: (referrerEarnings + parseFloat(amount)).toString()
       };
-      this.users.set(String(referral.referrerId), updatedReferrer);
+      this.users.set(referral.referrerId, updatedReferrer);
     }
   }
 
@@ -1294,7 +1294,7 @@ export class MemStorage implements IStorage {
 
     // Find the referral record
     const referral = Array.from(this.referrals.values()).find(
-      (r) => r.refereeId === parseInt(refereeId) && r.referrerId === parseInt(referee.referredBy || "0")
+      (r) => r.refereeId === refereeId && r.referrerId === (referee.referredBy || "0")
     );
 
     if (!referral || referral.status !== "pending") return;
@@ -1304,7 +1304,7 @@ export class MemStorage implements IStorage {
 
     // Check how many rewarded referrals the referrer already has
     const referrerRewardedReferrals = Array.from(this.referrals.values()).filter(
-      (r) => r.referrerId === parseInt(referee.referredBy || "0") && r.status === "rewarded"
+      (r) => r.referrerId === (referee.referredBy || "0") && r.status === "rewarded"
     ).length;
 
     const maxEarningReferrals = this.referralSettings.maxReferralsPerUser || 3;
