@@ -36,6 +36,7 @@ import GamesPage from "@/pages/games-page";
 import DicePage from "@/pages/dice-page";
 import MinesPage from "@/pages/mines-page";
 import HtmlGamePage from "@/pages/html-game-page";
+import DynamicGameLoader from "@/components/games/DynamicGameLoader";
 import DepositWithdrawalPage from "@/pages/deposit-withdrawal-page";
 import { ReferralPage } from "@/pages/referral-page";
 import { NotificationBanner } from "@/components/ui/notification-banner";
@@ -953,6 +954,7 @@ export default function App() {
                 <AdminProtectedRoute path="/admin" component={AdminPage} />
                 <AdminProtectedRoute path="/admin/audit" component={AdminAuditPage} />
                 <ProtectedRoute path="/html-game/:id" component={HtmlGamePage} />
+                <ProtectedRoute path="/game/:id" component={DynamicGameLoader} />
 
                 {/* 404 Not Found page */}
                 <Route>

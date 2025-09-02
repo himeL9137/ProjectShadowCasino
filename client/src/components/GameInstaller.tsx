@@ -10,9 +10,10 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Upload, FileText, Image, Code, Play, CheckCircle, AlertCircle, 
-  X, Plus, Gamepad2, Settings, Eye, Download, Trash2 
+  X, Plus, Gamepad2, Settings, Eye, Download, Trash2, BookOpen, Star, Zap
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { gameTemplates, GameTemplate, getTemplateById } from '@/lib/gameTemplates';
 
 interface GameFile {
   file: File;
@@ -41,8 +42,11 @@ export function GameInstaller({ onGameInstalled }: GameInstallerProps) {
   const [uploadedFiles, setUploadedFiles] = useState<GameFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [currentTab, setCurrentTab] = useState('upload');
+  const [currentTab, setCurrentTab] = useState('templates');
   const [tagInput, setTagInput] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<GameTemplate | null>(null);
+  const [templateFilter, setTemplateFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
+  const [showCodePreview, setShowCodePreview] = useState(false);
   
   const [form, setForm] = useState<GameInstallationForm>({
     name: '',
@@ -138,6 +142,45 @@ export function GameInstaller({ onGameInstalled }: GameInstallerProps) {
       }
       newFiles.splice(index, 1);
       return newFiles;
+    });
+  };
+
+  const downloadTemplate = (template: GameTemplate) => {
+    const filename = template.requiredFiles?.[0] || `${template.id}.${template.type === 'html' ? 'html' : template.type === 'javascript' ? 'js' : 'tsx'}`;
+    const blob = new Blob([template.template], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Auto-fill form with template information
+    setForm(prev => ({
+      ...prev,
+      name: template.name,
+      category: template.category,
+      description: template.description,
+      instructions: template.instructions
+    }));
+    
+    // Create a file from the template and add it to uploaded files
+    const file = new File([template.template], filename, { type: 'text/plain' });
+    const gameFile: GameFile = {
+      file,
+      preview: template.template.substring(0, 200) + '...',
+      type: 'game'
+    };
+    setUploadedFiles([gameFile]);
+    
+    // Move to upload tab to show the file
+    setCurrentTab('upload');
+    
+    toast({
+      title: "Template downloaded!",
+      description: `${template.name} has been downloaded and added to your files`,
     });
   };
 
@@ -295,11 +338,185 @@ export function GameInstaller({ onGameInstalled }: GameInstallerProps) {
       
       <CardContent>
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="templates">Game Templates</TabsTrigger>
             <TabsTrigger value="upload">Upload Files</TabsTrigger>
             <TabsTrigger value="configure">Configure Game</TabsTrigger>
             <TabsTrigger value="preview">Preview & Install</TabsTrigger>
           </TabsList>
+          
+          {/* Game Templates Tab */}
+          <TabsContent value="templates" className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Game Templates & Examples
+                </h3>
+                <Select value={templateFilter} onValueChange={(value: any) => setTemplateFilter(value)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Star className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-800">Professional Game Templates</p>
+                    <p>These templates create games that work exactly like our built-in games (Slots, Dice, Plinko). They include proper API integration, balance updates, animations, and the same user experience as existing casino games.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {gameTemplates
+                  .filter(template => templateFilter === 'all' || template.difficulty === templateFilter)
+                  .map(template => (
+                    <Card 
+                      key={template.id} 
+                      className={`cursor-pointer transition-all hover:shadow-md ${
+                        selectedTemplate?.id === template.id ? 'border-blue-500 bg-blue-50' : ''
+                      }`}
+                      onClick={() => setSelectedTemplate(template)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            <Code className="h-5 w-5 text-blue-600" />
+                            <CardTitle className="text-base">{template.name}</CardTitle>
+                          </div>
+                          <div className="flex gap-1">
+                            <Badge variant={template.difficulty === 'beginner' ? 'default' : 
+                                           template.difficulty === 'intermediate' ? 'secondary' : 'destructive'}>
+                              {template.difficulty}
+                            </Badge>
+                            <Badge variant="outline">{template.type}</Badge>
+                          </div>
+                        </div>
+                        <CardDescription className="text-sm">{template.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs font-medium text-gray-600 mb-1">Features:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {template.features.map((feature, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {feature}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          {selectedTemplate?.id === template.id && (
+                            <div className="space-y-2 border-t pt-3">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowCodePreview(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Code
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                className="w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  downloadTemplate(template);
+                                }}
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                Use This Template
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+
+              {selectedTemplate && (
+                <Card className="bg-gray-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-yellow-600" />
+                      Instructions for {selectedTemplate.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none">
+                      <pre className="whitespace-pre-wrap text-sm bg-white p-4 rounded border">
+                        {selectedTemplate.instructions}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Template code preview modal/dialog could go here */}
+              {showCodePreview && selectedTemplate && (
+                <Card className="bg-gray-900 text-green-400">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Code className="h-5 w-5" />
+                        {selectedTemplate.name} - Source Code
+                      </CardTitle>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowCodePreview(false)}
+                        className="text-white hover:bg-gray-800"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-96 overflow-y-auto">
+                      <pre className="text-xs leading-relaxed whitespace-pre-wrap">
+                        {selectedTemplate.template}
+                      </pre>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedTemplate.template);
+                          toast({
+                            title: "Code copied!",
+                            description: "Template code has been copied to your clipboard",
+                          });
+                        }}
+                      >
+                        Copy Code
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={() => downloadTemplate(selectedTemplate)}
+                      >
+                        Download as File
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
           
           {/* Upload Tab */}
           <TabsContent value="upload" className="space-y-4">

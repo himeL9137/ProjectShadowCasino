@@ -255,6 +255,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Custom game play endpoint for React component games
+  app.post("/api/games/custom-play", authenticateJWT, async (req, res) => {
+    try {
+      const { gameId, betAmount, currency, gameData } = req.body;
+      
+      if (!gameId || !betAmount || !currency) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const user = req.user!;
+      
+      // Parse the game ID to get the actual custom game ID
+      const customGameId = gameId.replace('custom-', '');
+      
+      // Get the custom game details
+      const customGames = await storage.getCustomGames();
+      const game = customGames.find(g => g.id.toString() === customGameId);
+      
+      if (!game || !game.isApproved) {
+        return res.status(404).json({ message: "Game not found or not approved" });
+      }
+
+      // Validate bet amount
+      const betAmountNum = parseFloat(betAmount);
+      const minBet = parseFloat(game.minBet);
+      const maxBet = parseFloat(game.maxBet);
+      
+      if (betAmountNum < minBet || betAmountNum > maxBet) {
+        return res.status(400).json({ 
+          message: `Bet amount must be between ${minBet} and ${maxBet}` 
+        });
+      }
+
+      // Check user balance
+      if (parseFloat(user.balance) < betAmountNum) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Deduct bet amount
+      await storage.updateUserBalance(user.id, -betAmountNum, currency);
+
+      // Calculate game result based on game's win chance
+      const isWin = Math.random() < (game.winChance / 100);
+      let winAmount = 0;
+      let multiplier = 0;
+
+      if (isWin) {
+        // Calculate win amount based on the game's max multiplier
+        // Use a random multiplier between 1 and maxMultiplier
+        multiplier = 1 + Math.random() * (game.maxMultiplier - 1);
+        winAmount = betAmountNum * multiplier;
+        
+        // Add winnings to user balance
+        await storage.updateUserBalance(user.id, winAmount, currency);
+      }
+
+      // Save game transaction
+      const gameTransaction = {
+        userId: user.id,
+        gameType: `custom_${game.name.toLowerCase().replace(/\s+/g, '_')}` as GameType,
+        betAmount: betAmountNum,
+        winAmount,
+        currency: currency as Currency,
+        isWin,
+        details: JSON.stringify({
+          customGameId: game.id,
+          gameName: game.name,
+          multiplier,
+          gameData
+        })
+      };
+
+      await storage.saveGameTransaction(gameTransaction);
+
+      // If it's a win, save to winners list for display
+      if (isWin && winAmount > 0) {
+        await storage.saveWinner({
+          userId: user.id,
+          gameType: gameTransaction.gameType,
+          winAmount,
+          betAmount: betAmountNum,
+          currency: currency as Currency,
+          multiplier
+        });
+      }
+
+      res.status(200).json({
+        isWin,
+        winAmount,
+        multiplier,
+        gameData: {
+          customGameId: game.id,
+          gameName: game.name,
+          ...gameData
+        }
+      });
+    } catch (error: any) {
+      console.error("Error in custom game play:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
