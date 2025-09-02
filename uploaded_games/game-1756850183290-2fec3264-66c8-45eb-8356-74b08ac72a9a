@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lucky Number Game</title>
+    <style>
+        .casino-game-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1f2937, #111827);
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+        .game-title { font-size: 24px; margin-bottom: 20px; }
+        .balance-display { font-size: 18px; margin: 10px 0; }
+        .guess-input { padding: 10px; font-size: 16px; margin: 10px; border-radius: 5px; border: none; }
+        .casino-bet-button { margin: 5px; }
+        .result { margin: 20px 0; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="casino-game-container">
+        <h1 class="game-title">🎲 Lucky Number Game</h1>
+        <div class="balance-display">Balance: <span class="casino-balance">Loading...</span></div>
+        
+        <p>Guess a number between 1 and 10!</p>
+        <input type="number" id="guessInput" class="guess-input" min="1" max="10" placeholder="Enter your guess">
+        
+        <br>
+        <button class="casino-bet-button" data-bet-amount="10" onclick="playGame(10)">Bet 10</button>
+        <button class="casino-bet-button" data-bet-amount="50" onclick="playGame(50)">Bet 50</button>
+        <button class="casino-bet-button" data-bet-amount="100" onclick="playGame(100)">Bet 100</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function playGame(betAmount) {
+            const guess = parseInt(document.getElementById('guessInput').value);
+            if (!guess || guess < 1 || guess > 10) {
+                document.getElementById('result').innerHTML = '<span style="color: red;">Please enter a number between 1 and 10!</span>';
+                return;
+            }
+            
+            const winningNumber = Math.floor(Math.random() * 10) + 1;
+            const won = guess === winningNumber;
+            
+            document.getElementById('result').innerHTML = `
+                <p>Winning number was: ${winningNumber}</p>
+                <p style="color: ${won ? 'green' : 'red'};">
+                    ${won ? '🎉 You Won!' : '😔 Better luck next time!'}
+                </p>
+            `;
+            
+            if (window.casinoAPI) {
+                window.casinoAPI.placeBet(betAmount, won);
+            }
+        }
+    </script>
+</body>
+</html>

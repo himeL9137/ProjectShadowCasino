@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""
+Advanced Number Guessing Game in Python
+Casino-integrated game with betting system
+"""
+
+import random
+import json
+from typing import Dict, Any
+
+class NumberGuessingGame:
+    def __init__(self):
+        self.secret_number = random.randint(1, 100)
+        self.attempts = 0
+        self.max_attempts = 6
+        self.bet_amount = 20
+        self.game_state = "playing"
+        self.hints = []
+        
+    def setup_web_interface(self) -> str:
+        """Generate HTML interface for the Python game"""
+        return '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Python Number Guesser</title>
+            <style>
+                .casino-game-container {
+                    max-width: 700px;
+                    margin: 0 auto;
+                    padding: 25px;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    border-radius: 15px;
+                    color: white;
+                    font-family: 'Courier New', monospace;
+                }
+                .python-code { background: #2d3748; padding: 15px; border-radius: 8px; margin: 10px 0; }
+                .game-stats { display: flex; justify-content: space-between; margin: 15px 0; }
+                .guess-input { padding: 10px; font-size: 16px; border-radius: 5px; border: none; width: 100px; }
+                .python-btn { 
+                    background: linear-gradient(45deg, #48bb78, #38a169);
+                    color: white; padding: 10px 20px; border: none;
+                    border-radius: 5px; cursor: pointer; margin: 5px;
+                }
+                .hints-panel { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 10px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="casino-game-container">
+                <h1>🐍 Python Number Guesser</h1>
+                <div class="balance-display">Balance: <span class="casino-balance">Loading...</span></div>
+                
+                <div class="python-code">
+                    <code>secret_number = random.randint(1, 100)</code><br>
+                    <code>attempts_left = 6</code><br>
+                    <code>win_condition = guess == secret_number</code>
+                </div>
+                
+                <div class="game-stats">
+                    <span>Attempts: <span id="attempts">0</span>/6</span>
+                    <span>Range: 1-100</span>
+                    <span>Bet: $<span id="currentBet">20</span></span>
+                </div>
+                
+                <div class="guess-section">
+                    <input type="number" id="guessInput" class="guess-input" min="1" max="100" placeholder="1-100">
+                    <button class="python-btn" onclick="makeGuess()">Submit Guess</button>
+                    <button class="python-btn" onclick="setBet()">Change Bet</button>
+                </div>
+                
+                <div class="hints-panel">
+                    <h3>💡 Python Hints:</h3>
+                    <div id="hintsDisplay">Make your first guess to get started!</div>
+                </div>
+                
+                <div id="gameResult" class="result"></div>
+            </div>
+
+            <script>
+                class PythonNumberGame {
+                    constructor() {
+                        this.secretNumber = Math.floor(Math.random() * 100) + 1;
+                        this.attempts = 0;
+                        this.maxAttempts = 6;
+                        this.betAmount = 20;
+                        this.hints = [];
+                    }
+
+                    makeGuess() {
+                        const guess = parseInt(document.getElementById('guessInput').value);
+                        if (!guess || guess < 1 || guess > 100) {
+                            this.showResult('Invalid guess! Enter a number between 1 and 100.', 'red');
+                            return;
+                        }
+
+                        this.attempts++;
+                        document.getElementById('attempts').textContent = this.attempts;
+
+                        if (guess === this.secretNumber) {
+                            this.showResult('🎉 Correct! You won!', 'green');
+                            this.endGame(true);
+                        } else if (this.attempts >= this.maxAttempts) {
+                            this.showResult(`💀 Game Over! The number was ${this.secretNumber}`, 'red');
+                            this.endGame(false);
+                        } else {
+                            this.giveHint(guess);
+                        }
+
+                        document.getElementById('guessInput').value = '';
+                    }
+
+                    giveHint(guess) {
+                        let hint = '';
+                        if (guess < this.secretNumber) {
+                            hint = `${guess} is too low! Try higher.`;
+                        } else {
+                            hint = `${guess} is too high! Try lower.`;
+                        }
+
+                        // Advanced Python-style hints
+                        const diff = Math.abs(guess - this.secretNumber);
+                        if (diff <= 5) hint += ' 🔥 Very close!';
+                        else if (diff <= 15) hint += ' 🟡 Getting warmer!';
+                        else hint += ' 🧊 Still cold!';
+
+                        this.hints.push(hint);
+                        this.updateHintsDisplay();
+                    }
+
+                    updateHintsDisplay() {
+                        const hintsDiv = document.getElementById('hintsDisplay');
+                        hintsDiv.innerHTML = this.hints.map((hint, i) => 
+                            `<div>Attempt ${i + 1}: ${hint}</div>`
+                        ).join('');
+                    }
+
+                    endGame(won) {
+                        if (window.casinoAPI) {
+                            window.casinoAPI.placeBet(this.betAmount, won);
+                        }
+                    }
+
+                    setBet() {
+                        const newBet = prompt('Enter new bet amount (20-2000):', this.betAmount);
+                        if (newBet && !isNaN(newBet) && newBet >= 20 && newBet <= 2000) {
+                            this.betAmount = parseInt(newBet);
+                            document.getElementById('currentBet').textContent = this.betAmount;
+                        }
+                    }
+
+                    showResult(message, color) {
+                        document.getElementById('gameResult').innerHTML = 
+                            `<p style="color: ${color}; font-size: 18px;">${message}</p>`;
+                    }
+                }
+
+                const pythonGame = new PythonNumberGame();
+                window.makeGuess = () => pythonGame.makeGuess();
+                window.setBet = () => pythonGame.setBet();
+            </script>
+        </body>
+        </html>
+        '''
+
+    def make_guess(self, guess: int) -> Dict[str, Any]:
+        """Process a guess and return game state"""
+        self.attempts += 1
+        
+        if guess == self.secret_number:
+            self.game_state = "won"
+            return {
+                "status": "won",
+                "message": f"Congratulations! You guessed {self.secret_number} correctly!",
+                "attempts": self.attempts,
+                "won": True
+            }
+        elif self.attempts >= self.max_attempts:
+            self.game_state = "lost"
+            return {
+                "status": "lost", 
+                "message": f"Game over! The number was {self.secret_number}",
+                "attempts": self.attempts,
+                "won": False
+            }
+        else:
+            hint = "Higher" if guess < self.secret_number else "Lower"
+            self.hints.append(f"Guess {guess}: Too {hint.lower()}")
+            return {
+                "status": "continue",
+                "message": f"Try {hint.lower()}! Attempts left: {self.max_attempts - self.attempts}",
+                "attempts": self.attempts,
+                "hint": hint,
+                "won": False
+            }
+
+if __name__ == "__main__":
+    game = NumberGuessingGame()
+    print("Python Number Guessing Game initialized!")
+    print(f"Secret number range: 1-100")
+    print(f"Max attempts: {game.max_attempts}")
+    
+    # For web integration, output the HTML interface
+    print(game.setup_web_interface())

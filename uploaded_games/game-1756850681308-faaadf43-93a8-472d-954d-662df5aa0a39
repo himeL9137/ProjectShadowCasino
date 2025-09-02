@@ -1,0 +1,360 @@
+/*
+ * Advanced C# Calculator Game
+ * Casino-integrated mathematical calculator with betting
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+
+namespace CasinoCalculatorGame
+{
+    public class AdvancedCalculator
+    {
+        private decimal betAmount = 30;
+        private string currentExpression = "";
+        private decimal lastResult = 0;
+        private Random random = new Random();
+        
+        public class CalculationResult
+        {
+            public bool Success { get; set; }
+            public decimal Result { get; set; }
+            public string Expression { get; set; }
+            public string Error { get; set; }
+            public bool IsPerfectGuess { get; set; }
+        }
+
+        public string GenerateWebInterface()
+        {
+            return @"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>C# Advanced Calculator</title>
+    <style>
+        .casino-game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            background: linear-gradient(135deg, #8B5CF6, #A855F7);
+            border-radius: 20px;
+            color: white;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .csharp-header {
+            background: linear-gradient(45deg, #512DA8, #7C4DFF);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .calculator-display {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-family: monospace;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            border: 2px solid #333;
+        }
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .calc-btn {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: linear-gradient(45deg, #424242, #616161);
+            color: white;
+        }
+        .calc-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #616161, #757575);
+        }
+        .calc-btn.operator {
+            background: linear-gradient(45deg, #FF6F00, #FF8F00);
+        }
+        .calc-btn.special {
+            background: linear-gradient(45deg, #D32F2F, #F44336);
+        }
+        .betting-section {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .challenge-section {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class=""casino-game-container"">
+        <div class=""csharp-header"">
+            <h1>🧮 C# Advanced Calculator</h1>
+            <p>Calculate expressions and guess the result to win!</p>
+        </div>
+        
+        <div class=""balance-display"">
+            Balance: <span class=""casino-balance"">Loading...</span>
+        </div>
+        
+        <div class=""calculator-display"" id=""display"">0</div>
+        
+        <div class=""calculator-buttons"">
+            <button class=""calc-btn special"" onclick=""clearDisplay()"">C</button>
+            <button class=""calc-btn special"" onclick=""deleteLast()"">←</button>
+            <button class=""calc-btn operator"" onclick=""addToDisplay('/')"">÷</button>
+            <button class=""calc-btn operator"" onclick=""addToDisplay('*')"">×</button>
+            
+            <button class=""calc-btn"" onclick=""addToDisplay('7')"">7</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('8')"">8</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('9')"">9</button>
+            <button class=""calc-btn operator"" onclick=""addToDisplay('-')"">-</button>
+            
+            <button class=""calc-btn"" onclick=""addToDisplay('4')"">4</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('5')"">5</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('6')"">6</button>
+            <button class=""calc-btn operator"" onclick=""addToDisplay('+')"">+</button>
+            
+            <button class=""calc-btn"" onclick=""addToDisplay('1')"">1</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('2')"">2</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('3')"">3</button>
+            <button class=""calc-btn special"" onclick=""calculate()"" rowspan=""2"">=</button>
+            
+            <button class=""calc-btn"" onclick=""addToDisplay('0')"" colspan=""2"">0</button>
+            <button class=""calc-btn"" onclick=""addToDisplay('.')"">.</button>
+        </div>
+        
+        <div class=""betting-section"">
+            <h3>💰 Calculator Challenge</h3>
+            <p>I'll give you a math problem. Calculate it correctly to win!</p>
+            <div class=""challenge-section"">
+                <div id=""challenge"">Click 'New Challenge' to start!</div>
+                <button onclick=""newChallenge()"" style=""margin: 10px 5px; padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;"">New Challenge</button>
+                <button onclick=""submitAnswer()"" style=""margin: 10px 5px; padding: 8px 16px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;"">Submit Answer</button>
+            </div>
+            <div>
+                <label>Bet Amount:</label>
+                <input type=""number"" id=""betInput"" value=""30"" min=""30"" max=""2000"" style=""margin: 0 10px; padding: 5px; border-radius: 3px; border: none;"">
+                <button onclick=""setBet()"" style=""padding: 5px 10px; background: #FF9800; color: white; border: none; border-radius: 3px; cursor: pointer;"">Set Bet</button>
+            </div>
+        </div>
+        
+        <div id=""gameResult"" style=""margin: 20px 0; font-size: 18px; text-align: center;""></div>
+    </div>
+
+    <script>
+        class CSharpCalculatorGame {
+            constructor() {
+                this.currentExpression = '';
+                this.betAmount = 30;
+                this.challengeExpression = '';
+                this.challengeAnswer = 0;
+                this.currentDisplay = '0';
+            }
+
+            addToDisplay(value) {
+                if (this.currentDisplay === '0' && value !== '.') {
+                    this.currentDisplay = value;
+                } else {
+                    this.currentDisplay += value;
+                }
+                this.updateDisplay();
+            }
+
+            clearDisplay() {
+                this.currentDisplay = '0';
+                this.updateDisplay();
+            }
+
+            deleteLast() {
+                if (this.currentDisplay.length > 1) {
+                    this.currentDisplay = this.currentDisplay.slice(0, -1);
+                } else {
+                    this.currentDisplay = '0';
+                }
+                this.updateDisplay();
+            }
+
+            calculate() {
+                try {
+                    // Replace display symbols with JS operators
+                    let expression = this.currentDisplay.replace(/×/g, '*').replace(/÷/g, '/');
+                    let result = eval(expression);
+                    this.currentDisplay = result.toString();
+                    this.updateDisplay();
+                } catch (error) {
+                    this.currentDisplay = 'Error';
+                    this.updateDisplay();
+                    setTimeout(() => {
+                        this.currentDisplay = '0';
+                        this.updateDisplay();
+                    }, 2000);
+                }
+            }
+
+            updateDisplay() {
+                document.getElementById('display').textContent = this.currentDisplay;
+            }
+
+            newChallenge() {
+                // Generate random math challenge
+                const operations = ['+', '-', '*', '/'];
+                const num1 = Math.floor(Math.random() * 50) + 1;
+                const num2 = Math.floor(Math.random() * 20) + 1;
+                const operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                this.challengeExpression = `${num1} ${operation} ${num2}`;
+                
+                // Calculate correct answer
+                try {
+                    this.challengeAnswer = eval(this.challengeExpression);
+                    if (operation === '/') {
+                        this.challengeAnswer = Math.round(this.challengeAnswer * 100) / 100;
+                    }
+                } catch (error) {
+                    this.challengeAnswer = 0;
+                }
+                
+                document.getElementById('challenge').innerHTML = `
+                    <strong>Calculate: ${this.challengeExpression} = ?</strong><br>
+                    <small>Use the calculator and submit your answer!</small>
+                `;
+            }
+
+            submitAnswer() {
+                if (!this.challengeExpression) {
+                    document.getElementById('gameResult').innerHTML = 
+                        '<span style=""color: orange;"">Start a new challenge first!</span>';
+                    return;
+                }
+
+                const userAnswer = parseFloat(this.currentDisplay);
+                const tolerance = 0.01; // Allow small floating point differences
+                const isCorrect = Math.abs(userAnswer - this.challengeAnswer) < tolerance;
+
+                document.getElementById('gameResult').innerHTML = `
+                    <p>Challenge: ${this.challengeExpression}</p>
+                    <p>Correct Answer: ${this.challengeAnswer}</p>
+                    <p>Your Answer: ${userAnswer}</p>
+                    <p style=""color: ${isCorrect ? 'lightgreen' : 'lightcoral'};"">
+                        ${isCorrect ? '🎉 Correct! You won!' : '❌ Wrong answer. Better luck next time!'}
+                    </p>
+                `;
+
+                // Send result to casino API
+                if (window.casinoAPI) {
+                    window.casinoAPI.placeBet(this.betAmount, isCorrect);
+                }
+            }
+
+            setBet() {
+                const betInput = document.getElementById('betInput');
+                this.betAmount = Math.max(30, Math.min(2000, parseInt(betInput.value) || 30));
+                betInput.value = this.betAmount;
+            }
+        }
+
+        const calculatorGame = new CSharpCalculatorGame();
+
+        // Global functions for HTML onclick events
+        window.addToDisplay = (value) => calculatorGame.addToDisplay(value);
+        window.clearDisplay = () => calculatorGame.clearDisplay();
+        window.deleteLast = () => calculatorGame.deleteLast();
+        window.calculate = () => calculatorGame.calculate();
+        window.newChallenge = () => calculatorGame.newChallenge();
+        window.submitAnswer = () => calculatorGame.submitAnswer();
+        window.setBet = () => calculatorGame.setBet();
+
+        console.log('C# Advanced Calculator game initialized!');
+    </script>
+</body>
+</html>";
+        }
+
+        public CalculationResult ProcessExpression(string expression)
+        {
+            try
+            {
+                // Simple expression evaluation (in real app, use proper math parser)
+                var result = EvaluateExpression(expression);
+                
+                return new CalculationResult
+                {
+                    Success = true,
+                    Result = result,
+                    Expression = expression,
+                    IsPerfectGuess = (result % 1 == 0) // Perfect integer result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CalculationResult
+                {
+                    Success = false,
+                    Error = ex.Message,
+                    Expression = expression
+                };
+            }
+        }
+
+        private decimal EvaluateExpression(string expression)
+        {
+            // Simple calculator logic - in production use proper math parser
+            expression = expression.Replace(" ", "");
+            
+            // Handle basic operations
+            if (expression.Contains("+"))
+            {
+                var parts = expression.Split('+');
+                return decimal.Parse(parts[0]) + decimal.Parse(parts[1]);
+            }
+            else if (expression.Contains("-"))
+            {
+                var parts = expression.Split('-');
+                return decimal.Parse(parts[0]) - decimal.Parse(parts[1]);
+            }
+            else if (expression.Contains("*"))
+            {
+                var parts = expression.Split('*');
+                return decimal.Parse(parts[0]) * decimal.Parse(parts[1]);
+            }
+            else if (expression.Contains("/"))
+            {
+                var parts = expression.Split('/');
+                return decimal.Parse(parts[0]) / decimal.Parse(parts[1]);
+            }
+            
+            return decimal.Parse(expression);
+        }
+
+        public void SetBetAmount(decimal amount)
+        {
+            betAmount = Math.Max(30, Math.Min(2000, amount));
+        }
+
+        public static void Main(string[] args)
+        {
+            var calculator = new AdvancedCalculator();
+            Console.WriteLine("C# Advanced Calculator Game initialized!");
+            Console.WriteLine(calculator.GenerateWebInterface());
+        }
+    }
+}

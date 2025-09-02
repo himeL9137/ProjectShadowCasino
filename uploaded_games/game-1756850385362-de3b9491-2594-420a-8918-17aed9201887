@@ -1,0 +1,371 @@
+/*
+ * Advanced Memory Challenge Game in Java
+ * Casino-integrated pattern memory game
+ */
+
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class MemoryChallengeGame {
+    private ArrayList<Integer> sequence;
+    private ArrayList<Integer> playerInput;
+    private int currentRound;
+    private int betAmount;
+    private boolean gameActive;
+    private static final String[] COLORS = {"🔴", "🟢", "🔵", "🟡", "🟣", "🟠"};
+    private static final int MAX_ROUNDS = 8;
+    
+    public MemoryChallengeGame() {
+        this.sequence = new ArrayList<>();
+        this.playerInput = new ArrayList<>();
+        this.currentRound = 1;
+        this.betAmount = 15;
+        this.gameActive = true;
+        initializeGame();
+    }
+    
+    public void initializeGame() {
+        sequence.clear();
+        playerInput.clear();
+        currentRound = 1;
+        gameActive = true;
+        generateSequence();
+        updateWebDisplay();
+    }
+    
+    private void generateSequence() {
+        sequence.clear();
+        for (int i = 0; i < currentRound + 2; i++) {
+            sequence.add(ThreadLocalRandom.current().nextInt(0, COLORS.length));
+        }
+    }
+    
+    public void addPlayerInput(int colorIndex) {
+        if (!gameActive) return;
+        
+        playerInput.add(colorIndex);
+        
+        // Check if current input is correct
+        int currentIndex = playerInput.size() - 1;
+        if (playerInput.get(currentIndex) != sequence.get(currentIndex)) {
+            // Wrong input - game over
+            gameActive = false;
+            endGame(false, "Wrong color! Game Over!");
+            return;
+        }
+        
+        // Check if sequence is complete
+        if (playerInput.size() == sequence.size()) {
+            if (currentRound >= MAX_ROUNDS) {
+                // Won the game!
+                gameActive = false;
+                endGame(true, "🎉 Perfect! You completed all rounds!");
+            } else {
+                // Next round
+                currentRound++;
+                playerInput.clear();
+                generateSequence();
+                setTimeout(() -> showSequence(), 1000);
+            }
+        }
+        
+        updateWebDisplay();
+    }
+    
+    public void showSequence() {
+        // This would be handled by JavaScript for display timing
+        updateWebDisplay();
+    }
+    
+    public void setBetAmount(int amount) {
+        this.betAmount = Math.max(15, Math.min(750, amount));
+    }
+    
+    private void endGame(boolean won, String message) {
+        // Calculate multiplier based on rounds completed
+        double multiplier = 1.0 + (currentRound - 1) * 0.5;
+        
+        // Call JavaScript casino API
+        callCasinoAPI(betAmount, won, message);
+    }
+    
+    // Utility method to call casino API (would be implemented via JNI/JavaScript bridge)
+    private native void callCasinoAPI(int betAmount, boolean won, String message);
+    
+    public String getSequenceAsString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < sequence.size(); i++) {
+            if (i > 0) sb.append(" ");
+            sb.append(COLORS[sequence.get(i)]);
+        }
+        return sb.toString();
+    }
+    
+    public String getPlayerInputAsString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < playerInput.size(); i++) {
+            if (i > 0) sb.append(" ");
+            sb.append(COLORS[playerInput.get(i)]);
+        }
+        return sb.toString();
+    }
+    
+    // Web interface generation
+    public String generateWebInterface() {
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Java Memory Challenge</title>
+            <style>
+                .casino-game-container {
+                    max-width: 900px;
+                    margin: 0 auto;
+                    padding: 30px;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    border-radius: 20px;
+                    color: white;
+                    font-family: 'Arial', sans-serif;
+                    text-align: center;
+                }
+                .java-header {
+                    background: linear-gradient(45deg, #f39c12, #e67e22);
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin-bottom: 20px;
+                }
+                .sequence-display {
+                    font-size: 36px;
+                    padding: 20px;
+                    background: rgba(0,0,0,0.3);
+                    border-radius: 15px;
+                    margin: 20px 0;
+                    min-height: 80px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .color-buttons {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 15px;
+                    margin: 30px 0;
+                    max-width: 400px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                .color-btn {
+                    font-size: 48px;
+                    padding: 20px;
+                    border: none;
+                    border-radius: 15px;
+                    cursor: pointer;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    background: rgba(255,255,255,0.1);
+                }
+                .color-btn:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+                }
+                .game-stats {
+                    display: flex;
+                    justify-content: space-around;
+                    background: rgba(0,0,0,0.2);
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin: 20px 0;
+                }
+                .control-panel {
+                    margin: 20px 0;
+                }
+                .java-btn {
+                    background: linear-gradient(45deg, #3498db, #2980b9);
+                    color: white;
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    margin: 5px;
+                    font-size: 16px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="casino-game-container">
+                <div class="java-header">
+                    <h1>☕ Java Memory Challenge</h1>
+                    <p>Remember the sequence and repeat it!</p>
+                </div>
+                
+                <div class="balance-display">
+                    Balance: <span class="casino-balance">Loading...</span>
+                </div>
+                
+                <div class="game-stats">
+                    <div>Round: <span id="currentRound">1</span>/8</div>
+                    <div>Sequence Length: <span id="sequenceLength">3</span></div>
+                    <div>Bet: $<span id="betAmount">15</span></div>
+                </div>
+                
+                <div class="sequence-display" id="sequenceDisplay">
+                    Watch the sequence...
+                </div>
+                
+                <div class="color-buttons" id="colorButtons">
+                    <button class="color-btn" onclick="javaGame.addInput(0)">🔴</button>
+                    <button class="color-btn" onclick="javaGame.addInput(1)">🟢</button>
+                    <button class="color-btn" onclick="javaGame.addInput(2)">🔵</button>
+                    <button class="color-btn" onclick="javaGame.addInput(3)">🟡</button>
+                    <button class="color-btn" onclick="javaGame.addInput(4)">🟣</button>
+                    <button class="color-btn" onclick="javaGame.addInput(5)">🟠</button>
+                </div>
+                
+                <div class="control-panel">
+                    <button class="java-btn" onclick="javaGame.showSequence()">👁️ Show Sequence</button>
+                    <button class="java-btn" onclick="javaGame.newGame()">🔄 New Game</button>
+                    <input type="number" id="betInput" value="15" min="15" max="750" 
+                           style="padding: 8px; margin: 0 10px; border-radius: 5px; border: none;">
+                    <button class="java-btn" onclick="javaGame.setBet()">💰 Set Bet</button>
+                </div>
+                
+                <div id="gameMessage" style="margin: 20px 0; font-size: 18px;"></div>
+            </div>
+
+            <script>
+                class JavaMemoryGame {
+                    constructor() {
+                        this.sequence = [];
+                        this.playerInput = [];
+                        this.currentRound = 1;
+                        this.betAmount = 15;
+                        this.gameActive = true;
+                        this.colors = ['🔴', '🟢', '🔵', '🟡', '🟣', '🟠'];
+                        this.maxRounds = 8;
+                        this.initGame();
+                    }
+
+                    initGame() {
+                        this.sequence = [];
+                        this.playerInput = [];
+                        this.currentRound = 1;
+                        this.gameActive = true;
+                        this.generateSequence();
+                        this.updateDisplay();
+                        setTimeout(() => this.showSequence(), 1000);
+                    }
+
+                    generateSequence() {
+                        this.sequence = [];
+                        const length = this.currentRound + 2;
+                        for (let i = 0; i < length; i++) {
+                            this.sequence.push(Math.floor(Math.random() * this.colors.length));
+                        }
+                    }
+
+                    async showSequence() {
+                        const display = document.getElementById('sequenceDisplay');
+                        display.textContent = 'Watch carefully...';
+                        
+                        await this.sleep(1000);
+                        
+                        for (let i = 0; i < this.sequence.length; i++) {
+                            display.textContent = this.colors[this.sequence[i]];
+                            await this.sleep(800);
+                            display.textContent = '...';
+                            await this.sleep(400);
+                        }
+                        
+                        display.textContent = 'Now repeat the sequence!';
+                    }
+
+                    addInput(colorIndex) {
+                        if (!this.gameActive) return;
+                        
+                        this.playerInput.push(colorIndex);
+                        
+                        // Check if current input is correct
+                        const currentIndex = this.playerInput.length - 1;
+                        if (this.playerInput[currentIndex] !== this.sequence[currentIndex]) {
+                            this.gameActive = false;
+                            this.endGame(false, 'Wrong color! Game Over!');
+                            return;
+                        }
+                        
+                        // Check if sequence is complete
+                        if (this.playerInput.length === this.sequence.length) {
+                            if (this.currentRound >= this.maxRounds) {
+                                this.gameActive = false;
+                                this.endGame(true, '🎉 Perfect! You completed all rounds!');
+                            } else {
+                                this.currentRound++;
+                                this.playerInput = [];
+                                this.generateSequence();
+                                this.updateDisplay();
+                                setTimeout(() => this.showSequence(), 1500);
+                            }
+                        }
+                        
+                        this.updateDisplay();
+                    }
+
+                    setBet() {
+                        const betInput = document.getElementById('betInput');
+                        this.betAmount = Math.max(15, Math.min(750, parseInt(betInput.value) || 15));
+                        this.updateDisplay();
+                    }
+
+                    endGame(won, message) {
+                        document.getElementById('gameMessage').innerHTML = 
+                            `<span style="color: ${won ? 'lightgreen' : 'lightcoral'}">${message}</span>`;
+                        
+                        if (window.casinoAPI) {
+                            window.casinoAPI.placeBet(this.betAmount, won);
+                        }
+                    }
+
+                    newGame() {
+                        this.initGame();
+                        document.getElementById('gameMessage').textContent = '';
+                    }
+
+                    updateDisplay() {
+                        document.getElementById('currentRound').textContent = this.currentRound;
+                        document.getElementById('sequenceLength').textContent = this.currentRound + 2;
+                        document.getElementById('betAmount').textContent = this.betAmount;
+                        
+                        if (this.playerInput.length > 0) {
+                            const playerStr = this.playerInput.map(i => this.colors[i]).join(' ');
+                            document.getElementById('sequenceDisplay').textContent = playerStr;
+                        }
+                    }
+
+                    sleep(ms) {
+                        return new Promise(resolve => setTimeout(resolve, ms));
+                    }
+                }
+
+                const javaGame = new JavaMemoryGame();
+                console.log('Java Memory Challenge game initialized!');
+            </script>
+        </body>
+        </html>
+        """;
+    }
+    
+    private void updateWebDisplay() {
+        // This would update the web interface
+        // Implementation depends on the web bridge
+    }
+    
+    // Utility method for timing (simplified for web)
+    private void setTimeout(Runnable task, int ms) {
+        // Would be implemented via JavaScript bridge
+        task.run();
+    }
+    
+    public static void main(String[] args) {
+        MemoryChallengeGame game = new MemoryChallengeGame();
+        System.out.println("Java Memory Challenge Game initialized!");
+        System.out.println(game.generateWebInterface());
+    }
+}

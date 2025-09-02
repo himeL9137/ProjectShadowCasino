@@ -1,0 +1,117 @@
+// Rock Paper Scissors Game in JavaScript
+class RockPaperScissorsGame {
+    constructor() {
+        this.choices = ['rock', 'paper', 'scissors'];
+        this.wins = { rock: 'scissors', paper: 'rock', scissors: 'paper' };
+        this.betAmount = 10;
+        this.setupGame();
+    }
+
+    setupGame() {
+        // Create game interface
+        const gameHtml = `
+            <div class="casino-game-container">
+                <h1 class="game-title">🪨📄✂️ Rock Paper Scissors</h1>
+                <div class="balance-display">Balance: <span class="casino-balance">Loading...</span></div>
+                
+                <div class="game-board">
+                    <div class="choice-buttons">
+                        <button class="choice-btn" data-choice="rock" onclick="game.playChoice('rock')">🪨 Rock</button>
+                        <button class="choice-btn" data-choice="paper" onclick="game.playChoice('paper')">📄 Paper</button>
+                        <button class="choice-btn" data-choice="scissors" onclick="game.playChoice('scissors')">✂️ Scissors</button>
+                    </div>
+                    
+                    <div class="bet-controls">
+                        <label>Bet Amount:</label>
+                        <input type="number" id="betInput" value="10" min="5" max="500">
+                        <button onclick="game.setBetAmount()">Set Bet</button>
+                    </div>
+                    
+                    <div id="gameResult" class="result"></div>
+                </div>
+            </div>
+            
+            <style>
+                .casino-game-container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #2d1b69, #11998e);
+                    border-radius: 15px;
+                    color: white;
+                    text-align: center;
+                    font-family: Arial, sans-serif;
+                }
+                .choice-buttons { margin: 20px 0; }
+                .choice-btn {
+                    font-size: 24px;
+                    padding: 15px 25px;
+                    margin: 10px;
+                    border: none;
+                    border-radius: 10px;
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    color: white;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                }
+                .choice-btn:hover { transform: scale(1.1); }
+                .bet-controls { margin: 20px 0; }
+                .bet-controls input { padding: 8px; margin: 0 10px; border-radius: 5px; border: none; }
+                .result { margin: 20px 0; font-size: 18px; min-height: 60px; }
+            </style>
+        `;
+        
+        if (typeof document !== 'undefined') {
+            document.body.innerHTML = gameHtml;
+        }
+    }
+
+    setBetAmount() {
+        const betInput = document.getElementById('betInput');
+        this.betAmount = parseInt(betInput.value) || 10;
+        console.log('Bet amount set to:', this.betAmount);
+    }
+
+    playChoice(playerChoice) {
+        this.setBetAmount();
+        
+        const computerChoice = this.choices[Math.floor(Math.random() * 3)];
+        const result = this.determineWinner(playerChoice, computerChoice);
+        
+        const resultDiv = document.getElementById('gameResult');
+        resultDiv.innerHTML = `
+            <p>You chose: ${this.getEmoji(playerChoice)} ${playerChoice}</p>
+            <p>Computer chose: ${this.getEmoji(computerChoice)} ${computerChoice}</p>
+            <p style="color: ${result.won ? 'green' : result.tie ? 'yellow' : 'red'};">
+                ${result.message}
+            </p>
+        `;
+        
+        // Send result to casino API
+        if (window.casinoAPI && !result.tie) {
+            window.casinoAPI.placeBet(this.betAmount, result.won);
+        }
+    }
+
+    determineWinner(player, computer) {
+        if (player === computer) {
+            return { won: false, tie: true, message: "It's a tie! No bet placed." };
+        }
+        
+        const won = this.wins[player] === computer;
+        return {
+            won: won,
+            tie: false,
+            message: won ? "🎉 You won!" : "😔 You lost!"
+        };
+    }
+
+    getEmoji(choice) {
+        const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
+        return emojis[choice];
+    }
+}
+
+// Initialize game when page loads
+const game = new RockPaperScissorsGame();
+console.log('Rock Paper Scissors game initialized!');

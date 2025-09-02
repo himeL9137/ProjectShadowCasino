@@ -1,0 +1,291 @@
+/*
+Advanced Blackjack Game in C++
+Casino-integrated card game with betting system
+*/
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <random>
+#include <algorithm>
+#include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
+
+class BlackjackGame {
+private:
+    std::vector<int> playerCards;
+    std::vector<int> dealerCards;
+    std::mt19937 rng;
+    int betAmount = 25;
+    bool gameActive = true;
+    std::string gameResult = "";
+
+public:
+    BlackjackGame() : rng(std::random_device{}()) {
+        initializeGame();
+    }
+
+    void initializeGame() {
+        playerCards.clear();
+        dealerCards.clear();
+        gameActive = true;
+        gameResult = "";
+        
+        // Deal initial cards
+        dealCard(true);  // Player
+        dealCard(false); // Dealer
+        dealCard(true);  // Player
+        dealCard(false); // Dealer (hidden)
+        
+        updateDisplay();
+    }
+
+    int dealCard(bool toPlayer) {
+        int card = (rng() % 13) + 1; // 1-13 (Ace through King)
+        if (toPlayer) {
+            playerCards.push_back(card);
+        } else {
+            dealerCards.push_back(card);
+        }
+        return card;
+    }
+
+    int calculateTotal(const std::vector<int>& cards) {
+        int total = 0;
+        int aces = 0;
+        
+        for (int card : cards) {
+            if (card == 1) { // Ace
+                aces++;
+                total += 11;
+            } else if (card > 10) { // Face cards
+                total += 10;
+            } else {
+                total += card;
+            }
+        }
+        
+        // Adjust for aces
+        while (total > 21 && aces > 0) {
+            total -= 10;
+            aces--;
+        }
+        
+        return total;
+    }
+
+    std::string getCardName(int card) {
+        switch(card) {
+            case 1: return "A";
+            case 11: return "J";
+            case 12: return "Q";
+            case 13: return "K";
+            default: return std::to_string(card);
+        }
+    }
+
+    void hit() {
+        if (!gameActive) return;
+        
+        dealCard(true);
+        int playerTotal = calculateTotal(playerCards);
+        
+        if (playerTotal > 21) {
+            gameResult = "Bust! You went over 21.";
+            gameActive = false;
+            endGame(false);
+        }
+        
+        updateDisplay();
+    }
+
+    void stand() {
+        if (!gameActive) return;
+        
+        // Dealer plays
+        while (calculateTotal(dealerCards) < 17) {
+            dealCard(false);
+        }
+        
+        int playerTotal = calculateTotal(playerCards);
+        int dealerTotal = calculateTotal(dealerCards);
+        
+        if (dealerTotal > 21) {
+            gameResult = "Dealer busts! You win!";
+            endGame(true);
+        } else if (playerTotal > dealerTotal) {
+            gameResult = "You win with " + std::to_string(playerTotal) + "!";
+            endGame(true);
+        } else if (dealerTotal > playerTotal) {
+            gameResult = "Dealer wins with " + std::to_string(dealerTotal) + ".";
+            endGame(false);
+        } else {
+            gameResult = "It's a tie!";
+            endGame(false); // Tie = house wins
+        }
+        
+        gameActive = false;
+        updateDisplay();
+    }
+
+    void setBet(int amount) {
+        betAmount = std::max(25, std::min(1000, amount));
+    }
+
+    void endGame(bool won) {
+        // Call JavaScript casino API
+        EM_ASM({
+            if (window.casinoAPI) {
+                window.casinoAPI.placeBet($0, $1);
+            }
+        }, betAmount, won);
+    }
+
+    void updateDisplay() {
+        std::string playerCardsStr = "";
+        for (size_t i = 0; i < playerCards.size(); i++) {
+            if (i > 0) playerCardsStr += ", ";
+            playerCardsStr += getCardName(playerCards[i]);
+        }
+        
+        std::string dealerCardsStr = "";
+        for (size_t i = 0; i < dealerCards.size(); i++) {
+            if (i > 0) dealerCardsStr += ", ";
+            if (i == 1 && gameActive) {
+                dealerCardsStr += "??"; // Hidden card
+            } else {
+                dealerCardsStr += getCardName(dealerCards[i]);
+            }
+        }
+        
+        int playerTotal = calculateTotal(playerCards);
+        int dealerTotal = gameActive ? calculateTotal(std::vector<int>(dealerCards.begin(), dealerCards.begin() + 1)) 
+                                     : calculateTotal(dealerCards);
+        
+        // Update HTML display via JavaScript
+        EM_ASM({
+            const gameHtml = `
+                <div class="casino-game-container" style="
+                    max-width: 800px; margin: 0 auto; padding: 25px;
+                    background: linear-gradient(135deg, #1a202c, #2d3748);
+                    border-radius: 15px; color: white; font-family: Arial, sans-serif;
+                ">
+                    <h1 style="text-align: center; color: #f7fafc;">♠️ C++ Blackjack ♣️</h1>
+                    <div style="text-align: center; margin: 15px 0;">
+                        Balance: <span class="casino-balance">Loading...</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-around; margin: 30px 0;">
+                        <div style="text-align: center; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;">
+                            <h3>🙂 Your Cards</h3>
+                            <div style="font-size: 18px; margin: 10px 0;">${UTF8ToString($0)}</div>
+                            <div style="font-size: 20px; color: #4299e1;">Total: ${$1}</div>
+                        </div>
+                        
+                        <div style="text-align: center; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;">
+                            <h3>🎩 Dealer Cards</h3>
+                            <div style="font-size: 18px; margin: 10px 0;">${UTF8ToString($2)}</div>
+                            <div style="font-size: 20px; color: #e53e3e;">Total: ${$3}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button onclick="cppGame.hit()" style="
+                            background: linear-gradient(45deg, #48bb78, #38a169);
+                            color: white; padding: 12px 24px; border: none;
+                            border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px;
+                        " ${$4 ? 'disabled' : ''}>Hit</button>
+                        
+                        <button onclick="cppGame.stand()" style="
+                            background: linear-gradient(45deg, #ed8936, #dd6b20);
+                            color: white; padding: 12px 24px; border: none;
+                            border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px;
+                        " ${$4 ? 'disabled' : ''}>Stand</button>
+                        
+                        <button onclick="cppGame.newGame()" style="
+                            background: linear-gradient(45deg, #667eea, #764ba2);
+                            color: white; padding: 12px 24px; border: none;
+                            border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px;
+                        ">New Game</button>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 15px 0;">
+                        <input type="number" id="betInput" value="${$5}" min="25" max="1000" 
+                               style="padding: 8px; border-radius: 5px; border: none; margin-right: 10px;">
+                        <button onclick="cppGame.setBet()" style="
+                            background: #4a5568; color: white; padding: 8px 16px;
+                            border: none; border-radius: 5px; cursor: pointer;
+                        ">Set Bet</button>
+                    </div>
+                    
+                    <div style="text-align: center; font-size: 20px; margin: 20px 0; color: #fbd38d;">
+                        ${UTF8ToString($6)}
+                    </div>
+                </div>
+            `;
+            
+            if (document.body) {
+                document.body.innerHTML = gameHtml;
+            }
+        }, playerCardsStr.c_str(), playerTotal, dealerCardsStr.c_str(), 
+           dealerTotal, !gameActive, betAmount, gameResult.c_str());
+    }
+
+    void newGame() {
+        initializeGame();
+    }
+};
+
+// Global game instance
+BlackjackGame* game = nullptr;
+
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE
+    void initBlackjack() {
+        game = new BlackjackGame();
+    }
+    
+    EMSCRIPTEN_KEEPALIVE
+    void hit() {
+        if (game) game->hit();
+    }
+    
+    EMSCRIPTEN_KEEPALIVE
+    void stand() {
+        if (game) game->stand();
+    }
+    
+    EMSCRIPTEN_KEEPALIVE
+    void newGame() {
+        if (game) game->newGame();
+    }
+    
+    EMSCRIPTEN_KEEPALIVE
+    void setBet() {
+        if (game) {
+            int amount = EM_ASM_INT({
+                return parseInt(document.getElementById('betInput').value) || 25;
+            });
+            game->setBet(amount);
+        }
+    }
+}
+
+// JavaScript interface for web
+EM_JS(void, setupJSInterface, (), {
+    window.cppGame = {
+        hit: function() { _hit(); },
+        stand: function() { _stand(); },
+        newGame: function() { _newGame(); },
+        setBet: function() { _setBet(); }
+    };
+    
+    // Initialize game when loaded
+    _initBlackjack();
+    console.log('C++ Blackjack game initialized!');
+});
+
+int main() {
+    setupJSInterface();
+    return 0;
+}

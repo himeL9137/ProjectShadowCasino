@@ -330,12 +330,12 @@ export type GameSetting = typeof gameSettings.$inferSelect;
 export const customGames = pgTable("custom_games", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  type: text("type").notNull().default("html"), // html, tsx, js, react, etc.
-  htmlContent: text("html_content"), // For HTML games
+  type: text("type").notNull().default("html"), // html, javascript, python, cpp, java, csharp, rust, go, php, ruby, etc.
+  htmlContent: text("html_content"), // For HTML games or rendered output
   filePath: text("file_path"), // For uploaded file-based games
   originalFileName: text("original_file_name"), // Original uploaded file name
-  fileExtension: text("file_extension"), // .tsx, .js, .html, etc.
-  gameCode: text("game_code"), // Processed/compiled game code
+  fileExtension: text("file_extension"), // .html, .js, .py, .cpp, .java, .cs, .rs, .go, .php, .rb, etc.
+  gameCode: text("game_code"), // Original source code in any language
   thumbnailUrl: text("thumbnail_url"), // Preview image
   category: text("category").notNull().default("casino"), // casino, card, puzzle, arcade
   tags: text("tags").array().default([]), // searchable tags
