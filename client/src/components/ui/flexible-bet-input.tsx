@@ -42,22 +42,29 @@ export function FlexibleBetInput({
     setInputValue(value.toString());
   }, [value]);
 
+  // Ensure minBet and maxBet are valid numbers
+  const validMinBet = isNaN(minBet) || minBet <= 0 ? 1 : minBet;
+  const validMaxBet = !maxBet || isNaN(maxBet) || maxBet <= 0 ? activeBalance : maxBet;
+
   // Calculate effective max bet using real-time balance
-  const effectiveMaxBet = maxBet ? Math.min(activeBalance, maxBet) : activeBalance;
+  const effectiveMaxBet = validMaxBet ? Math.min(activeBalance, validMaxBet) : activeBalance;
 
   // Quick bet amounts based on real-time balance (10%, 25%, 50%, 100% of balance)
   const quickBets = [
-    Math.max(minBet, Math.floor(activeBalance * 0.1)),
-    Math.max(minBet, Math.floor(activeBalance * 0.25)),
-    Math.max(minBet, Math.floor(activeBalance * 0.5)),
-    Math.max(minBet, activeBalance)
+    Math.max(validMinBet, Math.floor(activeBalance * 0.1)),
+    Math.max(validMinBet, Math.floor(activeBalance * 0.25)),
+    Math.max(validMinBet, Math.floor(activeBalance * 0.5)),
+    Math.max(validMinBet, activeBalance)
   ].filter((amount, index, arr) => arr.indexOf(amount) === index); // Remove duplicates
 
   const validateAndSetAmount = (amount: number) => {
     setError('');
     
-    if (amount < minBet) {
-      setError(`Minimum bet is ${minBet} ${activeCurrency}`);
+    // Ensure minBet is a valid number
+    const validMinBet = isNaN(minBet) || minBet <= 0 ? 1 : minBet;
+    
+    if (amount < validMinBet) {
+      setError(`Minimum bet is ${validMinBet} ${activeCurrency}`);
       return false;
     }
     
@@ -90,9 +97,10 @@ export function FlexibleBetInput({
 
   const handleInputBlur = () => {
     const numValue = parseFloat(inputValue);
+    const validMinBet = isNaN(minBet) || minBet <= 0 ? 1 : minBet;
     if (isNaN(numValue) || numValue <= 0) {
-      setInputValue(minBet.toString());
-      onChange(minBet);
+      setInputValue(validMinBet.toString());
+      onChange(validMinBet);
     }
   };
 
@@ -133,7 +141,7 @@ export function FlexibleBetInput({
           variant="outline"
           size="sm"
           onClick={() => adjustAmount(-10)}
-          disabled={disabled || value <= minBet}
+          disabled={disabled || value <= validMinBet}
           className="h-10 w-10 flex-shrink-0"
         >
           <Minus className="w-4 h-4" />
@@ -146,7 +154,7 @@ export function FlexibleBetInput({
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             disabled={disabled}
-            min={minBet}
+            min={validMinBet}
             max={effectiveMaxBet}
             step="0.01"
             className={`text-center text-lg font-semibold h-10 ${error ? 'border-red-500' : ''}`}

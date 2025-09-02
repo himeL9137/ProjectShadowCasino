@@ -78,7 +78,8 @@ export default function HtmlGamePage() {
         return;
       }
       
-      setGame(foundGame);
+      const gameData = await foundGame.json();
+      setGame(gameData);
     } catch (error) {
       console.error('Error fetching game:', error);
       toast({

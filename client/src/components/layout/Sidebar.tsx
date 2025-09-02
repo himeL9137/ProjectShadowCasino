@@ -12,17 +12,57 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "@/providers/LanguageProvider";
+import { useState, useEffect } from "react";
 const projectShadowLogo = "/assets/new-logo.png";
+
+interface CustomGame {
+  id: number;
+  name: string;
+  type: string;
+  htmlContent: string;
+  winChance: number;
+  maxMultiplier: number;
+  minBet: string;
+  maxBet: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  createdBy: number;
+}
 
 export function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
   const { state, open, toggleSidebar } = useSidebar();
   const { t } = useTranslation();
+  const [customGames, setCustomGames] = useState<CustomGame[]>([]);
+  const [loadingGames, setLoadingGames] = useState(false);
   
   // Only allow specific admin users access to admin panel
   const isAdmin = user?.role === UserRole.ADMIN;
   const isAuthorizedAdmin = isAdmin && (user?.username === "shadowHimel" || user?.username === "shadowTalha" || user?.username === "shadowKaran" || user?.username === "Albab AJ");
+
+  // Fetch custom games
+  useEffect(() => {
+    const fetchCustomGames = async () => {
+      if (!user) return;
+      
+      try {
+        setLoadingGames(true);
+        const response = await fetch('/api/games/custom');
+        if (response.ok) {
+          const games = await response.json();
+          setCustomGames(games.filter((game: CustomGame) => game.isActive));
+        }
+      } catch (error) {
+        console.error('Error fetching custom games:', error);
+      } finally {
+        setLoadingGames(false);
+      }
+    };
+
+    fetchCustomGames();
+  }, [user]);
   const isRouteActive = (route: string) => {
     if (route === "/" && location === "/") return true;
     if (route !== "/" && location.startsWith(route)) return true;
@@ -164,6 +204,42 @@ export function Sidebar() {
                     </div>
                   </Link>
                 </>
+              )}
+
+              {/* Custom HTML Games */}
+              {customGames.length > 0 && (
+                <>
+                  <div className="text-xs text-gray-400 mb-2 px-2 mt-3 pl-10">CUSTOM GAMES</div>
+                  {customGames.slice(0, 5).map((game) => (
+                    <Link key={game.id} href={`/html-game/${game.id}`}>
+                      <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
+                        isRouteActive(`/html-game/${game.id}`)
+                          ? "bg-background-light text-primary"
+                          : "text-gray-300 hover:bg-background-light hover:text-primary"
+                      } transition-colors cursor-pointer`}>
+                        <span className="truncate">{game.name}</span>
+                        {game.type && (
+                          <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
+                            {game.type.toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                  {customGames.length > 5 && (
+                    <Link href="/games">
+                      <div className="flex items-center p-2 rounded-md mb-1 pl-10 text-gray-400 hover:bg-background-light hover:text-primary transition-colors cursor-pointer">
+                        <span className="text-sm">+{customGames.length - 5} more games</span>
+                      </div>
+                    </Link>
+                  )}
+                </>
+              )}
+
+              {loadingGames && (
+                <div className="flex items-center p-2 pl-10 text-gray-400">
+                  <span className="text-sm">Loading games...</span>
+                </div>
               )}
             </>
           )}

@@ -98,6 +98,21 @@ const MovingStarsBackground = React.memo(function MovingStarsBackground() {
   );
 });
 
+interface CustomGame {
+  id: number;
+  name: string;
+  type: string;
+  htmlContent: string;
+  winChance: number;
+  maxMultiplier: number;
+  minBet: string;
+  maxBet: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  createdBy: number;
+}
+
 const HomePage = React.memo(function HomePage() {
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -105,6 +120,8 @@ const HomePage = React.memo(function HomePage() {
   const [isLoadingWinners, setIsLoadingWinners] = useState(false);
   const [depositAmount, setDepositAmount] = useState<number>(100);
   const [isDepositing, setIsDepositing] = useState(false);
+  const [customGames, setCustomGames] = useState<CustomGame[]>([]);
+  const [loadingCustomGames, setLoadingCustomGames] = useState(false);
   const { toast } = useToast();
 
   // Memoized translation function to prevent object recreation on every render
@@ -233,6 +250,28 @@ const HomePage = React.memo(function HomePage() {
 
     fetchWinners();
   }, []);
+
+  // Load custom games data
+  useEffect(() => {
+    const fetchCustomGames = async () => {
+      if (!user) return;
+      
+      setLoadingCustomGames(true);
+      try {
+        const response = await fetch('/api/games/custom');
+        if (response.ok) {
+          const games = await response.json();
+          setCustomGames(games.filter((game: CustomGame) => game.isActive));
+        }
+      } catch (error) {
+        console.error('Error fetching custom games:', error);
+      } finally {
+        setLoadingCustomGames(false);
+      }
+    };
+
+    fetchCustomGames();
+  }, [user]);
 
   // Handle deposit
   const handleDeposit = async () => {
@@ -510,6 +549,95 @@ const HomePage = React.memo(function HomePage() {
               </div>
             </div>
           </div>
+
+          {/* Custom HTML Games Section */}
+          {user && customGames.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                Custom Games
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {customGames.slice(0, 8).map((game) => (
+                  <div key={game.id} className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
+                    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
+                      {/* Custom game pattern background */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="grid grid-cols-4 gap-1 h-full">
+                          {Array.from({ length: 16 }).map((_, i) => (
+                            <div 
+                              key={i}
+                              className="bg-primary rounded animate-pulse"
+                              style={{
+                                animationDelay: `${i * 100}ms`,
+                                animationDuration: `${2 + (i % 3)}s`
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* HTML Game visual */}
+                      <div className="relative z-10">
+                        <div className="text-6xl mb-2">🎮</div>
+                        <div className="flex justify-center space-x-1">
+                          <div className="w-3 h-3 bg-primary rounded-full animate-ping"></div>
+                          <div className="w-3 h-3 bg-secondary rounded-full animate-ping delay-100"></div>
+                          <div className="w-3 h-3 bg-accent rounded-full animate-ping delay-200"></div>
+                        </div>
+                      </div>
+                      
+                      <div className="absolute top-4 right-4 bg-primary/20 text-primary rounded-md px-2">
+                        <span className="text-sm font-medium">{game.type.toUpperCase()}</span>
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-lg font-bold truncate">{game.name}</h3>
+                      <p className="text-gray-400 text-sm mt-1 mb-3 line-clamp-2">
+                        {game.description || `Win chance: ${game.winChance}% • Max multiplier: ${game.maxMultiplier}x`}
+                      </p>
+                      <Link href={`/html-game/${game.id}`}>
+                        <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
+                          Play Now
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Show more games link */}
+              {customGames.length > 8 && (
+                <div className="text-center mt-6">
+                  <Link href="/games">
+                    <button className="px-6 py-2 border border-primary text-primary rounded-md hover:bg-primary/10 transition-colors">
+                      View {customGames.length - 8} More Custom Games
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Show loading state */}
+          {user && loadingCustomGames && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                Custom Games
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-card rounded-lg shadow-lg overflow-hidden animate-pulse">
+                    <div className="bg-gray-700 aspect-[4/3]"></div>
+                    <div className="p-5">
+                      <div className="h-5 bg-gray-700 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-700 rounded mb-3 w-3/4"></div>
+                      <div className="h-8 bg-gray-700 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           
 
