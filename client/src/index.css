@@ -39,6 +39,33 @@ body {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
+/* Dialog and Modal improvements for better scroll behavior */
+.dialog-content-container {
+  position: fixed !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+  touch-action: none !important; /* Prevent pull-to-refresh on mobile */
+}
+
+.dialog-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+
+/* Prevent dialog close on scroll */
+[data-radix-dialog-content] {
+  touch-action: none !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Improve scrolling inside dialogs */
+.dialog-scroll-area {
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
 /* Mobile responsive utilities */
 @media (max-width: 640px) {
   .responsive-padding {
@@ -60,6 +87,13 @@ body {
   
   .mobile-grid-1 {
     grid-template-columns: 1fr !important;
+  }
+  
+  /* Better mobile dialog behavior */
+  [data-radix-dialog-content] {
+    max-height: 95vh !important;
+    margin: 2.5vh auto !important;
+    touch-action: pan-y !important;
   }
 }
 

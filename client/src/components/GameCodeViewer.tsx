@@ -48,7 +48,7 @@ export function GameCodeViewer({ open, onOpenChange, game, onSave }: GameCodeVie
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" preventOutsideClose={true}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Code className="h-5 w-5" />

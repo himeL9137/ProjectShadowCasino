@@ -239,7 +239,10 @@ export function ImprovedGameManagement({ onRefresh }: ImprovedGameManagementProp
               Install New Game
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogContent 
+            className="max-w-5xl max-h-[90vh] overflow-y-auto"
+            preventOutsideClose={true}
+          >
             <DialogHeader>
               <DialogTitle>Install New Game</DialogTitle>
             </DialogHeader>
@@ -510,7 +513,10 @@ export function ImprovedGameManagement({ onRefresh }: ImprovedGameManagementProp
 
       {/* Game Details Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent 
+          className="max-w-4xl max-h-[90vh] overflow-y-auto"
+          preventOutsideClose={true}
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Gamepad2 className="h-5 w-5" />

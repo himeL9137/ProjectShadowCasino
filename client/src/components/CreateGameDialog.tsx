@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" preventOutsideClose={true}>
         <DialogHeader>
           <DialogTitle>Create New HTML Game</DialogTitle>
           <DialogDescription>
