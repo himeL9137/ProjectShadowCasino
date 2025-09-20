@@ -31,6 +31,9 @@ interface GameResult {
   gameData: {
     slotIndex: number;
     ballPath: number[];
+    payout: number;
+    profit: number;
+    betAmount: number;
   };
 }
 
@@ -57,6 +60,9 @@ export function StakePlinko() {
   const wallsRef = useRef<Matter.Body[]>([]);
   const slotsRef = useRef<Matter.Body[]>([]);
   const animationRef = useRef<number | null>(null);
+
+  // Ref to store latest processBallResult function to prevent event listener staleness
+  const processBallResultRef = useRef<(ballId: number, slotIndex: number) => Promise<void>>();
 
   // Exact 16-slot multiplier system as specified
   const getMultipliers = useCallback(() => {
@@ -230,7 +236,7 @@ export function StakePlinko() {
     // Add collision detection
     Matter.Events.on(engine, 'collisionStart', handleCollision);
 
-  }, [settings.rows, settings.risk, getMultipliers]);
+  }, [getMultipliers]);
 
   // Get slot color based on multiplier
   const getSlotColor = (multiplier: number): string => {
@@ -241,36 +247,8 @@ export function StakePlinko() {
     return '#6b7280'; // Gray for low
   };
 
-  // Handle ball collision with slots
-  const handleCollision = useCallback((event: Matter.IEventCollision<Matter.Engine>) => {
-    event.pairs.forEach((pair) => {
-      const { bodyA, bodyB } = pair;
-      
-      // Check if collision is between ball and slot
-      const ball = bodyA.label.startsWith('ball_') ? bodyA : 
-                   bodyB.label.startsWith('ball_') ? bodyB : null;
-      const slot = bodyA.label.startsWith('slot_') ? bodyA :
-                   bodyB.label.startsWith('slot_') ? bodyB : null;
-
-      if (ball && slot) {
-        const ballId = parseInt(ball.label.split('_')[1]);
-        const [, slotIndex, multiplier] = slot.label.split('_');
-        
-        // Process ball completion
-        processBallResult(ballId, parseInt(slotIndex), parseFloat(multiplier));
-        
-        // Remove ball from world
-        setTimeout(() => {
-          if (engineRef.current) {
-            Matter.World.remove(engineRef.current.world, ball);
-          }
-        }, 100);
-      }
-    });
-  }, []);
-
   // Process ball result with guaranteed correct calculation
-  const processBallResult = async (ballId: number, slotIndex: number) => {
+  const processBallResult = useCallback(async (ballId: number, slotIndex: number) => {
     try {
       // Find the ball to get its result data
       const ball = activeBalls.find(b => b.id === ballId);
@@ -337,7 +315,42 @@ export function StakePlinko() {
     } catch (error) {
       console.error('Error processing ball result:', error);
     }
-  };
+  }, [activeBalls, betAmount, calculatePayout, user, toast, currencySymbol, refreshUser]);
+
+  // Update the ref whenever processBallResult changes to prevent stale closures
+  useEffect(() => {
+    processBallResultRef.current = processBallResult;
+  }, [processBallResult]);
+
+  // Handle ball collision with slots - using ref to prevent stale closures
+  const handleCollision = useCallback((event: Matter.IEventCollision<Matter.Engine>) => {
+    event.pairs.forEach((pair) => {
+      const { bodyA, bodyB } = pair;
+      
+      // Check if collision is between ball and slot
+      const ball = bodyA.label.startsWith('ball_') ? bodyA : 
+                   bodyB.label.startsWith('ball_') ? bodyB : null;
+      const slot = bodyA.label.startsWith('slot_') ? bodyA :
+                   bodyB.label.startsWith('slot_') ? bodyB : null;
+
+      if (ball && slot) {
+        const ballId = parseInt(ball.label.split('_')[1]);
+        const [, slotIndex] = slot.label.split('_');
+        
+        // Use the ref to get the latest processBallResult function
+        if (processBallResultRef.current) {
+          processBallResultRef.current(ballId, parseInt(slotIndex));
+        }
+        
+        // Remove ball from world
+        setTimeout(() => {
+          if (engineRef.current) {
+            Matter.World.remove(engineRef.current.world, ball);
+          }
+        }, 100);
+      }
+    });
+  }, []); // Empty dependency array since we use ref
 
   // Drop a ball
   const dropBall = useCallback(async () => {
@@ -359,13 +372,13 @@ export function StakePlinko() {
       setBallCounter(ballId);
 
       // Use client-side biased random selection instead of server
-      const multipliers = getMultipliers();
+      const localMultipliers = getMultipliers();
       const weights = getSlotWeights();
       const targetSlot = getWeightedRandomSlot(weights);
-      const multiplier = multipliers[targetSlot];
+      const multiplier = localMultipliers[targetSlot];
 
-      // Make API call with predetermined result
-      const gameResult = await PlinkoMasterService.playGame({
+      // Make API call to process the bet
+      await PlinkoMasterService.playGame({
         gameType: "PLINKO_MASTER",
         betAmount: betValue,
         currency: currentCurrency,
@@ -440,14 +453,14 @@ export function StakePlinko() {
 
     try {
       setIsPlaying(true);
-      const multipliers = getMultipliers();
+      const localMultipliers = getMultipliers();
       const weights = getSlotWeights();
 
       for (let i = 0; i < count; i++) {
         setTimeout(async () => {
           const ballId = ballCounter + i + 1;
           const targetSlot = getWeightedRandomSlot(weights);
-          const multiplier = multipliers[targetSlot];
+          const multiplier = localMultipliers[targetSlot];
 
           // Create ball
           const canvas = canvasRef.current;
