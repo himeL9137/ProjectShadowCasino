@@ -21,6 +21,7 @@ interface Ball {
   targetSlot: number;
   multiplier: number;
   isComplete: boolean;
+  antiStuckIntervalId?: NodeJS.Timeout;
 }
 
 interface GameResult {
@@ -60,6 +61,7 @@ export function StakePlinko() {
   const wallsRef = useRef<Matter.Body[]>([]);
   const slotsRef = useRef<Matter.Body[]>([]);
   const animationRef = useRef<number | null>(null);
+  const ballIntervalsRef = useRef<Map<number, NodeJS.Timeout>>(new Map());
 
   // Ref to store latest processBallResult function to prevent event listener staleness
   const processBallResultRef = useRef<(ballId: number, slotIndex: number) => Promise<void>>();
@@ -119,10 +121,17 @@ export function StakePlinko() {
     const width = canvas.width = 800;
     const height = canvas.height = 600;
 
-    // Create engine
+    // Create engine with authentic stake.com physics
     const engine = Matter.Engine.create();
-    engine.world.gravity.y = 0.8;
+    engine.world.gravity.y = 1.0;  // Stronger gravity for more realistic fall
     engine.world.gravity.scale = 0.001;
+    
+    // Set engine timing for smoother physics
+    engine.timing.timeScale = 1.0;
+    
+    // Enable collision detection improvements
+    engine.detector = Matter.Detector.create();
+    
     engineRef.current = engine;
 
     // Create renderer
@@ -165,31 +174,46 @@ export function StakePlinko() {
     wallsRef.current = [leftWall, rightWall, bottomWall];
     Matter.World.add(engine.world, wallsRef.current);
 
-    // Create pins in proper Plinko pattern (16 rows for 16 slots)
-    const pinRows = 16;
-    const pinSpacing = Math.min(40, width / (pinRows + 2));
-    const startY = 120;
+    // Create pins in authentic Plinko triangular pattern
+    const pinRows = settings.rows; // Use dynamic rows from settings
+    const multipliers = getMultipliers();
+    const numSlots = multipliers.length;
+    
+    // Calculate spacing to perfectly align with slots
+    // For 16 slots, we need the final row to have 15 pins (creating 16 gaps)
+    const gameAreaWidth = Math.min(width * 0.85, 720); // Consistent game area
+    const slotWidth = gameAreaWidth / numSlots;
+    
+    // Pin spacing should create exact alignment with slots
+    // Final row needs (numSlots - 1) pins to create numSlots gaps
+    const finalRowPins = numSlots - 1; // For 16 slots, final row has 15 pins
+    const pinSpacing = gameAreaWidth / finalRowPins;
+    const startY = 100;
+    const verticalSpacing = 35; // Consistent vertical spacing
     const pins: Matter.Body[] = [];
 
     for (let row = 0; row < pinRows; row++) {
-      const pinsInRow = row + 3;
+      // Calculate pins in this row: start with 3, increase by 1 each row
+      // But ensure final row has exactly (numSlots - 1) pins
+      const pinsInRow = Math.min(row + 3, finalRowPins);
       const rowWidth = (pinsInRow - 1) * pinSpacing;
       const startX = (width - rowWidth) / 2;
-      const y = startY + row * (pinSpacing * 0.75);
+      const y = startY + row * verticalSpacing;
 
       for (let col = 0; col < pinsInRow; col++) {
         const x = startX + col * pinSpacing;
         
-        const pin = Matter.Bodies.circle(x, y, 4, {
+        // Create authentic plinko pins with better physics
+        const pin = Matter.Bodies.circle(x, y, 5, {
           isStatic: true,
           render: {
-            fillStyle: '#fbbf24',
-            strokeStyle: '#f59e0b',
-            lineWidth: 2
+            fillStyle: '#ffd700',  // Golden color like stake.com
+            strokeStyle: '#ffa500',
+            lineWidth: 1
           },
-          restitution: 0.7,
-          friction: 0.01,
-          frictionStatic: 0.01
+          restitution: 0.8,      // Higher bounce for better pin interaction
+          friction: 0.005,       // Very low friction for smoother bounces
+          frictionStatic: 0.005
         });
         
         pins.push(pin);
@@ -199,28 +223,43 @@ export function StakePlinko() {
     pinsRef.current = pins;
     Matter.World.add(engine.world, pins);
 
-    // Create collection slots
-    const multipliers = getMultipliers();
-    const slotWidth = 45;
-    const slotsY = height - 60;
-    const totalSlotsWidth = multipliers.length * slotWidth;
+    // Create collection slots aligned with pin pyramid
+    const slotsY = height - 50;
+    const totalSlotsWidth = numSlots * slotWidth;
     const slotsStartX = (width - totalSlotsWidth) / 2;
 
     const slots: Matter.Body[] = [];
     multipliers.forEach((multiplier, index) => {
       const x = slotsStartX + index * slotWidth + slotWidth / 2;
       
-      // Create invisible sensor for collision detection
-      const slot = Matter.Bodies.rectangle(x, slotsY, slotWidth - 2, 40, {
+      // Create collection slot with better collision detection
+      const slot = Matter.Bodies.rectangle(x, slotsY, slotWidth - 1, 35, {
         isStatic: true,
         isSensor: true,
         render: {
           fillStyle: getSlotColor(multiplier),
-          strokeStyle: '#374151',
+          strokeStyle: '#2d3748',
           lineWidth: 1
         },
         label: `slot_${index}_${multiplier}`
       });
+      
+      // Add slot dividers for visual clarity
+      if (index < numSlots - 1) {
+        const divider = Matter.Bodies.rectangle(
+          x + slotWidth / 2, 
+          slotsY - 10, 
+          2, 
+          55, 
+          {
+            isStatic: true,
+            render: {
+              fillStyle: '#4a5568',
+            }
+          }
+        );
+        slots.push(divider);
+      }
       
       slots.push(slot);
     });
@@ -232,8 +271,19 @@ export function StakePlinko() {
     Matter.Engine.run(engine);
     Matter.Render.run(render);
 
-    // Add collision detection
+    // Add collision detection with better handling
     Matter.Events.on(engine, 'collisionStart', handleCollision);
+    
+    // Add physics update event for smooth animation
+    Matter.Events.on(engine, 'afterUpdate', () => {
+      // This ensures smooth rendering updates
+      if (renderRef.current) {
+        Matter.Render.lookAt(renderRef.current, {
+          min: { x: 0, y: 0 },
+          max: { x: width, y: height }
+        });
+      }
+    });
 
   }, [getMultipliers]);
 
@@ -254,6 +304,13 @@ export function StakePlinko() {
       // Find the ball to get its result data
       const ball = activeBalls.find(b => b.id === ballId);
       if (!ball) return;
+
+      // Clear anti-stuck interval for this ball
+      const intervalId = ballIntervalsRef.current.get(ballId);
+      if (intervalId) {
+        clearInterval(intervalId);
+        ballIntervalsRef.current.delete(ballId);
+      }
 
       const betValue = parseFloat(betAmount);
       
@@ -388,20 +445,21 @@ export function StakePlinko() {
         rows: settings.rows
       });
 
-      // Create ball at random drop position
+      // Create ball with authentic stake.com physics
       const canvas = canvasRef.current;
-      const dropWidth = 100;
+      // More focused drop area for consistent gameplay
+      const dropWidth = 60;
       const dropX = (canvas.width - dropWidth) / 2 + Math.random() * dropWidth;
       
-      const ball = Matter.Bodies.circle(dropX, 50, 8, {
-        restitution: 0.6,
-        friction: 0.001,
-        frictionAir: 0.005,
-        density: 0.8,
+      const ball = Matter.Bodies.circle(dropX, 30, 6, {
+        restitution: 0.75,      // Optimal bounce for realistic pin interaction
+        friction: 0.002,        // Slight friction for natural movement
+        frictionAir: 0.01,      // Air resistance for realistic trajectory
+        density: 1.0,           // Proper weight for authentic ball physics
         render: {
           fillStyle: '#ffffff',
-          strokeStyle: '#3b82f6',
-          lineWidth: 3
+          strokeStyle: '#2563eb',
+          lineWidth: 2
         },
         label: `ball_${ballId}`
       });
@@ -420,13 +478,57 @@ export function StakePlinko() {
 
       setActiveBalls(prev => [...prev, newBall]);
 
-      // Auto-remove ball after timeout (safety measure)
-      setTimeout(() => {
+      // Auto-remove ball after timeout (safety measure) with proper cleanup
+      const ballTimeoutId = setTimeout(() => {
         if (engineRef.current) {
           Matter.World.remove(engineRef.current.world, ball);
           setActiveBalls(prev => prev.filter(b => b.id !== ballId));
+          
+          // Clear anti-stuck interval when ball is removed
+          const intervalId = ballIntervalsRef.current.get(ballId);
+          if (intervalId) {
+            clearInterval(intervalId);
+            ballIntervalsRef.current.delete(ballId);
+          }
         }
-      }, 10000);
+      }, 8000);
+      
+      // Anti-stuck mechanism: detect if ball stops moving for too long
+      let lastPosition = { x: ball.position.x, y: ball.position.y };
+      let stuckCounter = 0;
+      
+      const antiStuckInterval = setInterval(() => {
+        if (!engineRef.current || !ball.world) {
+          clearInterval(antiStuckInterval);
+          ballIntervalsRef.current.delete(ballId);
+          return;
+        }
+        
+        const currentPosition = ball.position;
+        const movement = Math.abs(currentPosition.x - lastPosition.x) + Math.abs(currentPosition.y - lastPosition.y);
+        
+        if (movement < 0.5) { // Ball barely moved
+          stuckCounter++;
+          if (stuckCounter > 30) { // Stuck for 3 seconds
+            // Give ball a small impulse to unstick it
+            Matter.Body.applyForce(ball, ball.position, { 
+              x: (Math.random() - 0.5) * 0.01, 
+              y: 0.005 
+            });
+            stuckCounter = 0;
+          }
+        } else {
+          stuckCounter = 0;
+        }
+        
+        lastPosition = { x: currentPosition.x, y: currentPosition.y };
+      }, 100);
+      
+      // Store interval ID for proper cleanup
+      ballIntervalsRef.current.set(ballId, antiStuckInterval);
+      
+      // Update ball object with interval ID
+      newBall.antiStuckIntervalId = antiStuckInterval;
 
     } catch (error) {
       console.error('Error dropping ball:', error);
@@ -469,18 +571,19 @@ export function StakePlinko() {
           const canvas = canvasRef.current;
           if (!canvas) return;
           
-          const dropWidth = 100;
+          // Consistent drop physics for multiple balls
+          const dropWidth = 60;
           const dropX = (canvas.width - dropWidth) / 2 + Math.random() * dropWidth;
           
-          const ball = Matter.Bodies.circle(dropX, 50, 8, {
-            restitution: 0.6,
-            friction: 0.001,
-            frictionAir: 0.005,
-            density: 0.8,
+          const ball = Matter.Bodies.circle(dropX, 30, 6, {
+            restitution: 0.75,      // Optimal bounce for realistic pin interaction
+            friction: 0.002,        // Slight friction for natural movement
+            frictionAir: 0.01,      // Air resistance for realistic trajectory
+            density: 1.0,           // Proper weight for authentic ball physics
             render: {
               fillStyle: '#ffffff',
-              strokeStyle: '#3b82f6',
-              lineWidth: 3
+              strokeStyle: '#2563eb',
+              lineWidth: 2
             },
             label: `ball_${ballId}`
           });
@@ -499,6 +602,56 @@ export function StakePlinko() {
           };
 
           setActiveBalls(prev => [...prev, newBall]);
+          
+          // Add anti-stuck mechanism for multiple balls too
+          let lastPosition = { x: ball.position.x, y: ball.position.y };
+          let stuckCounter = 0;
+          
+          const antiStuckInterval = setInterval(() => {
+            if (!engineRef.current || !ball.world) {
+              clearInterval(antiStuckInterval);
+              ballIntervalsRef.current.delete(ballId);
+              return;
+            }
+            
+            const currentPosition = ball.position;
+            const movement = Math.abs(currentPosition.x - lastPosition.x) + Math.abs(currentPosition.y - lastPosition.y);
+            
+            if (movement < 0.5) { // Ball barely moved
+              stuckCounter++;
+              if (stuckCounter > 30) { // Stuck for 3 seconds
+                // Give ball a small impulse to unstick it
+                Matter.Body.applyForce(ball, ball.position, { 
+                  x: (Math.random() - 0.5) * 0.01, 
+                  y: 0.005 
+                });
+                stuckCounter = 0;
+              }
+            } else {
+              stuckCounter = 0;
+            }
+            
+            lastPosition = { x: currentPosition.x, y: currentPosition.y };
+          }, 100);
+          
+          // Store interval ID for proper cleanup
+          ballIntervalsRef.current.set(ballId, antiStuckInterval);
+          newBall.antiStuckIntervalId = antiStuckInterval;
+          
+          // Auto-remove ball after timeout with proper cleanup
+          setTimeout(() => {
+            if (engineRef.current) {
+              Matter.World.remove(engineRef.current.world, ball);
+              setActiveBalls(prev => prev.filter(b => b.id !== ballId));
+              
+              // Clear anti-stuck interval when ball is removed
+              const intervalId = ballIntervalsRef.current.get(ballId);
+              if (intervalId) {
+                clearInterval(intervalId);
+                ballIntervalsRef.current.delete(ballId);
+              }
+            }
+          }, 8000);
         }, i * 200); // Stagger ball drops
       }
 
@@ -520,7 +673,13 @@ export function StakePlinko() {
     initializePhysics();
     
     return () => {
-      // Cleanup
+      // Cleanup all intervals
+      ballIntervalsRef.current.forEach((intervalId) => {
+        clearInterval(intervalId);
+      });
+      ballIntervalsRef.current.clear();
+      
+      // Cleanup physics
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
