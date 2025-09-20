@@ -3,6 +3,8 @@ export interface PlinkoMasterOptions {
   forceWin?: boolean;
   forceLose?: boolean;
   numBalls?: number;
+  risk?: 'low' | 'medium' | 'high';
+  rows?: number;
 }
 
 export interface PlinkoMasterResult {
@@ -13,11 +15,18 @@ export interface PlinkoMasterResult {
   result: "WIN" | "LOSS" | "BREAK-EVEN";
   ballPath: number[];
   isWin: boolean;
+  risk: 'low' | 'medium' | 'high';
+  rows: number;
 }
 
 export class PlinkoMasterService {
-  // Fixed 16-slot multiplier array matching exact specification
-  private static readonly MULTIPLIERS = [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
+  // Stake.com authentic multiplier patterns for 16 rows
+  private static readonly MULTIPLIER_PATTERNS = {
+    low: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16],           // Low Risk: Max 16x
+    medium: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.5, 1, 1.5, 3, 5, 10, 41, 110],          // Medium Risk: Max 110x (user requested)
+    high: [1000, 130, 26, 8, 3, 1.5, 1, 0.2, 0.2, 1, 1.5, 3, 8, 26, 130, 1000]         // High Risk: Max 1000x
+  };
+  
   private static readonly ROWS = 16;
 
   /**
@@ -54,21 +63,33 @@ export class PlinkoMasterService {
       position += direction === 1 ? 0.5 : -0.5;
     }
     
-    // Round to nearest slot and clamp to valid range
+    // Round to nearest slot and clamp to valid range (always 16 slots)
     const slotIndex = Math.round(position);
-    return Math.max(0, Math.min(slotIndex, this.MULTIPLIERS.length - 1));
+    return Math.max(0, Math.min(slotIndex, 15)); // 16 slots = indices 0-15
+  }
+
+  /**
+   * Get multiplier array for a specific risk level
+   * @param risk Risk level
+   * @returns Array of multipliers
+   */
+  static getMultipliers(risk: 'low' | 'medium' | 'high' = 'medium'): number[] {
+    return [...this.MULTIPLIER_PATTERNS[risk]];
   }
 
   /**
    * Apply rigging to force specific outcomes
    * @param forceWin Force a winning outcome
    * @param forceLose Force a losing outcome
+   * @param risk Risk level to determine multiplier pattern
    * @returns Forced slot index or null if no rigging
    */
-  static applyRigging(forceWin?: boolean, forceLose?: boolean): number | null {
+  static applyRigging(forceWin?: boolean, forceLose?: boolean, risk: 'low' | 'medium' | 'high' = 'medium'): number | null {
+    const multipliers = this.getMultipliers(risk);
+    
     if (forceWin) {
       // Get all winning slots (multiplier >= 1.0)
-      const winningSlots = this.MULTIPLIERS
+      const winningSlots = multipliers
         .map((mult, idx) => ({ mult, idx }))
         .filter(slot => slot.mult >= 1.0)
         .map(slot => slot.idx);
@@ -78,7 +99,7 @@ export class PlinkoMasterService {
     
     if (forceLose) {
       // Get all losing slots (multiplier < 1.0)
-      const losingSlots = this.MULTIPLIERS
+      const losingSlots = multipliers
         .map((mult, idx) => ({ mult, idx }))
         .filter(slot => slot.mult < 1.0)
         .map(slot => slot.idx);
@@ -92,29 +113,23 @@ export class PlinkoMasterService {
   /**
    * Play a single Plinko Master game
    * @param betAmount Bet amount in currency
-   * @param options Game options (rigging, etc.)
+   * @param options Game options (rigging, risk level, etc.)
    * @returns Game result with all calculations
    */
   static playGame(betAmount: number, options: PlinkoMasterOptions = {}): PlinkoMasterResult {
+    const risk = options.risk || 'medium';
+    const rows = options.rows || 16;
+    const multipliers = this.getMultipliers(risk);
+    
     let slotIndex: number;
     let ballPath: number[];
     
     // Check for rigging first
     if (options.forceWin) {
-      // Force win - pick a slot with multiplier >= 1.0
-      const winningSlots = this.MULTIPLIERS
-        .map((mult, idx) => ({ mult, idx }))
-        .filter(slot => slot.mult >= 1.0)
-        .map(slot => slot.idx);
-      slotIndex = winningSlots[Math.floor(Math.random() * winningSlots.length)];
+      slotIndex = this.applyRigging(true, false, risk) || 0;
       ballPath = this.generatePathToSlot(slotIndex);
     } else if (options.forceLose) {
-      // Force lose - pick a slot with multiplier < 1.0
-      const losingSlots = this.MULTIPLIERS
-        .map((mult, idx) => ({ mult, idx }))
-        .filter(slot => slot.mult < 1.0)
-        .map(slot => slot.idx);
-      slotIndex = losingSlots[Math.floor(Math.random() * losingSlots.length)];
+      slotIndex = this.applyRigging(false, true, risk) || 0;
       ballPath = this.generatePathToSlot(slotIndex);
     } else {
       // Simulate realistic ball drop through pins
@@ -123,7 +138,7 @@ export class PlinkoMasterService {
     }
     
     // Get multiplier for the slot
-    const multiplier = this.MULTIPLIERS[slotIndex];
+    const multiplier = multipliers[slotIndex];
     
     // Calculate payout and profit with 2 decimal precision
     const payout = parseFloat((betAmount * multiplier).toFixed(2));
@@ -146,7 +161,9 @@ export class PlinkoMasterService {
       profit,
       result,
       ballPath,
-      isWin: result === "WIN"
+      isWin: result === "WIN",
+      risk,
+      rows
     };
   }
 
@@ -195,20 +212,23 @@ export class PlinkoMasterService {
   /**
    * Get multiplier for a specific slot
    * @param slotIndex Slot index (0-15)
+   * @param risk Risk level
    * @returns Multiplier value
    */
-  static getMultiplier(slotIndex: number): number {
-    if (slotIndex < 0 || slotIndex >= this.MULTIPLIERS.length) {
+  static getMultiplier(slotIndex: number, risk: 'low' | 'medium' | 'high' = 'medium'): number {
+    const multipliers = this.getMultipliers(risk);
+    if (slotIndex < 0 || slotIndex >= multipliers.length) {
       throw new Error(`Invalid slot index: ${slotIndex}`);
     }
-    return this.MULTIPLIERS[slotIndex];
+    return multipliers[slotIndex];
   }
 
   /**
-   * Get all multipliers
+   * Get all multipliers for a specific risk level
+   * @param risk Risk level
    * @returns Array of all multipliers
    */
-  static getAllMultipliers(): number[] {
-    return [...this.MULTIPLIERS];
+  static getAllMultipliers(risk: 'low' | 'medium' | 'high' = 'medium'): number[] {
+    return this.getMultipliers(risk);
   }
 }

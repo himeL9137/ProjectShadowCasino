@@ -270,6 +270,9 @@ export interface GamePlay {
   rollOver?: boolean;
   clientSeed?: string;
   nonce?: number;
+  // Plinko Master specific properties
+  risk?: 'low' | 'medium' | 'high';
+  rows?: number;
 }
 
 // Schema for game play

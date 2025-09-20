@@ -104,7 +104,10 @@ export class GameController {
         result = GameController.processPlinkoGame(isWin, betAmount);
         break;
       case 'PLINKO_MASTER':
-        result = GameController.processPlinkoMasterGame(isWin, betAmount);
+        result = GameController.processPlinkoMasterGame(isWin, betAmount, {
+          risk: gamePlay.risk,
+          rows: gamePlay.rows
+        });
         break;
       case 'MINES':
         result = GameController.processMinesGame(isWin, betAmount, {
@@ -340,11 +343,13 @@ export class GameController {
   }
 
   // Process plinko master game with 16 slots and variable multipliers
-  private static processPlinkoMasterGame(isWin: boolean, betAmount: number): GameResult {
+  private static processPlinkoMasterGame(isWin: boolean, betAmount: number, options?: { risk?: 'low' | 'medium' | 'high'; rows?: number }): GameResult {
     // Use the proper PlinkoMasterService with rigging options
     const gameResult = PlinkoMasterService.playGame(betAmount, {
       forceWin: isWin,
-      forceLose: !isWin
+      forceLose: !isWin,
+      risk: options?.risk || 'medium',
+      rows: options?.rows || 16
     });
 
     return {

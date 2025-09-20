@@ -8,6 +8,8 @@ export interface PlinkoMasterGameRequest {
   forceWin?: boolean;
   forceLose?: boolean;
   numBalls?: number;
+  risk?: 'low' | 'medium' | 'high';
+  rows?: number;
 }
 
 export interface PlinkoMasterGameResult {
@@ -96,11 +98,17 @@ export class PlinkoMasterService {
   }
 
   /**
-   * Get multiplier array (same as backend and HTML logic)
-   * @returns Array of multipliers
+   * Get multiplier array for specific risk level (same as backend logic)
+   * @param risk Risk level
+   * @returns Array of 16 multipliers
    */
-  static getMultipliers(): number[] {
-    return [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8];
+  static getMultipliers(risk: 'low' | 'medium' | 'high' = 'medium'): number[] {
+    const patterns = {
+      low: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16],           // Low Risk: Max 16x
+      medium: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.5, 1, 1.5, 3, 5, 10, 41, 110],          // Medium Risk: Max 110x 
+      high: [1000, 130, 26, 8, 3, 1.5, 1, 0.2, 0.2, 1, 1.5, 3, 8, 26, 130, 1000]         // High Risk: Max 1000x
+    };
+    return [...patterns[risk]];
   }
 
   /**
@@ -109,10 +117,10 @@ export class PlinkoMasterService {
    * @returns CSS color class
    */
   static getMultiplierColor(multiplier: number): string {
-    if (multiplier >= 2.0) return "text-red-400";
-    if (multiplier >= 1.4) return "text-orange-400";
-    if (multiplier >= 1.0) return "text-green-400";
-    if (multiplier >= 0.6) return "text-yellow-400";
-    return "text-gray-400";
+    if (multiplier >= 100) return "text-red-500";      // 100x+ = Red (very high)
+    if (multiplier >= 10) return "text-orange-500";    // 10x-99x = Orange (high)
+    if (multiplier >= 2) return "text-yellow-500";     // 2x-9x = Yellow (medium-high)
+    if (multiplier >= 1) return "text-green-400";      // 1x+ = Green (positive)
+    return "text-gray-400";                             // <1x = Gray (loss)
   }
 }

@@ -64,11 +64,10 @@ export function StakePlinko() {
   // Ref to store latest processBallResult function to prevent event listener staleness
   const processBallResultRef = useRef<(ballId: number, slotIndex: number) => Promise<void>>();
 
-  // Exact 16-slot multiplier system as specified
+  // Exact 16-slot multiplier system using current risk level
   const getMultipliers = useCallback(() => {
-    // Fixed 16-slot system: [2.0x, 1.8x, 1.6x, 1.4x, 1.0x, 0.8x, 0.6x, 0.4x, 0.4x, 0.6x, 0.8x, 1.0x, 1.4x, 1.6x, 1.8x, 2.0x]
-    return [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
-  }, []);
+    return PlinkoMasterService.getMultipliers(settings.risk);
+  }, [settings.risk]);
 
   // Probability weights (higher = more likely to land) - 16 slots
   const getSlotWeights = useCallback(() => {
@@ -238,13 +237,15 @@ export function StakePlinko() {
 
   }, [getMultipliers]);
 
-  // Get slot color based on multiplier
+  // Get slot color based on multiplier - using service logic for consistency
   const getSlotColor = (multiplier: number): string => {
-    if (multiplier >= 100) return '#dc2626'; // Red for very high
-    if (multiplier >= 10) return '#ea580c'; // Orange for high
-    if (multiplier >= 2) return '#ca8a04'; // Yellow for medium-high
-    if (multiplier >= 1) return '#16a34a'; // Green for positive
-    return '#6b7280'; // Gray for low
+    const colorClass = PlinkoMasterService.getMultiplierColor(multiplier);
+    // Convert Tailwind classes to hex colors
+    if (colorClass === 'text-red-500') return '#ef4444';     // 100x+ = Red
+    if (colorClass === 'text-orange-500') return '#f97316';  // 10x-99x = Orange  
+    if (colorClass === 'text-yellow-500') return '#eab308';  // 2x-9x = Yellow
+    if (colorClass === 'text-green-400') return '#4ade80';   // 1x+ = Green
+    return '#9ca3af'; // Gray for loss
   };
 
   // Process ball result with guaranteed correct calculation
@@ -382,7 +383,9 @@ export function StakePlinko() {
         gameType: "PLINKO_MASTER",
         betAmount: betValue,
         currency: currentCurrency,
-        numBalls: 1
+        numBalls: 1,
+        risk: settings.risk,
+        rows: settings.rows
       });
 
       // Create ball at random drop position
