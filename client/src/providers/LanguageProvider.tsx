@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo, memo } from 'react';
 import { getStoredLanguage, setStoredLanguage, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, t as translateFunction } from '@/lib/i18n';
 
 interface LanguageContextType {
@@ -13,7 +13,7 @@ interface LanguageProviderProps {
   children: ReactNode;
 }
 
-export function LanguageProvider({ children }: LanguageProviderProps) {
+export const LanguageProvider = memo(function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<string>(DEFAULT_LANGUAGE);
   const [isRTL, setIsRTL] = useState<boolean>(false);
 
@@ -50,18 +50,19 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     updateRTL(newLanguage);
   };
 
-  const value: LanguageContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const value: LanguageContextType = useMemo(() => ({
     language,
     setLanguage,
     isRTL
-  };
+  }), [language, setLanguage, isRTL]);
 
   return (
     <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
-}
+});
 
 export function useLanguage(): LanguageContextType {
   const context = useContext(LanguageContext);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import { EnhancedLoadingScreen } from '@/components/enhanced-loading-screen';
 
 type LoadingContextType = {
@@ -24,18 +24,18 @@ if (typeof window !== 'undefined') {
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
-export function LoadingProvider({ children }: { children: ReactNode }) {
+export const LoadingProvider = React.memo(function LoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [duration, setDuration] = useState(4000);
 
-  const showLoading = (customDuration?: number) => {
+  const showLoading = useCallback((customDuration?: number) => {
     if (customDuration) setDuration(customDuration);
     setIsLoading(true);
-  };
+  }, []);
 
-  const hideLoading = () => {
+  const hideLoading = useCallback(() => {
     setIsLoading(false);
-  };
+  }, []);
 
   // Clean up event listeners
   useEffect(() => {
@@ -48,15 +48,22 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    showLoading,
+    hideLoading,
+    isLoading
+  }), [showLoading, hideLoading, isLoading]);
+
   return (
-    <LoadingContext.Provider value={{ showLoading, hideLoading, isLoading }}>
+    <LoadingContext.Provider value={contextValue}>
       {isLoading && hasUserInteracted && 
         <EnhancedLoadingScreen onLoadingComplete={hideLoading} duration={duration} />
       }
       {children}
     </LoadingContext.Provider>
   );
-}
+});
 
 export function useLoading() {
   const context = useContext(LoadingContext);

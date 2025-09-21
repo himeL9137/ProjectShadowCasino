@@ -2,7 +2,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { SocketProvider } from "./providers/SocketProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { initializeTheme } from "./lib/themes";
@@ -19,10 +18,8 @@ createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <LoadingProvider>
-        <SocketProvider>
-          <App />
-          <ToastContainer position="bottom-right" theme="dark" />
-        </SocketProvider>
+        <App />
+        <ToastContainer position="bottom-right" theme="dark" />
       </LoadingProvider>
     </QueryClientProvider>
   </Provider>

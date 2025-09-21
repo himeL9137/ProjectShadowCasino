@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState, useMemo, memo } from "react";
 import { getThemeById, initializeTheme, setActiveTheme, allThemes, themes, Theme } from "@/lib/themes";
 
 interface ThemeContextType {
@@ -10,7 +10,7 @@ interface ThemeContextType {
 
 export const ThemeContext = createContext<ThemeContextType | null>(null);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+export const ThemeProvider = memo(function ThemeProvider({ children }: { children: ReactNode }) {
   const [currentTheme, setCurrentTheme] = useState<Theme>(themes[0]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
@@ -160,16 +160,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setActiveTheme(themeId);
   };
   
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    currentTheme, 
+    setTheme,
+    availableThemes: allThemes,
+    isTransitioning
+  }), [currentTheme, setTheme, isTransitioning]);
+
   // Apply the theme class to the main wrapper for proper scoping
   return (
-    <ThemeContext.Provider 
-      value={{ 
-        currentTheme, 
-        setTheme,
-        availableThemes: allThemes,
-        isTransitioning
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       <div 
         className={`app-wrapper ${currentTheme.class} ${isTransitioning ? 'theme-transitioning' : ''}`}
         style={{
@@ -181,4 +182,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       </div>
     </ThemeContext.Provider>
   );
-}
+});

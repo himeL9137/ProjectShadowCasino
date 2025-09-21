@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, memo, ReactNode } from 'react';
 import { useDebug } from '@/hooks/use-debug';
 
 /**
  * Enhanced DebugProvider manages granular debug mode state and applies specific CSS classes
  * for different performance optimizations when debug mode is enabled
  */
-export function DebugProvider({ children }: { children: React.ReactNode }) {
+export const DebugProvider = memo(function DebugProvider({ children }: { children: ReactNode }) {
   const { debugMode, settings } = useDebug();
 
   useEffect(() => {
@@ -114,4 +114,4 @@ export function DebugProvider({ children }: { children: React.ReactNode }) {
   }, [debugMode, settings]);
 
   return <>{children}</>;
-}
+});

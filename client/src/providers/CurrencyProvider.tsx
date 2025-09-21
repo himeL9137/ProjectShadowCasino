@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef, memo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -37,7 +37,7 @@ interface CurrencyContextType {
 
 export const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-export const CurrencyProvider = React.memo(function CurrencyProvider({ children }: { children: ReactNode }) {
+export const CurrencyProvider = memo(function CurrencyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isConnected } = useWebSocket();
@@ -364,10 +364,11 @@ export const CurrencyProvider = React.memo(function CurrencyProvider({ children 
     }
   };
 
-  // List of available currencies for the dropdown
-  const availableCurrencies = Object.values(Currency);
+  // Memoize available currencies list to prevent recreation on every render
+  const availableCurrencies = useMemo(() => Object.values(Currency), []);
   
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     currency,
     balance,
     setCurrency: changeCurrency,
@@ -381,7 +382,19 @@ export const CurrencyProvider = React.memo(function CurrencyProvider({ children 
     isLoadingRates,
     getConversionRate,
     convertAmount
-  };
+  }), [
+    currency,
+    balance,
+    changeCurrency,
+    formattedBalance,
+    isChangingCurrency,
+    isBalanceRefreshing,
+    availableCurrencies,
+    exchangeRates,
+    isLoadingRates,
+    getConversionRate,
+    convertAmount
+  ]);
   
   return (
     <CurrencyContext.Provider value={value}>

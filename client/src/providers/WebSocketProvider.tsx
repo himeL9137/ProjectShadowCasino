@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode, useRef, useCallback, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useRef, useCallback, useMemo, memo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
 import { queryClient } from '@/lib/queryClient';
@@ -21,7 +21,7 @@ const RECONNECT_INTERVAL = 3000; // 3 seconds
 const CLIENT_PING_INTERVAL = 25000; // 25 seconds - slightly less than server heartbeat
 
 // Provider component
-export const WebSocketProvider = React.memo(function WebSocketProvider({ children }: { children: ReactNode }) {
+export const WebSocketProvider = memo(function WebSocketProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
