@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useTheme } from "@/hooks/use-theme";
 import { useCurrency } from "@/hooks/use-currency";
@@ -18,8 +19,9 @@ import { LogOut } from "lucide-react";
 
 export default function SettingsPage() {
   const { currentTheme, setTheme } = useTheme();
-  const { currentCurrency, setCurrency, currencySymbol } = useCurrency();
-  const { user, logoutMutation } = useAuth();
+  const { currency, setCurrency, getCurrencySymbol, availableCurrencies } = useCurrency();
+  const { user, logout, isLoading } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   return (
     <MainLayout>
@@ -77,11 +79,20 @@ export default function SettingsPage() {
                     <Button 
                       variant="destructive" 
                       className="flex items-center"
-                      onClick={() => logoutMutation.mutate()}
-                      disabled={logoutMutation.isPending}
+                      onClick={async () => {
+                        setIsLoggingOut(true);
+                        try {
+                          await logout();
+                        } catch (error) {
+                          console.error("Logout error:", error);
+                        } finally {
+                          setIsLoggingOut(false);
+                        }
+                      }}
+                      disabled={isLoggingOut}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
-                      {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                      {isLoggingOut ? "Logging out..." : "Logout"}
                     </Button>
                   </div>
                 </CardContent>
@@ -134,21 +145,18 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {Object.values(Currency).map((currency) => (
+                    {availableCurrencies.map((currencyOption) => (
                       <div 
-                        key={currency}
+                        key={currencyOption}
                         className={`bg-background-darker rounded-lg p-6 cursor-pointer text-center transition-all duration-200 ${
-                          currentCurrency === currency ? 'border-2 border-primary' : 'border-2 border-transparent hover:border-gray-700'
+                          currency === currencyOption ? 'border-2 border-primary' : 'border-2 border-transparent hover:border-gray-700'
                         }`}
-                        onClick={() => setCurrency(currency)}
+                        onClick={() => setCurrency(currencyOption)}
                       >
                         <div className="text-3xl mb-2">
-                          {currency === Currency.USD && "$"}
-                          {currency === Currency.BDT && "৳"}
-                          {currency === Currency.INR && "₹"}
-                          {currency === Currency.BTC && "₿"}
+                          {getCurrencySymbol(currencyOption)}
                         </div>
-                        <p className="text-white font-medium">{currency}</p>
+                        <p className="text-white font-medium">{currencyOption}</p>
                       </div>
                     ))}
                   </div>

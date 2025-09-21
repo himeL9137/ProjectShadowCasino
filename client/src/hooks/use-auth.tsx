@@ -8,6 +8,7 @@ type User = {
   id: number;
   username: string;
   email: string;
+  phone: string;
   balance: string;
   currency: string;
   role: string;
