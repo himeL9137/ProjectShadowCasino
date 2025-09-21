@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getAuthToken, setCookie, getCookie } from "./cookie-utils";
+import { apiLogger, authLogger } from "./debug-logger";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -42,7 +43,7 @@ export async function apiRequest(
     if (process.env.NODE_ENV === 'development') {
       const setCookieHeader = res.headers.get('Set-Cookie');
       if (!setCookieHeader) {
-        console.log('No Set-Cookie header in response');
+        apiLogger.debug('No Set-Cookie header in response');
       }
     }
 
@@ -56,7 +57,7 @@ export async function apiRequest(
         const responseData = await resClone.json();
         
         if (responseData && responseData.token) {
-          console.log('Received token in response, storing in multiple locations for redundancy');
+          authLogger.info('Received token in response, storing in multiple locations for redundancy');
           
           // Store in localStorage (primary)
           localStorage.setItem('authToken', responseData.token);
@@ -72,21 +73,21 @@ export async function apiRequest(
           // Verify cookie was set
           const cookieCheck = getCookie('jwt');
           if (cookieCheck) {
-            console.log('JWT cookie set successfully by client');
+            authLogger.debug('JWT cookie set successfully by client');
           } else {
-            console.warn('Failed to set JWT cookie on client side');
+            authLogger.warn('Failed to set JWT cookie on client side');
           }
           
-          console.log('Authentication information saved in multiple locations for redundancy');
+          authLogger.debug('Authentication information saved in multiple locations for redundancy');
         }
       } catch (e) {
-        console.warn('Could not extract token from response:', e);
+        authLogger.warn('Could not extract token from response:', e);
       }
     }
     
     return res;
   } catch (error) {
-    console.error(`API request to ${url} failed:`, error);
+    apiLogger.error(`API request to ${url} failed:`, error);
     throw error;
   }
 }
@@ -101,7 +102,7 @@ export async function adminApiCall<T>(
     // Use the unified token retrieval function
     const token = getAuthToken();
     
-    console.log(`Making admin API call to ${url} with token: ${token ? 'present' : 'missing'}`);
+    apiLogger.debug(`Making admin API call to ${url} with token: ${token ? 'present' : 'missing'}`);
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -111,9 +112,9 @@ export async function adminApiCall<T>(
     // Add authorization if token exists
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log(`Using auth token from getAuthToken(): ${token.substring(0, 10)}...`);
+      apiLogger.debug(`Using auth token from getAuthToken(): ${token.substring(0, 10)}...`);
     } else {
-      console.warn('No auth token found for admin API call');
+      apiLogger.warn('No auth token found for admin API call');
     }
 
     // Make the request with authentication
@@ -128,7 +129,7 @@ export async function adminApiCall<T>(
     if (!res.ok) {
       // Handle specific error codes
       if (res.status === 401) {
-        console.error('Authentication required for admin API call. Redirecting to login...');
+        apiLogger.error('Authentication required for admin API call. Redirecting to login...');
         // Clear any existing tokens as they're invalid
         localStorage.removeItem('authToken');
         localStorage.removeItem('jwt');
@@ -139,7 +140,7 @@ export async function adminApiCall<T>(
       }
       
       if (res.status === 403) {
-        console.error('Forbidden: Insufficient permissions for admin API call');
+        apiLogger.error('Forbidden: Insufficient permissions for admin API call');
         throw new Error('You do not have permission to access this resource.');
       }
       
@@ -154,7 +155,7 @@ export async function adminApiCall<T>(
         errorMessage = errorText || `Request failed with status ${res.status}`;
       }
       
-      console.error(`Admin API call failed for ${url}:`, errorMessage);
+      apiLogger.error(`Admin API call failed for ${url}:`, errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -166,7 +167,7 @@ export async function adminApiCall<T>(
     // Parse JSON response
     return await res.json();
   } catch (error) {
-    console.error(`Admin API call failed for ${url}:`, error);
+    apiLogger.error(`Admin API call failed for ${url}:`, error);
     throw error;
   }
 }
@@ -184,9 +185,9 @@ export const getQueryFn: <T>(options: {
     const headers: HeadersInit = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log(`Query: Adding Authorization header with token (first 10 chars): ${token.substring(0, 10)}...`);
+      apiLogger.throttledDebug(`Adding Authorization header with token (first 10 chars): ${token.substring(0, 10)}...`);
     } else {
-      console.log('Query: No auth token available, proceeding without Authorization header');
+      apiLogger.throttledDebug('No auth token available, proceeding without Authorization header');
     }
     
     try {
@@ -215,12 +216,12 @@ export const getQueryFn: <T>(options: {
       try {
         return await res.json();
       } catch (error) {
-        console.error('Failed to parse JSON response:', error);
+        apiLogger.error('Failed to parse JSON response:', error);
         throw new Error('Invalid JSON response from server. Please try again or contact support.');
       }
       
     } catch (error) {
-      console.error(`Query to ${queryKey[0]} failed:`, error);
+      apiLogger.error(`Query to ${queryKey[0]} failed:`, error);
       throw error;
     }
   };

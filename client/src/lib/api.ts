@@ -1,6 +1,7 @@
 // Helper functions for API requests
 import { getAuthToken } from "./cookie-utils";
 import { buildAPIUrl } from "@/config/api";
+import { apiLogger } from "./debug-logger";
 
 /**
  * Makes an authenticated API request
@@ -36,7 +37,7 @@ export async function apiRequest(
     try {
       localStorage.setItem('authHeader', authHeader);
     } catch (err) {
-      console.error('Failed to store auth header in localStorage:', err);
+      apiLogger.error('Failed to store auth header in localStorage:', err);
     }
   }
   
@@ -51,7 +52,7 @@ export async function apiRequest(
   const fullUrl = buildAPIUrl(url);
   
   // Enhanced debugging for deployment troubleshooting
-  console.log(`API Request Debug:`, {
+  apiLogger.debug(`API Request Debug:`, {
     originalUrl: url,
     fullUrl: fullUrl,
     hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
@@ -59,7 +60,7 @@ export async function apiRequest(
   
   // Log the request for debugging
   if (token) {
-    console.log(`Query: Adding Authorization header with token (first 10 chars): ${token.substring(0, 10)}...`);
+    apiLogger.throttledDebug(`Adding Authorization header with token (first 10 chars): ${token.substring(0, 10)}...`);
   }
   
   // Make the request

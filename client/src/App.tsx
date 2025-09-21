@@ -39,6 +39,7 @@ import PinDemoPage from "@/pages/pin-demo";
 import { AutoRedirect } from "@/components/AutoRedirect";
 import { AdBlockBypass } from "@/components/AdBlockBypass";
 import { DebugPerformanceIndicator } from "@/components/debug/DebugUtils";
+import { DebugModeToggle } from "@/components/debug/DebugModeToggle";
 
 
 
@@ -130,6 +131,7 @@ export default function App() {
               </Switch>
               </TooltipProvider>
               <DebugPerformanceIndicator />
+              <DebugModeToggle />
               </CurrencyProvider>
             </WebSocketProvider>
           </DebugProvider>

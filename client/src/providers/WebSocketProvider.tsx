@@ -5,6 +5,7 @@ import { queryClient } from '@/lib/queryClient';
 import { Currency } from '@shared/schema';
 import { getCookie, setCookie, getAuthToken } from '@/lib/cookie-utils';
 import { buildWebSocketUrl } from '@/config/api';
+import { wsLogger } from '@/lib/debug-logger';
 
 // Define the WebSocket context type
 interface WebSocketContextType {
@@ -33,7 +34,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
   const createWebSocketConnection = useCallback(() => {
     if (!user) return null;
 
-    console.log('Setting up WebSocket connection...');
+    wsLogger.info('Setting up WebSocket connection...');
 
     // Get the JWT token from various sources
     let token = '';
@@ -45,7 +46,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
 
       // Only log token details in development
       if (process.env.NODE_ENV === 'development' && token) {
-        console.log('WebSocket auth token acquired');
+        wsLogger.debug('WebSocket auth token acquired');
       }
 
       // If we have a token in user object but not in cookie/localStorage, use that
@@ -54,7 +55,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
         const userToken = (user as any).token;
         if (userToken) {
           token = userToken;
-          console.log('Using token from user object for WebSocket');
+          wsLogger.debug('Using token from user object for WebSocket');
 
           // Sync token to both storage mechanisms
           setCookie('jwt', userToken, {
@@ -67,15 +68,15 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
       }
 
       if (!token && process.env.NODE_ENV === 'development') {
-        console.warn('No authentication token found for WebSocket connection');
+        wsLogger.warn('No authentication token found for WebSocket connection');
       }
     } catch (err) {
-      console.error('Error retrieving token for WebSocket:', err);
+      wsLogger.error('Error retrieving token for WebSocket:', err);
     }
 
     // Use the new configuration function to get the correct WebSocket URL
     const wsUrl = buildWebSocketUrl();
-    console.log('WebSocket URL:', wsUrl);
+    wsLogger.debug('WebSocket URL:', wsUrl);
 
     // Create WebSocket with options
     let newSocket: WebSocket;
@@ -83,14 +84,14 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
     try {
       // Create WebSocket with token if available
       if (token) {
-        console.log('Creating WebSocket with token');
+        wsLogger.debug('Creating WebSocket with token');
         newSocket = new WebSocket(`${wsUrl}?token=${token}`);
       } else {
-        console.log('Creating WebSocket without token');
+        wsLogger.debug('Creating WebSocket without token');
         newSocket = new WebSocket(wsUrl);
       }
     } catch (error) {
-      console.error('Error creating WebSocket:', error);
+      wsLogger.error('Error creating WebSocket:', error);
       return null;
     }
 
@@ -100,7 +101,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
   // Function to handle reconnection
   const reconnect = useCallback(() => {
     if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
-      console.log(`Maximum reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached`);
+      wsLogger.warn(`Maximum reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached`);
       return;
     }
 
@@ -110,7 +111,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
 
     reconnectTimeoutRef.current = setTimeout(() => {
       reconnectAttempts.current += 1;
-      console.log(`Reconnection attempt ${reconnectAttempts.current}/${MAX_RECONNECT_ATTEMPTS}`);
+      wsLogger.info(`Reconnection attempt ${reconnectAttempts.current}/${MAX_RECONNECT_ATTEMPTS}`);
       const newSocket = createWebSocketConnection();
 
       if (newSocket) {
@@ -123,13 +124,13 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
   // Setup WebSocket event handlers
   const setupSocketHandlers = useCallback((webSocket: WebSocket) => {
     webSocket.onopen = () => {
-      console.log('WebSocket connection established');
+      wsLogger.info('WebSocket connection established');
       setIsConnected(true);
       reconnectAttempts.current = 0; // Reset reconnect attempts on successful connection
     };
 
     webSocket.onclose = (event) => {
-      console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
+      wsLogger.info(`WebSocket connection closed: ${event.code} ${event.reason}`);
       setIsConnected(false);
 
       // Don't attempt to reconnect if the close was clean and intentional (code 1000)
@@ -139,7 +140,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
     };
 
     webSocket.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      wsLogger.error('WebSocket error:', error);
       setIsConnected(false);
     };
 
@@ -148,7 +149,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
         const data = JSON.parse(event.data);
         handleSocketMessage(data);
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        wsLogger.error('Error parsing WebSocket message:', error);
       }
     };
   }, [reconnect]);
@@ -181,7 +182,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
 
         // Clean up on unmount
         return () => {
-          console.log('Unmounting, closing WebSocket connection');
+          wsLogger.debug('Unmounting, closing WebSocket connection');
           // Clear reconnect timeout
           if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current);
@@ -199,7 +200,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
         };
       }
     } else {
-      console.log('No user authenticated, skipping WebSocket connection until user logs in');
+      wsLogger.debug('No user authenticated, skipping WebSocket connection until user logs in');
     }
   }, [user, createWebSocketConnection, setupSocketHandlers]);
 
@@ -213,7 +214,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
         break;
       case 'currency_changed':
         // Special handling for currency changes to ensure UI updates without page refresh
-        console.log('Received currency change event:', payload);
+        wsLogger.debug('Received currency change event:', payload);
         handleCurrencyChanged(payload);
         break;
       case 'chat_message':
@@ -241,7 +242,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
         queryClient.invalidateQueries({ queryKey: ['/api/exchange-rates'] });
         break;
       case 'connected':
-        console.log('Connected to WebSocket server as:', payload.username);
+        wsLogger.info('Connected to WebSocket server as:', payload.username);
         break;
       case 'heartbeat':
         // Respond to server heartbeat to keep connection alive
@@ -249,16 +250,16 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
         break;
       case 'pong':
         // Server responded to our ping
-        console.log('Received pong from server');
+        wsLogger.throttledInfo('Received pong from server');
         break;
       default:
-        console.log('Unhandled WebSocket message type:', type);
+        wsLogger.warn('Unhandled WebSocket message type:', type);
     }
   };
 
   // Handle currency change events with improved event distribution
   const handleCurrencyChanged = (payload: any) => {
-    console.log('Processing currency change event via WebSocket:', payload);
+    wsLogger.debug('Processing currency change event via WebSocket:', payload);
 
     // Extract currency information - handle both formats from different sources
     const newCurrency = payload.newCurrency || payload.currency;
@@ -267,7 +268,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
     const oldBalance = payload.oldBalance || payload.previousBalance;
 
     if (!newCurrency || !newBalance) {
-      console.error('Currency change event missing required data:', payload);
+      wsLogger.error('Currency change event missing required data:', payload);
       return;
     }
 
@@ -317,9 +318,9 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
       });
       window.dispatchEvent(balanceEvent);
 
-      console.log(`Currency changed successfully: ${oldCurrency} (${oldBalance}) -> ${newCurrency} (${newBalance})`);
+      wsLogger.info(`Currency changed successfully: ${oldCurrency} (${oldBalance}) -> ${newCurrency} (${newBalance})`);
     } catch (error) {
-      console.error('Error broadcasting currency change:', error);
+      wsLogger.error('Error broadcasting currency change:', error);
     }
   };
 
@@ -335,7 +336,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
   useEffect(() => {
     // Start ping interval when connected
     if (isConnected && socket) {
-      console.log('Starting client ping interval');
+      wsLogger.throttledInfo('Starting client ping interval');
 
       // Clear any existing interval
       if (pingIntervalRef.current) {
@@ -345,7 +346,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
       // Set up new interval
       pingIntervalRef.current = setInterval(() => {
         if (socket && socket.readyState === WebSocket.OPEN) {
-          console.log('Sending client ping to keep connection alive');
+          wsLogger.throttledInfo('Sending client ping to keep connection alive');
           sendMessage('ping', { timestamp: new Date().toISOString() });
         }
       }, CLIENT_PING_INTERVAL);
@@ -353,7 +354,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
       // Clean up interval on component unmount or disconnect
       return () => {
         if (pingIntervalRef.current) {
-          console.log('Clearing client ping interval');
+          wsLogger.throttledInfo('Clearing client ping interval');
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
         }
@@ -363,7 +364,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
 
   // Handle balance updates from the server
   const handleBalanceUpdate = (payload: { balance: string; currency: Currency }) => {
-    console.log('Received balance update:', payload);
+    wsLogger.debug('Received balance update:', payload);
 
     // Update the cached balance data
     queryClient.setQueryData(['/api/wallet/balance'], {
@@ -393,9 +394,9 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
       });
       window.dispatchEvent(storageEvent);
 
-      console.log('Dispatched balance update to all components:', payload.currency);
+      wsLogger.debug('Dispatched balance update to all components:', payload.currency);
     } catch (error) {
-      console.error('Error broadcasting balance update:', error);
+      wsLogger.error('Error broadcasting balance update:', error);
     }
   };
 
@@ -405,7 +406,7 @@ export const WebSocketProvider = memo(function WebSocketProvider({ children }: {
       const message = JSON.stringify({ type, payload });
       socket.send(message);
     } else {
-      console.warn('Cannot send message, WebSocket is not connected');
+      wsLogger.warn('Cannot send message, WebSocket is not connected');
     }
   };
 

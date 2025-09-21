@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useEffect, useState, useMemo, memo } from "react";
 import { getThemeById, initializeTheme, setActiveTheme, allThemes, themes, Theme } from "@/lib/themes";
+import { themeLogger } from "@/lib/debug-logger";
 
 interface ThemeContextType {
   currentTheme: Theme;
@@ -155,7 +156,7 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: { childre
     applyThemeWithTransition(theme, true);
     
     // Log theme change for debugging
-    console.log(`Theme changed to: ${theme.name}`);
+    themeLogger.info(`Theme changed to: ${theme.name}`);
     
     setActiveTheme(themeId);
   };

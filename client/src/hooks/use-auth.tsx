@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { get, post } from "@/lib/api";
 import { setCookie, removeCookie } from "@/lib/cookie-utils";
+import { authLogger } from "@/lib/debug-logger";
 
 type User = {
   id: number;
@@ -50,49 +51,49 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
   useEffect(() => {
     async function loadUser() {
       try {
-        console.log('Checking authentication status...');
+        authLogger.debug('Checking authentication status...');
         
         // Check if we have any stored authentication with enhanced detection
         const localToken = localStorage.getItem('authToken') || localStorage.getItem('jwt');
         const cookieString = document.cookie;
         const hasCookieAuth = cookieString.includes('jwt=');
         
-        console.log('Checking stored authentication:', {
+        authLogger.debug('Checking stored authentication:', {
           localStorage: !!localToken,
           cookies: hasCookieAuth,
           cookieString: cookieString.substring(0, 100) + (cookieString.length > 100 ? '...' : '')
         });
         
         if (!localToken && !hasCookieAuth) {
-          console.log('No stored authentication found, user needs to login');
+          authLogger.debug('No stored authentication found, user needs to login');
           setUser(null);
           setIsLoading(false);
           return;
         }
 
-        console.log('Found stored authentication, attempting auto-login...');
+        authLogger.debug('Found stored authentication, attempting auto-login...');
         
         try {
           const response = await get('/api/user');
-          console.log('Auto-login response:', response.status, response.ok);
+          authLogger.debug('Auto-login response:', response.status, response.ok);
 
           if (response.ok) {
             try {
               const userData = await response.json();
               if (process.env.NODE_ENV === 'development') {
-                console.log('Auto-login successful for user:', userData.username);
+                authLogger.info('Auto-login successful for user:', userData.username);
               }
               setUser(userData);
               return; // Early return on success
             } catch (jsonError) {
-              console.log('Auto-login JSON parsing error:', jsonError);
+              authLogger.warn('Auto-login JSON parsing error:', jsonError);
               setUser(null);
             }
           } else if (response.status === 403) {
             try {
               const errorData = await response.json();
               if (errorData.banned) {
-                console.log('User account is banned');
+                authLogger.warn('User account is banned');
                 setError('Your account has been banned. Please contact support for assistance.');
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('jwt');
@@ -101,7 +102,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
                 navigate('/auth');
                 return;
               } else if (errorData.kicked) {
-                console.log('User account is temporarily suspended');
+                authLogger.warn('User account is temporarily suspended');
                 setError('Your account has been temporarily suspended. Please contact support for assistance.');
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('jwt');
@@ -111,7 +112,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
                 return;
               } else {
                 // Session expired due to IP/device change
-                console.log('Session expired due to security check, clearing stored auth');
+                authLogger.info('Session expired due to security check, clearing stored auth');
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('jwt');
                 document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
@@ -119,24 +120,24 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
               }
             } catch (jsonError) {
               // Fallback for non-JSON 403 responses
-              console.log('Session expired due to security check, clearing stored auth');
+              authLogger.info('Session expired due to security check, clearing stored auth');
               localStorage.removeItem('authToken');
               localStorage.removeItem('jwt');
               document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
               setUser(null);
             }
           } else {
-            console.log('Auto-login failed with status:', response.status);
+            authLogger.debug('Auto-login failed with status:', response.status);
             const responseText = await response.text();
-            console.log('Response body:', responseText);
+            authLogger.debug('Response body:', responseText);
             setUser(null);
           }
         } catch (apiError) {
-          console.log('Auto-login API error:', apiError);
+          authLogger.debug('Auto-login API error:', apiError);
           setUser(null);
         }
       } catch (error) {
-        console.error('Error during auto-login:', error);
+        authLogger.error('Error during auto-login:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -152,18 +153,18 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
     setIsLoading(true);
 
     try {
-      console.log('Logging in with:', data.username);
+      authLogger.debug('Logging in with:', data.username);
 
       // Use post helper to properly handle API base URL
       // The post helper already returns parsed JSON data
       const responseData = await post('/api/login', data);
 
       const { user, token } = responseData;
-      console.log('Login successful:', user);
+      authLogger.info('Login successful:', user);
 
       // Enhanced token storage for persistent sessions
       if (token) {
-        console.log('Storing authentication token for persistent login...');
+        authLogger.debug('Storing authentication token for persistent login...');
 
         // Primary storage in localStorage (most reliable)
         try {
@@ -171,9 +172,9 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
           localStorage.setItem('jwt', token);
           localStorage.setItem('loginTime', Date.now().toString());
           localStorage.setItem('userAgent', navigator.userAgent);
-          console.log('Authentication tokens stored for persistent sessions');
+          authLogger.debug('Authentication tokens stored for persistent sessions');
         } catch (err) {
-          console.warn('Error saving to localStorage:', err);
+          authLogger.warn('Error saving to localStorage:', err);
         }
 
         // Secondary storage in sessionStorage for immediate session
@@ -182,13 +183,13 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
             sessionStorage.setItem('jwt', token);
           }
         } catch (err) {
-          console.warn('Error saving to sessionStorage:', err);
+          authLogger.warn('Error saving to sessionStorage:', err);
         }
 
         // Cookie storage is handled by server automatically with 30-day expiration
-        console.log('Persistent login setup complete - user will stay logged in until logout or device change');
+        authLogger.debug('Persistent login setup complete - user will stay logged in until logout or device change');
       } else {
-        console.error('No token received from login response');
+        authLogger.error('No token received from login response');
       }
 
       setUser(user);
@@ -196,7 +197,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
-      console.error('Login error:', errorMessage);
+      authLogger.error('Login error:', errorMessage);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -210,7 +211,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
     setIsLoading(true);
 
     try {
-      console.log('Registering new user:', data.username);
+      authLogger.debug('Registering new user:', data.username);
       const registerData = {
         ...data,
         balance: "0", // New users start with 0 balance
@@ -252,12 +253,12 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
       try {
         responseData = await response.json();
       } catch (e) {
-        console.error('Error parsing registration response:', e);
+        authLogger.warn('Error parsing registration response:', e);
         throw new Error('Invalid response from server');
       }
 
       const { user, token } = responseData;
-      console.log('Registration successful:', user);
+      authLogger.info('Registration successful:', user);
 
       // Store token in both cookies and local storage for compatibility
       if (token) {
@@ -283,16 +284,16 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
             sessionStorage.setItem('jwt', token);
           }
 
-          console.log('Auth token saved to multiple storage locations for better persistence');
+          authLogger.debug('Auth token saved to multiple storage locations for better persistence');
         } catch (err) {
-          console.warn('Error saving to localStorage:', err);
+          authLogger.warn('Error saving to localStorage:', err);
           // Still continue - the cookie should work
         }
 
         // Token refresh disabled for now
-        console.log('Token refresh disabled - using auth cookie persistence');
+        authLogger.debug('Token refresh disabled - using auth cookie persistence');
       } else {
-        console.error('No token received from registration response');
+        authLogger.error('No token received from registration response');
       }
 
       setUser(user);
@@ -300,7 +301,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Registration failed';
-      console.error('Registration error:', errorMessage);
+      authLogger.error('Registration error:', errorMessage);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -313,7 +314,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
     setError(null);
 
     try {
-      console.log('Logging out and clearing persistent session...');
+      authLogger.debug('Logging out and clearing persistent session...');
       await post('/api/logout', {});
 
       // Clear user data
@@ -335,7 +336,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
         try {
           localStorage.removeItem(key);
         } catch (e) {
-          console.warn(`Error removing ${key} from localStorage:`, e);
+          authLogger.warn(`Error removing ${key} from localStorage:`, e);
         }
       });
 
@@ -345,7 +346,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
           sessionStorage.removeItem('jwt');
           sessionStorage.clear(); // Clear all session data
         } catch (e) {
-          console.warn('Error clearing sessionStorage:', e);
+          authLogger.warn('Error clearing sessionStorage:', e);
         }
       }
 
@@ -356,15 +357,15 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
         document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + window.location.hostname;
         document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
       } catch (e) {
-        console.warn('Error clearing cookies:', e);
+        authLogger.warn('Error clearing cookies:', e);
       }
 
-      console.log('Persistent session cleared - user will need to login again');
+      authLogger.debug('Persistent session cleared - user will need to login again');
       navigate('/auth');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Logout failed';
       setError(errorMessage);
-      console.error('Logout error:', error);
+      authLogger.error('Logout error:', error);
     }
   };
 
@@ -383,15 +384,15 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: { chi
 
   const refreshUser = async () => {
     try {
-      console.log('Refreshing user data...');
+      authLogger.debug('Refreshing user data...');
       const response = await get('/api/user');
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
-        console.log('User data refreshed:', userData);
+        authLogger.debug('User data refreshed:', userData);
       }
     } catch (error) {
-      console.error('Error refreshing user:', error);
+      authLogger.error('Error refreshing user:', error);
     }
   };
 
