@@ -1,102 +1,11 @@
 import React, { useState, useEffect, memo, useMemo, useCallback } from "react";
-import { FastBalanceDisplay } from "@/components/optimized/FastBalanceDisplay";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/providers/LanguageProvider";
-
-// Moving Stars Background Component with interaction-based disappearing
-// Optimized with React.memo to prevent unnecessary re-renders
-const MovingStarsBackground = React.memo(function MovingStarsBackground() {
-  const [starsVisible, setStarsVisible] = useState(true);
-
-  // Memoize the event handler to prevent unnecessary re-creations
-  const handleUserInteraction = useCallback(() => {
-    setTimeout(() => {
-      setStarsVisible(false);
-    }, 5000); // Hide after 5 seconds
-  }, []);
-
-  // Memoize the events array
-  const interactionEvents = useMemo(() => 
-    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'], 
-    []
-  );
-
-  useEffect(() => {
-    const stars: HTMLDivElement[] = [];
-    const starsContainer = document.querySelector('.home-stars-container');
-    
-    if (starsContainer && starsVisible) {
-      // Create 500 stars for the home page (same as auth page)
-      for (let i = 0; i < 500; i++) {
-        const star = document.createElement('div');
-        star.className = 'home-star';
-        const size = Math.random() * 2 + 1;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 10}s, ${Math.random() * 10}s`;
-        starsContainer.appendChild(star);
-        stars.push(star);
-      }
-    }
-
-    // Add event listeners for various user interactions
-    interactionEvents.forEach(event => {
-      document.addEventListener(event, handleUserInteraction, { once: true });
-    });
-
-    return () => {
-      // Cleanup stars
-      stars.forEach(star => star.remove());
-      
-      // Remove event listeners
-      interactionEvents.forEach(event => {
-        document.removeEventListener(event, handleUserInteraction);
-      });
-    };
-  }, [starsVisible, handleUserInteraction, interactionEvents]);
-
-  // Memoize the CSS styles to prevent recalculation
-  const starStyles = useMemo(() => ({
-    __html: `
-      .home-star {
-        position: absolute;
-        background: white;
-        border-radius: 50%;
-        opacity: 0.6;
-        animation: twinkle 10s infinite, float 20s infinite;
-      }
-      
-      @keyframes twinkle {
-        0%, 100% { opacity: 0.2; }
-        50% { opacity: 1; }
-      }
-      
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
-      }
-      
-      .home-star:nth-child(3n) { animation-duration: 15s, 25s; }
-      .home-star:nth-child(3n+1) { animation-duration: 8s, 18s; }
-      .home-star:nth-child(3n+2) { animation-duration: 12s, 22s; }
-    `
-  }), []);
-
-  if (!starsVisible) return null;
-
-  return (
-    <div className="home-stars-container fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-      <style dangerouslySetInnerHTML={starStyles} />
-    </div>
-  );
-});
+import { Trophy, Users, Zap, TrendingUp, ChevronRight, Star } from "lucide-react";
 
 interface CustomGame {
   id: number;
@@ -113,559 +22,503 @@ interface CustomGame {
   createdBy: number;
 }
 
+const SlotsIcon = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
+    <rect x="8" y="12" width="48" height="40" rx="6" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+    <rect x="14" y="18" width="10" height="28" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+    <rect x="27" y="18" width="10" height="28" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+    <rect x="40" y="18" width="10" height="28" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+    <circle cx="19" cy="32" r="4" fill="#fbbf24"/>
+    <circle cx="32" cy="32" r="4" fill="#f87171"/>
+    <circle cx="45" cy="32" r="4" fill="#34d399"/>
+    <rect x="20" y="54" width="24" height="4" rx="2" fill="rgba(255,255,255,0.2)"/>
+  </svg>
+);
+
+const DiceIcon = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
+    <rect x="8" y="8" width="28" height="28" rx="6" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="2"/>
+    <circle cx="18" cy="18" r="3" fill="white"/>
+    <circle cx="26" cy="18" r="3" fill="white"/>
+    <circle cx="18" cy="26" r="3" fill="white"/>
+    <circle cx="26" cy="26" r="3" fill="white"/>
+    <rect x="28" y="28" width="28" height="28" rx="6" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="2"/>
+    <circle cx="42" cy="42" r="3.5" fill="white"/>
+  </svg>
+);
+
+const MinesIcon = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
+    <rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="25" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="46" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="4" y="25" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="25" y="25" width="14" height="14" rx="3" fill="#ef4444" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <text x="29" y="36" fontSize="10" fill="white" fontWeight="bold">💣</text>
+    <rect x="46" y="25" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="4" y="46" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="25" y="46" width="14" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <rect x="46" y="46" width="14" height="14" rx="3" fill="#10b981" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+    <path d="M50 53l4 4M50 57l4-4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+const PlinkoIcon = () => (
+  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
+    <circle cx="32" cy="8" r="5" fill="#fbbf24" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+    <circle cx="16" cy="20" r="3" fill="rgba(255,255,255,0.4)"/>
+    <circle cx="32" cy="20" r="3" fill="rgba(255,255,255,0.4)"/>
+    <circle cx="48" cy="20" r="3" fill="rgba(255,255,255,0.4)"/>
+    <circle cx="8" cy="32" r="3" fill="rgba(255,255,255,0.3)"/>
+    <circle cx="24" cy="32" r="3" fill="rgba(255,255,255,0.3)"/>
+    <circle cx="40" cy="32" r="3" fill="rgba(255,255,255,0.3)"/>
+    <circle cx="56" cy="32" r="3" fill="rgba(255,255,255,0.3)"/>
+    <circle cx="16" cy="44" r="3" fill="rgba(255,255,255,0.2)"/>
+    <circle cx="32" cy="44" r="3" fill="rgba(255,255,255,0.2)"/>
+    <circle cx="48" cy="44" r="3" fill="rgba(255,255,255,0.2)"/>
+    <rect x="4" y="54" width="12" height="6" rx="2" fill="#ef4444"/>
+    <rect x="18" y="54" width="12" height="6" rx="2" fill="#f97316"/>
+    <rect x="32" y="54" width="12" height="6" rx="2" fill="#eab308"/>
+    <rect x="46" y="54" width="12" height="6" rx="2" fill="#22c55e"/>
+  </svg>
+);
+
+const gameCards = [
+  {
+    id: "slots",
+    href: "/slots",
+    title: "Slots",
+    description: "Classic 3×3 slot machine. Spin to win up to 20× your bet!",
+    gradient: "from-violet-900 via-purple-800 to-indigo-900",
+    glowColor: "rgba(139,92,246,0.4)",
+    badge: "Popular",
+    badgeColor: "bg-violet-500/30 text-violet-200 border border-violet-500/30",
+    icon: <SlotsIcon />,
+    multiplier: "20×",
+  },
+  {
+    id: "dice",
+    href: "/dice",
+    title: "Dice",
+    description: "Over/Under dice game. Pick your target and roll the odds!",
+    gradient: "from-sky-900 via-blue-800 to-cyan-900",
+    glowColor: "rgba(14,165,233,0.4)",
+    badge: "Classic",
+    badgeColor: "bg-sky-500/30 text-sky-200 border border-sky-500/30",
+    icon: <DiceIcon />,
+    multiplier: "9.9×",
+  },
+  {
+    id: "mines",
+    href: "/mines",
+    title: "Mines",
+    description: "Find gems and dodge mines. Higher risk means higher rewards!",
+    gradient: "from-slate-900 via-gray-800 to-zinc-900",
+    glowColor: "rgba(100,116,139,0.4)",
+    badge: "High Risk",
+    badgeColor: "bg-red-500/30 text-red-200 border border-red-500/30",
+    icon: <MinesIcon />,
+    multiplier: "26×",
+  },
+  {
+    id: "plinko",
+    href: "/plinko_master",
+    title: "Plinko",
+    description: "Advanced physics-based plinko with 16 multiplier slots!",
+    gradient: "from-purple-900 via-indigo-800 to-violet-900",
+    glowColor: "rgba(99,102,241,0.4)",
+    badge: "New",
+    badgeColor: "bg-emerald-500/30 text-emerald-200 border border-emerald-500/30",
+    icon: <PlinkoIcon />,
+    multiplier: "1000×",
+  },
+];
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
+
 const HomePage = React.memo(function HomePage() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const [winners, setWinners] = useState<any[]>([]);
   const [isLoadingWinners, setIsLoadingWinners] = useState(false);
-  const [depositAmount, setDepositAmount] = useState<number>(100);
-  const [isDepositing, setIsDepositing] = useState(false);
   const [customGames, setCustomGames] = useState<CustomGame[]>([]);
   const [loadingCustomGames, setLoadingCustomGames] = useState(false);
   const { toast } = useToast();
 
-  // Memoized translation function to prevent object recreation on every render
-  const getText = useMemo(() => {
-    const translations: { [key: string]: { [lang: string]: string } } = {
-      welcomeBack: { 
-        en: 'Welcome back', bn: 'ফিরে আসার জন্য স্বাগতম', es: 'Bienvenido de vuelta', fr: 'Bon retour', de: 'Willkommen zurück', 
-        zh: '欢迎回来', ja: 'おかえりなさい', ko: '환영합니다', ar: 'مرحباً بعودتك', hi: 'वापसী पর স্বাগত है', ru: 'Добро пожаловать', 
-        pt: 'Bem-vindo de volta', it: 'Bentornato', tr: 'Tekrar hoş geldiniz', nl: 'Welkom terug', th: 'ยินดีต้อนรับกลับ', 
-        vi: 'Chào mừng trở lại', id: 'Selamat datang kembali', ms: 'Selamat kembali', pl: 'Witamy ponownie' 
-      },
-      balance: { 
-        en: 'Balance', bn: 'ব্যালেন্স', es: 'Saldo', fr: 'Solde', de: 'Guthaben', zh: '余额', ja: '残高', ko: '잔액', 
-        ar: 'الرصيد', hi: 'बैलेंस', ru: 'Баланс', pt: 'Saldo', it: 'Saldo', tr: 'Bakiye', nl: 'Saldo', th: 'ยอดเงิน', 
-        vi: 'Số dư', id: 'Saldo', ms: 'Baki', pl: 'Saldo' 
-      },
-      quickActions: { 
-        en: 'Quick Actions', bn: 'দ্রুত কার্যক্রম', es: 'Acciones Rápidas', fr: 'Actions Rapides', de: 'Schnellaktionen', 
-        zh: '快速操作', ja: 'クイックアクション', ko: '빠른 작업', ar: 'الإجراءات السريعة', hi: 'त्वरित कार्य', ru: 'Быстрые действия', 
-        pt: 'Ações Rápidas', it: 'Azioni Rapide', tr: 'Hızlı İşlemler', nl: 'Snelle Acties', th: 'การดำเนินการด่วน', 
-        vi: 'Hành động nhanh', id: 'Tindakan Cepat', ms: 'Tindakan Pantas', pl: 'Szybkie Akcje' 
-      },
-      playNow: { 
-        en: 'Play Now', bn: 'এখনই খেলুন', es: 'Jugar Ahora', fr: 'Jouer Maintenant', de: 'Jetzt Spielen', zh: '立即游戏', 
-        ja: '今すぐプレイ', ko: '지금 플레이', ar: 'العب الآن', hi: 'अभी खेलें', ru: 'Играть сейчас', pt: 'Jogar Agora', 
-        it: 'Gioca Ora', tr: 'Şimdi Oyna', nl: 'Speel Nu', th: 'เล่นเลย', vi: 'Chơi Ngay', id: 'Main Sekarang', 
-        ms: 'Main Sekarang', pl: 'Graj Teraz' 
-      },
-      deposit: { 
-        en: 'Deposit', bn: 'জমা', es: 'Depositar', fr: 'Dépôt', de: 'Einzahlen', zh: '存款', ja: '入金', ko: '입금', 
-        ar: 'إيداع', hi: 'जमा', ru: 'Пополнить', pt: 'Depositar', it: 'Deposito', tr: 'Para Yatır', nl: 'Storten', 
-        th: 'ฝากเงิน', vi: 'Nạp tiền', id: 'Setor', ms: 'Deposit', pl: 'Wpłata' 
-      },
-      withdraw: { 
-        en: 'Withdraw', bn: 'উত্তোলন', es: 'Retirar', fr: 'Retirer', de: 'Abheben', zh: '提款', ja: '出金', ko: '출금', 
-        ar: 'سحب', hi: 'निकालना', ru: 'Снять', pt: 'Sacar', it: 'Prelievo', tr: 'Para Çek', nl: 'Opnemen', 
-        th: 'ถอนเงิน', vi: 'Rút tiền', id: 'Tarik', ms: 'Keluarkan', pl: 'Wypłata' 
-      },
-      recentWinners: { 
-        en: 'Recent Winners', bn: 'সাম্প্রতিক বিজয়ী', es: 'Ganadores Recientes', fr: 'Gagnants Récents', de: 'Neueste Gewinner', 
-        zh: '最近获奖者', ja: '最近の勝者', ko: '최근 우승자', ar: 'الفائزون الأخيرون', hi: 'हाल के विजेता', ru: 'Недавние победители', 
-        pt: 'Vencedores Recentes', it: 'Vincitori Recenti', tr: 'Son Kazananlar', nl: 'Recente Winnaars', th: 'ผู้ชนะล่าสุด', 
-        vi: 'Người thắng gần đây', id: 'Pemenang Terbaru', ms: 'Pemenang Terkini', pl: 'Najnowsi Zwycięzcy' 
-      },
-      noWinners: { 
-        en: 'No recent winners', bn: 'সাম্প্রতিক কোন বিজয়ী নেই', es: 'No hay ganadores recientes', fr: 'Aucun gagnant récent', 
-        de: 'Keine aktuellen Gewinner', zh: '暂无最近获奖者', ja: '最近の勝者はいません', ko: '최근 우승자 없음', ar: 'لا يوجد فائزون أخيرون', 
-        hi: 'कोई हाल के विजेता नहीं', ru: 'Нет недавних победителей', pt: 'Nenhum vencedor recente', it: 'Nessun vincitore recente', 
-        tr: 'Yakın zamanda kazanan yok', nl: 'Geen recente winnaars', th: 'ไม่มีผู้ชนะล่าสุด', vi: 'Không có người thắng gần đây', 
-        id: 'Tidak ada pemenang terbaru', ms: 'Tiada pemenang terkini', pl: 'Brak najnowszych zwycięzców' 
-      },
-      won: { 
-        en: 'won', bn: 'জিতেছে', es: 'ganó', fr: 'a gagné', de: 'gewann', zh: '赢得', ja: '勝利', ko: '승리', ar: 'فاز', 
-        hi: 'जीता', ru: 'выиграл', pt: 'ganhou', it: 'ha vinto', tr: 'kazandı', nl: 'won', th: 'ชนะ', vi: 'thắng', 
-        id: 'menang', ms: 'menang', pl: 'wygrał' 
-      },
-      welcomeToShadowCasino: {
-        en: 'Welcome to Shadow Casino', bn: 'শ্যাডো ক্যাসিনোতে স্বাগতম', es: 'Bienvenido a Shadow Casino', fr: 'Bienvenue au Shadow Casino', 
-        de: 'Willkommen im Shadow Casino', zh: '欢迎来到Shadow Casino', ja: 'Shadow Casinoへようこそ', ko: 'Shadow Casino에 오신 것을 환영합니다', 
-        ar: 'مرحباً بكم في كازينو الظل', hi: 'शैडो कैसीनो में आपका स्वागत है', ru: 'Добро пожаловать в Shadow Casino', pt: 'Bem-vindo ao Shadow Casino', 
-        it: 'Benvenuto a Shadow Casino', tr: 'Shadow Casino\'ya Hoş Geldiniz', nl: 'Welkom bij Shadow Casino', th: 'ยินดีต้อนรับสู่ Shadow Casino', 
-        vi: 'Chào mừng đến với Shadow Casino', id: 'Selamat datang di Shadow Casino', ms: 'Selamat datang ke Shadow Casino', pl: 'Witamy w Shadow Casino'
-      },
-      casinoDescription: {
-        en: 'Experience the thrill of our premium casino games with cutting-edge design and exciting rewards.',
-        bn: 'অত্যাধুনিক ডিজাইন এবং রোমাঞ্চকর পুরস্কার সহ আমাদের প্রিমিয়াম ক্যাসিনো গেমের রোমাঞ্চ অনুভব করুন।',
-        es: 'Experimenta la emoción de nuestros juegos de casino premium con diseño vanguardista y recompensas emocionantes.',
-        fr: 'Découvrez le frisson de nos jeux de casino premium avec un design avant-gardiste et des récompenses passionnantes.',
-        de: 'Erleben Sie den Nervenkitzel unserer Premium-Casino-Spiele mit modernster Technik und aufregenden Belohnungen.',
-        zh: '体验我们优质赌场游戏的刺激，拥有前沿设计和令人兴奋的奖励。',
-        ja: '最先端のデザインとエキサイティングな報酬で、プレミアムカジノゲームのスリルを体験してください。',
-        ko: '최첨단 디자인과 흥미진진한 보상으로 프리미엄 카지노 게임의 스릴을 경험하세요.',
-        ar: 'اختبر إثارة ألعاب الكازينو المتميزة مع التصميم المتطور والمكافآت المثيرة.',
-        hi: 'अत्याधुनिक डिज़ाइन और रोमांचक पुरस्कारों के साथ हमारे प्रीमियम कैसीनो गेम्स का रोमांच अनुभव करें।',
-        ru: 'Испытайте волнение от наших премиальных казино игр с передовым дизайном и захватывающими наградами.',
-        pt: 'Experimente a emoção dos nossos jogos de casino premium com design inovador e recompensas emocionantes.',
-        it: 'Vivi l\'emozione dei nostri giochi di casinò premium con design all\'avanguardia e ricompense entusiasmanti.',
-        tr: 'Son teknoloji tasarım ve heyecan verici ödüllerle premium casino oyunlarımızın heyecanını yaşayın.',
-        nl: 'Ervaar de spanning van onze premium casinogames met geavanceerd ontwerp en opwindende beloningen.',
-        th: 'สัมผัสความตื่นเต้นของเกมคาสิโนพรีเมียมของเราด้วยการออกแบบที่ทันสมัยและรางวัลที่น่าตื่นเต้น',
-        vi: 'Trải nghiệm cảm giác hồi hộp của các trò chơi casino cao cấp với thiết kế tiên tiến và phần thưởng thú vị.',
-        id: 'Rasakan sensasi permainan kasino premium kami dengan desain canggih dan hadiah yang menarik.',
-        ms: 'Alami keseronokan permainan kasino premium kami dengan reka bentuk canggih dan ganjaran yang menarik.',
-        pl: 'Doświadcz emocji naszych gier kasynowych premium z nowoczesnym designem i ekscytującymi nagrodami.'
-      }
-    };
-    
-    return (key: string) => translations[key]?.[language] || translations[key]?.['en'] || key;
-  }, [language]);
-
-  // Memoized currency symbol function
-  const getCurrencySymbol = useCallback((currency: string = 'USD') => {
-    switch(currency) {
-      case 'USD': return '$';
-      case 'BDT': return '৳';
-      case 'INR': return '₹';
-      case 'BTC': return '₿';
-      default: return '$';
-    }
-  }, []);
-
-  // Memoized format money function
   const formatMoney = useCallback((amount: number | string) => {
-    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('en-US', {
+    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(numAmount);
   }, []);
 
-  // Load recent winners data
   useEffect(() => {
     const fetchWinners = async () => {
       setIsLoadingWinners(true);
       try {
-        const response = await fetch('/api/games/winners?limit=3');
-        if (!response.ok) throw new Error('Failed to fetch winners');
+        const response = await fetch("/api/games/winners?limit=5");
+        if (!response.ok) throw new Error("Failed");
         const data = await response.json();
         setWinners(data);
-      } catch (error) {
-        console.error('Error fetching winners:', error);
+      } catch {
       } finally {
         setIsLoadingWinners(false);
       }
     };
-
     fetchWinners();
   }, []);
 
-  // Load custom games data
   useEffect(() => {
     const fetchCustomGames = async () => {
       if (!user) return;
-      
       setLoadingCustomGames(true);
       try {
-        const response = await fetch('/api/games/custom');
+        const response = await fetch("/api/games/custom");
         if (response.ok) {
           const games = await response.json();
-          setCustomGames(games.filter((game: CustomGame) => game.isActive));
+          setCustomGames(games.filter((g: CustomGame) => g.isActive));
         }
-      } catch (error) {
-        console.error('Error fetching custom games:', error);
+      } catch {
       } finally {
         setLoadingCustomGames(false);
       }
     };
-
     fetchCustomGames();
   }, [user]);
 
-  // Handle deposit
-  const handleDeposit = async () => {
-    if (depositAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a positive amount to deposit",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsDepositing(true);
-    try {
-      const response = await fetch('/api/wallet/deposit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: depositAmount,
-          currency: user?.currency || 'USD'
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to deposit funds');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: "Deposit Successful",
-          description: `${getCurrencySymbol(user?.currency)}${formatMoney(depositAmount)} has been added to your account.`,
-          variant: "default",
-        });
-      } else {
-        // If it returned WhatsApp info
-        toast({
-          title: "WhatsApp Deposit",
-          description: "Please contact the provided WhatsApp number to complete your deposit.",
-          variant: "default",
-        });
-      }
-
-      // Force reload after successful deposit
-      window.location.reload();
-
-    } catch (err) {
-      toast({
-        title: "Deposit Failed",
-        description: err instanceof Error ? err.message : "An error occurred during deposit",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDepositing(false);
-    }
-  };
-
   return (
-    <>
-      {/* Add moving stars CSS styles (same as auth page) */}
-      <style>{`
-        .home-stars-container .home-star {
-          position: absolute;
-          background: rgba(255, 255, 255, 0.8);
-          border-radius: 50%;
-          animation: home-twinkle 5s infinite, home-move 20s linear infinite;
-          will-change: transform;
-        }
-        @keyframes home-twinkle {
-          0% { opacity: 0.3; }
-          50% { opacity: 0.8; }
-          100% { opacity: 0.3; }
-        }
-        @keyframes home-move {
-          0% { transform: translate(0, 0); }
-          100% { transform: translate(50vw, 50vh); }
-        }
-      `}</style>
-      
-      <MovingStarsBackground />
-      
-      <MainLayout>
-      <div className="px-6 py-8">
+    <MainLayout>
+      <div className="px-4 sm:px-6 py-8 max-w-7xl mx-auto">
+
+        {/* Hero Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="relative rounded-2xl overflow-hidden mb-10 border border-white/10"
+          style={{
+            background: "linear-gradient(135deg, #1e1035 0%, #0f172a 40%, #0c1a2e 100%)",
+          }}
         >
-          <div className="mb-8">
+          {/* Glow blobs */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute -top-16 -left-16 w-72 h-72 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #7c3aed, transparent)" }} />
+            <div className="absolute -bottom-16 -right-16 w-72 h-72 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #2563eb, transparent)" }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-32 opacity-10 blur-3xl" style={{ background: "radial-gradient(ellipse, #06b6d4, transparent)" }} />
+          </div>
+
+          <div className="relative z-10 p-8 sm:p-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <h2 className="text-2xl font-bold mb-2">
-                {getText('welcomeToShadowCasino')}
-              </h2>          
-              <div className="text-gray-300 max-w-4xl">
-                <p>
-                  {getText('casinoDescription')}
-                </p>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-400 text-sm font-medium tracking-wide uppercase">Live Casino</span>
               </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-2">
+                Welcome to{" "}
+                <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+                  Shadow Casino
+                </span>
+              </h1>
+              <p className="text-gray-400 text-base max-w-lg">
+                Play provably fair games with instant payouts. Choose your game and start winning today.
+              </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            {/* Slots Card */}
-            <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
-                {/* Animated background pattern */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="grid grid-cols-3 gap-2 h-full">
-                    <div className="bg-yellow-400 rounded animate-pulse"></div>
-                    <div className="bg-red-500 rounded animate-pulse delay-100"></div>
-                    <div className="bg-green-500 rounded animate-pulse delay-200"></div>
-                    <div className="bg-blue-500 rounded animate-pulse delay-300"></div>
-                    <div className="bg-purple-500 rounded animate-pulse delay-400"></div>
-                    <div className="bg-pink-500 rounded animate-pulse delay-500"></div>
-                    <div className="bg-orange-500 rounded animate-pulse delay-75"></div>
-                    <div className="bg-teal-500 rounded animate-pulse delay-150"></div>
-                    <div className="bg-cyan-500 rounded animate-pulse delay-250"></div>
-                  </div>
-                </div>
-                {/* Slot machine visual */}
-                <div className="relative z-10">
-                  <div className="text-6xl mb-2">🎰</div>
-                  <div className="flex justify-center space-x-1 text-2xl">
-                    <span className="animate-bounce">🍒</span>
-                    <span className="animate-bounce delay-100">💎</span>
-                    <span className="animate-bounce delay-200">🍀</span>
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 bg-primary/20 text-primary rounded-md px-2">
-                  <span className="text-sm font-medium">Popular</span>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-lg font-bold">Slots</h3>
-                <p className="text-gray-400 text-sm mt-1 mb-3">Classic 3x3 slots machine. Spin to win up to 20x your bet!</p>
-                <Link href="/slots">
-                  <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
-                    Play Now
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Dice Card */}
-            <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
-                {/* Dice dots pattern background */}
-                <div className="absolute inset-0 opacity-10">
-                  {Array.from({ length: 20 }).map((_, i) => (
-                    <div 
-                      key={i}
-                      className="absolute w-2 h-2 bg-white rounded-full animate-pulse"
-                      style={{
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        animationDelay: `${Math.random() * 2}s`
-                      }}
-                    />
-                  ))}
-                </div>
-                {/* Dice visual */}
-                <div className="relative z-10">
-                  <div className="text-6xl mb-2 animate-bounce">🎲</div>
-                  <div className="flex justify-center space-x-2">
-                    <div className="w-8 h-8 bg-white rounded border-2 border-gray-300 flex items-center justify-center text-black font-bold">6</div>
-                    <div className="text-2xl text-yellow-400">vs</div>
-                    <div className="w-8 h-8 bg-white rounded border-2 border-gray-300 flex items-center justify-center text-black font-bold">50</div>
-                  </div>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-lg font-bold">Dice</h3>
-                <p className="text-gray-400 text-sm mt-1 mb-3">Over/Under dice game. Choose your odds, place your bet!</p>
-                <Link href="/dice">
-                  <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
-                    Play Now
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Mines Card */}
-            <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="bg-gradient-to-br from-gray-900 via-slate-800 to-zinc-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
-                {/* Mine grid pattern background */}
-                <div className="absolute inset-0 opacity-20">
-                  {Array.from({ length: 25 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="absolute w-3 h-3 border border-gray-600 rounded"
-                      style={{
-                        left: `${(index % 5) * 16 + 10}%`,
-                        top: `${Math.floor(index / 5) * 16 + 10}%`,
-                        animation: `pulse ${1 + (index % 3)}s infinite`
-                      }}
-                    >
-                      {index % 8 === 0 && <div className="w-1 h-1 bg-red-500 rounded-full m-auto mt-1 animate-pulse"></div>}
-                      {index % 7 === 0 && index % 8 !== 0 && <div className="w-1 h-1 bg-green-500 rounded-full m-auto mt-1 animate-pulse"></div>}
-                    </div>
-                  ))}
-                </div>
-                {/* Mines visual */}
-                <div className="relative z-10">
-                  <div className="text-6xl mb-2">💣</div>
-                  <div className="flex justify-center space-x-1">
-                    <div className="w-6 h-6 bg-gray-700 border border-gray-500 rounded flex items-center justify-center">
-                      <span className="text-green-400 text-xs">💎</span>
-                    </div>
-                    <div className="w-6 h-6 bg-gray-700 border border-gray-500 rounded flex items-center justify-center">
-                      <span className="text-red-500 text-xs">💣</span>
-                    </div>
-                    <div className="w-6 h-6 bg-gray-700 border border-gray-500 rounded flex items-center justify-center">
-                      <span className="text-green-400 text-xs">💎</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 bg-red-500/30 text-red-200 rounded-md px-2">
-                  <span className="text-sm font-medium">Risk</span>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-lg font-bold">Mines</h3>
-                <p className="text-gray-400 text-sm mt-1 mb-3">Find gems while avoiding mines. High risk, high reward!</p>
-                <Link href="/mines">
-                  <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
-                    Play Now
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Plinko Master Card */}
-            <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="bg-gradient-to-br from-purple-900 via-indigo-800 to-violet-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
-                {/* Advanced plinko pattern */}
-                <div className="absolute inset-0 opacity-30">
-                  {Array.from({ length: 6 }).map((_, row) => (
-                    <div key={row} className="flex justify-center mb-1" style={{ paddingLeft: `${(row % 2) * 8}px` }}>
-                      {Array.from({ length: Math.min(8 - Math.floor(row / 2), 6) }).map((_, pin) => (
-                        <div
-                          key={pin}
-                          className="w-1.5 h-1.5 bg-white rounded-full mx-1 animate-pulse"
-                          style={{ animationDelay: `${(row * 100 + pin * 50)}ms` }}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                {/* Plinko Master visual */}
-                <div className="relative z-10">
-                  <div className="text-6xl mb-2 animate-bounce">🟠</div>
-                  <div className="flex justify-center space-x-px text-xs">
-                    <div className="bg-red-500 px-1 rounded">2.0x</div>
-                    <div className="bg-orange-500 px-1 rounded">1.8x</div>
-                    <div className="bg-yellow-500 px-1 rounded">1.6x</div>
-                    <div className="bg-green-500 px-1 rounded">1.4x</div>
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 bg-purple-500/30 text-purple-200 rounded-md px-2">
-                  <span className="text-sm font-medium">New</span>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-lg font-bold">Plinko</h3>
-                <p className="text-gray-400 text-sm mt-1 mb-3">Advanced plinko with dynamic physics and 16 slots!</p>
-                <Link href="/plinko_master">
-                  <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
-                    Play Now
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Custom HTML Games Section */}
-          {user && customGames.length > 0 && (
-            <div className="mb-10">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                Custom Games
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {customGames.slice(0, 8).map((game) => (
-                  <div key={game.id} className="bg-card rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer">
-                    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 aspect-[4/3] flex items-center justify-center text-center p-6 relative overflow-hidden">
-                      {/* Custom game pattern background */}
-                      <div className="absolute inset-0 opacity-10">
-                        <div className="grid grid-cols-4 gap-1 h-full">
-                          {Array.from({ length: 16 }).map((_, i) => (
-                            <div 
-                              key={i}
-                              className="bg-primary rounded animate-pulse"
-                              style={{
-                                animationDelay: `${i * 100}ms`,
-                                animationDuration: `${2 + (i % 3)}s`
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {/* HTML Game visual */}
-                      <div className="relative z-10">
-                        <div className="text-6xl mb-2">🎮</div>
-                        <div className="flex justify-center space-x-1">
-                          <div className="w-3 h-3 bg-primary rounded-full animate-ping"></div>
-                          <div className="w-3 h-3 bg-secondary rounded-full animate-ping delay-100"></div>
-                          <div className="w-3 h-3 bg-accent rounded-full animate-ping delay-200"></div>
-                        </div>
-                      </div>
-                      
-                      <div className="absolute top-4 right-4 bg-primary/20 text-primary rounded-md px-2">
-                        <span className="text-sm font-medium">{game.type.toUpperCase()}</span>
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="text-lg font-bold truncate">{game.name}</h3>
-                      <p className="text-gray-400 text-sm mt-1 mb-3 line-clamp-2">
-                        {game.description || `Win chance: ${game.winChance}% • Max multiplier: ${game.maxMultiplier}x`}
-                      </p>
-                      <Link href={`/html-game/${game.id}`}>
-                        <button className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors">
-                          Play Now
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Show more games link */}
-              {customGames.length > 8 && (
-                <div className="text-center mt-6">
-                  <Link href="/games">
-                    <button className="px-6 py-2 border border-primary text-primary rounded-md hover:bg-primary/10 transition-colors">
-                      View {customGames.length - 8} More Custom Games
-                    </button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Show loading state */}
-          {user && loadingCustomGames && (
-            <div className="mb-10">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                Custom Games
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="bg-card rounded-lg shadow-lg overflow-hidden animate-pulse">
-                    <div className="bg-gray-700 aspect-[4/3]"></div>
-                    <div className="p-5">
-                      <div className="h-5 bg-gray-700 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-700 rounded mb-3 w-3/4"></div>
-                      <div className="h-8 bg-gray-700 rounded"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          
-
-          <div className="bg-card rounded-lg p-6">
-            <h3 className="text-lg font-bold mb-2">Join the Casino Community</h3>
-            <p className="text-gray-400 mb-4">Connect with thousands of players already winning on Shadow Casino. Register now and claim your welcome bonus!</p>
-
-            <div className="flex items-center gap-4">
-              <Link href="/chat">
-                <button className="bg-background px-4 py-2 rounded-md hover:bg-muted transition-colors">
-                  Chat Room
-                </button>
-              </Link>
-              <a 
-                href="https://wa.me/01989379895" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-background px-4 py-2 rounded-md hover:bg-muted transition-colors inline-flex items-center gap-2"
+            <Link href="/games">
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white whitespace-nowrap"
+                style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
               >
-                <span className="text-green-500 text-xl">✆</span>
-                <span>Support</span>
-              </a>
-            </div>
+                <Zap className="w-4 h-4" />
+                Play Now
+              </motion.button>
+            </Link>
+          </div>
+
+          {/* Stats strip */}
+          <div className="relative z-10 border-t border-white/10 grid grid-cols-3 divide-x divide-white/10">
+            {[
+              { icon: <Users className="w-4 h-4" />, label: "Active Players", value: "2,400+" },
+              { icon: <Trophy className="w-4 h-4" />, label: "Total Paid Out", value: "$1.2M+" },
+              { icon: <TrendingUp className="w-4 h-4" />, label: "Biggest Win", value: "1000×" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-2">
+                <span className="text-violet-400">{stat.icon}</span>
+                <div className="text-center sm:text-left">
+                  <div className="text-white font-bold text-sm sm:text-base">{stat.value}</div>
+                  <div className="text-gray-500 text-xs hidden sm:block">{stat.label}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
+
+        {/* Games Section */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Featured Games</h2>
+            <Link href="/games">
+              <button className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                View all <ChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
+            {gameCards.map((game) => (
+              <motion.div key={game.id} variants={cardVariants}>
+                <Link href={game.href}>
+                  <div
+                    className="group bg-card rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                    style={{ boxShadow: `0 0 0 0 ${game.glowColor}` }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 32px ${game.glowColor}`;
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 0 0 ${game.glowColor}`;
+                    }}
+                  >
+                    {/* Card image area */}
+                    <div className={`bg-gradient-to-br ${game.gradient} aspect-[4/3] flex items-center justify-center relative overflow-hidden`}>
+                      {/* Subtle mesh pattern */}
+                      <div
+                        className="absolute inset-0 opacity-10"
+                        style={{
+                          backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+                          backgroundSize: "20px 20px",
+                        }}
+                      />
+
+                      {/* Icon */}
+                      <div className="relative z-10 flex flex-col items-center">
+                        <div className="group-hover:scale-110 transition-transform duration-300">
+                          {game.icon}
+                        </div>
+                        <div className="mt-3 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold">
+                          Up to {game.multiplier}
+                        </div>
+                      </div>
+
+                      {/* Badge */}
+                      <div className={`absolute top-3 right-3 text-xs font-medium px-2 py-0.5 rounded-full ${game.badgeColor}`}>
+                        {game.badge}
+                      </div>
+                    </div>
+
+                    {/* Card body */}
+                    <div className="p-4">
+                      <h3 className="font-bold text-white text-base mb-1">{game.title}</h3>
+                      <p className="text-gray-400 text-xs leading-relaxed mb-3">{game.description}</p>
+                      <button className="w-full py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 group-hover:opacity-100"
+                        style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}>
+                        Play Now
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Bottom row: Winners + Community */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+
+          {/* Recent Winners */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="bg-card rounded-2xl border border-white/5 overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-5 border-b border-white/5">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-yellow-400" />
+                <h3 className="font-bold text-white">Recent Winners</h3>
+              </div>
+              <span className="flex items-center gap-1 text-xs text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <div className="p-2">
+              {isLoadingWinners ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-white/10" />
+                    <div className="flex-1">
+                      <div className="h-3 bg-white/10 rounded w-24 mb-1" />
+                      <div className="h-2 bg-white/10 rounded w-16" />
+                    </div>
+                    <div className="h-4 bg-white/10 rounded w-12" />
+                  </div>
+                ))
+              ) : winners.length === 0 ? (
+                <div className="py-8 text-center text-gray-500 text-sm">No recent winners yet</div>
+              ) : (
+                winners.slice(0, 5).map((winner, idx) => (
+                  <div key={idx} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                      style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}>
+                      {winner.username?.substring(0, 2)?.toUpperCase() || "??"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white truncate">{winner.username || "Anonymous"}</div>
+                      <div className="text-xs text-gray-500">{winner.gameType || "Game"}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-emerald-400">+${formatMoney(winner.amount || 0)}</div>
+                      <div className="text-xs text-gray-500">{winner.multiplier ? `${winner.multiplier}×` : ""}</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+
+          {/* Community + Quick Links */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col gap-4"
+          >
+            {/* Promo card */}
+            <div className="relative rounded-2xl overflow-hidden border border-white/10 p-6 flex-1"
+              style={{ background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)" }}>
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
+                style={{ background: "radial-gradient(circle, #fbbf24, transparent)" }} />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  <span className="text-yellow-400 text-sm font-semibold">Welcome Bonus</span>
+                </div>
+                <h3 className="text-white text-lg font-bold mb-1">Get 100% Deposit Match</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  New members get a bonus on their first deposit. Join thousands of players winning daily.
+                </p>
+                <Link href="/account/wallet">
+                  <button className="px-5 py-2 rounded-lg text-sm font-semibold text-white"
+                    style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
+                    Claim Bonus
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick links */}
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { href: "/chat", label: "Live Chat", sub: "Talk to players", icon: "💬" },
+                { href: "/leaderboard", label: "Leaderboard", sub: "Top winners", icon: "🏆" },
+                { href: "/account/referrals", label: "Referrals", sub: "Earn commissions", icon: "🤝" },
+                {
+                  href: "https://wa.me/01989379895",
+                  label: "Support",
+                  sub: "24/7 help",
+                  icon: "✆",
+                  external: true,
+                },
+              ].map((item) =>
+                item.external ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-card border border-white/5 hover:border-white/20 rounded-xl p-4 flex items-center gap-3 transition-all hover:bg-white/5 cursor-pointer"
+                  >
+                    <span className="text-2xl">{item.icon}</span>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{item.label}</div>
+                      <div className="text-xs text-gray-500">{item.sub}</div>
+                    </div>
+                  </a>
+                ) : (
+                  <Link key={item.label} href={item.href}>
+                    <div className="bg-card border border-white/5 hover:border-white/20 rounded-xl p-4 flex items-center gap-3 transition-all hover:bg-white/5 cursor-pointer">
+                      <span className="text-2xl">{item.icon}</span>
+                      <div>
+                        <div className="text-sm font-semibold text-white">{item.label}</div>
+                        <div className="text-xs text-gray-500">{item.sub}</div>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Custom Games Section */}
+        {user && (loadingCustomGames || customGames.length > 0) && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Custom Games</h2>
+              {customGames.length > 8 && (
+                <Link href="/games">
+                  <button className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                    View all <ChevronRight className="w-4 h-4" />
+                  </button>
+                </Link>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {loadingCustomGames
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-card rounded-2xl overflow-hidden animate-pulse border border-white/5">
+                      <div className="bg-white/5 aspect-[4/3]" />
+                      <div className="p-4">
+                        <div className="h-4 bg-white/10 rounded mb-2 w-3/4" />
+                        <div className="h-3 bg-white/10 rounded mb-3 w-1/2" />
+                        <div className="h-8 bg-white/10 rounded" />
+                      </div>
+                    </div>
+                  ))
+                : customGames.slice(0, 8).map((game) => (
+                    <div key={game.id} className="bg-card rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+                      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-zinc-900 aspect-[4/3] flex items-center justify-center relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10"
+                          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+                        <div className="text-5xl">🎮</div>
+                        <div className="absolute top-3 right-3 bg-violet-500/30 text-violet-200 border border-violet-500/30 text-xs font-medium px-2 py-0.5 rounded-full">
+                          {game.type.toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-bold text-white text-sm mb-1 truncate">{game.name}</h3>
+                        <p className="text-gray-400 text-xs mb-3 line-clamp-2">
+                          {game.description || `Win: ${game.winChance}% • Max: ${game.maxMultiplier}×`}
+                        </p>
+                        <Link href={`/html-game/${game.id}`}>
+                          <button className="w-full py-2 rounded-lg text-sm font-semibold text-white"
+                            style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}>
+                            Play Now
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
-    </>
   );
 });
 

@@ -1,13 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { 
+import {
   Gamepad2, Dice5, TrendingUp,
   MessageSquare, DollarSign, User, Wallet,
   ClipboardList, ShieldAlert, Activity,
-  Palette, Settings, ChevronLeft, ChevronRight, Menu, Users, Pin
+  Palette, ChevronLeft, ChevronRight, Users,
+  Home, Layers
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { UserRole } from "@shared/schema";
-import { ThemeSelector } from "@/components/common/ThemeSelector";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -30,438 +30,248 @@ interface CustomGame {
   createdBy: number;
 }
 
+interface NavItemProps {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  isCollapsed: boolean;
+  isActive: boolean;
+  badge?: React.ReactNode;
+}
+
+function NavItem({ href, icon, label, isCollapsed, isActive, badge }: NavItemProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link href={href}>
+          <div
+            className={`
+              relative flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 transition-all duration-200 cursor-pointer text-sm font-medium
+              ${isActive
+                ? "bg-violet-600/20 text-violet-300 border border-violet-500/30"
+                : "text-gray-400 hover:text-gray-200 hover:bg-white/5 border border-transparent"}
+              ${isCollapsed ? "justify-center px-0" : ""}
+            `}
+          >
+            {isActive && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-violet-400 rounded-full" />
+            )}
+            <span className={`flex-shrink-0 ${isActive ? "text-violet-400" : ""}`}>{icon}</span>
+            {!isCollapsed && <span className="truncate">{label}</span>}
+            {!isCollapsed && badge}
+          </div>
+        </Link>
+      </TooltipTrigger>
+      {isCollapsed && (
+        <TooltipContent side="right" className="text-xs">
+          {label}
+        </TooltipContent>
+      )}
+    </Tooltip>
+  );
+}
+
+function SectionLabel({ label, isCollapsed }: { label: string; isCollapsed: boolean }) {
+  if (isCollapsed) return <div className="my-2 border-t border-white/5" />;
+  return (
+    <div className="px-3 pt-4 pb-1">
+      <span className="text-[10px] font-semibold tracking-widest text-gray-600 uppercase">{label}</span>
+    </div>
+  );
+}
+
 export function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
-  const { state, open, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const { t } = useTranslation();
   const [customGames, setCustomGames] = useState<CustomGame[]>([]);
-  const [loadingGames, setLoadingGames] = useState(false);
-  
-  // Only allow specific admin users access to admin panel
+
   const isAdmin = user?.role === UserRole.ADMIN;
-  const isAuthorizedAdmin = isAdmin && (user?.username === "shadowHimel" || user?.username === "shadowTalha" || user?.username === "shadowKaran" || user?.username === "Albab AJ");
+  const isAuthorizedAdmin =
+    isAdmin &&
+    ["shadowHimel", "shadowTalha", "shadowKaran", "Albab AJ"].includes(user?.username || "");
 
-  // Fetch custom games
   useEffect(() => {
-    const fetchCustomGames = async () => {
-      if (!user) return;
-      
-      try {
-        setLoadingGames(true);
-        const response = await fetch('/api/games/custom');
-        if (response.ok) {
-          const games = await response.json();
-          setCustomGames(games.filter((game: CustomGame) => game.isActive));
-        }
-      } catch (error) {
-        console.error('Error fetching custom games:', error);
-      } finally {
-        setLoadingGames(false);
-      }
-    };
-
-    fetchCustomGames();
+    if (!user) return;
+    fetch("/api/games/custom")
+      .then((r) => r.ok ? r.json() : [])
+      .then((games) => setCustomGames(games.filter((g: CustomGame) => g.isActive)))
+      .catch(() => {});
   }, [user]);
-  const isRouteActive = (route: string) => {
+
+  const isActive = (route: string) => {
     if (route === "/" && location === "/") return true;
     if (route !== "/" && location.startsWith(route)) return true;
     return false;
   };
 
   const isCollapsed = state === "collapsed";
-  
-  // Debug log to check state
-  console.log('Sidebar state:', { state, open, isCollapsed });
 
   return (
-    <div 
-      className={`bg-background-darker min-h-screen flex flex-col border-r border-border transition-all duration-300 ease-in-out relative z-50 ${
-        isCollapsed 
-          ? "w-16 lg:static lg:translate-x-0" 
-          : "w-64 lg:static lg:translate-x-0"
-      }`}
+    <div
+      className={`
+        min-h-screen flex flex-col border-r border-white/5 transition-all duration-300 ease-in-out relative z-50
+        ${isCollapsed ? "w-16" : "w-64"}
+      `}
+      style={{ background: "linear-gradient(180deg, #0f0c1e 0%, #0a0a14 100%)" }}
     >
       {/* Toggle Button */}
-      <div className="absolute -right-3 top-4 sidebar-toggle-button z-10">
+      <div className="absolute -right-3 top-5 z-10">
         <Button
           onClick={toggleSidebar}
           size="sm"
           variant="outline"
-          className="h-6 w-6 rounded-full border-border bg-background-darker hover:bg-background-light transition-all duration-200 hover:scale-110 shadow-md"
-          title={`${isCollapsed ? 'Expand' : 'Collapse'} sidebar (Ctrl+B)`}
+          className="h-6 w-6 rounded-full border-white/10 bg-gray-900 hover:bg-gray-800 transition-all duration-200 shadow-lg p-0"
+          title={`${isCollapsed ? "Expand" : "Collapse"} sidebar`}
         >
-          {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+          {isCollapsed ? (
+            <ChevronRight className="h-3 w-3 text-gray-400" />
+          ) : (
+            <ChevronLeft className="h-3 w-3 text-gray-400" />
+          )}
         </Button>
       </div>
 
       {/* Logo */}
-      <div className={`p-6 pb-2 transition-all duration-300 ${isCollapsed ? "px-3" : "px-6"}`}>
+      <div className={`flex items-center gap-3 p-5 pb-4 ${isCollapsed ? "px-3 justify-center" : ""}`}>
         <Link href="/">
-          <div className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <img 
-              src={projectShadowLogo} 
-              alt="Project Shadow" 
-              className={`${isCollapsed ? "h-8 w-8 object-contain" : "h-12"} w-auto transition-all duration-300`}
-            />
+          <div className="flex items-center gap-3 cursor-pointer">
+            <div className="relative flex-shrink-0">
+              <img
+                src={projectShadowLogo}
+                alt="Project Shadow"
+                className={`${isCollapsed ? "h-8 w-8" : "h-9 w-9"} object-contain`}
+              />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-gray-900" />
+            </div>
             {!isCollapsed && (
-              <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-white">
-                  PROJECT SHADOW
-                </h1>
-                <p className="text-sm text-gray-400">Gaming Platform</p>
+              <div>
+                <div className="text-white font-bold text-sm leading-none tracking-wide">PROJECT SHADOW</div>
+                <div className="text-gray-600 text-xs mt-0.5">Gaming Platform</div>
               </div>
             )}
           </div>
         </Link>
       </div>
-      
-      {/* Navigation Menu */}
-      <nav className={`flex-1 transition-all duration-300 ${isCollapsed ? "p-2" : "p-4"}`}>
-        <div className="mb-6">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/") && !location.includes("/account") && !location.includes("/admin")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <Gamepad2 className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{t('nav.home')}</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>{t('nav.home')}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/games">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/games")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <Activity className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{t('nav.games')}</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>{t('nav.games')}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
 
-          {!isCollapsed && (
-            <>
-              <Link href="/slots">
-                <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
-                  isRouteActive("/slots")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer`}>
-                  <span>Slots</span>
-                </div>
-              </Link>
-              
-              <Link href="/mines">
-                <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
-                  isRouteActive("/mines")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer`}>
-                  <span>Mines</span>
-                </div>
-              </Link>
-              
-              {/* Admin-only games */}
-              {isAdmin && (
-                <>
-                  <Link href="/dice">
-                    <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
-                      isRouteActive("/dice")
-                        ? "bg-background-light text-primary"
-                        : "text-gray-300 hover:bg-background-light hover:text-primary"
-                    } transition-colors cursor-pointer`}>
-                      <span>Dice 🔒</span>
-                    </div>
-                  </Link>
-                  
-                  <Link href="/plinko_master">
-                    <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
-                      isRouteActive("/plinko_master")
-                        ? "bg-background-light text-primary"
-                        : "text-gray-300 hover:bg-background-light hover:text-primary"
-                    } transition-colors cursor-pointer`}>
-                      <span>Plinko 🔒</span>
-                    </div>
-                  </Link>
-                </>
-              )}
+      {/* Divider */}
+      <div className="mx-4 border-t border-white/5 mb-2" />
 
-              {/* Custom HTML Games */}
-              {customGames.length > 0 && (
-                <>
-                  <div className="text-xs text-gray-400 mb-2 px-2 mt-3 pl-10">CUSTOM GAMES</div>
-                  {customGames.slice(0, 5).map((game) => (
-                    <Link key={game.id} href={`/html-game/${game.id}`}>
-                      <div className={`flex items-center p-2 rounded-md mb-1 pl-10 ${
-                        isRouteActive(`/html-game/${game.id}`)
-                          ? "bg-background-light text-primary"
-                          : "text-gray-300 hover:bg-background-light hover:text-primary"
-                      } transition-colors cursor-pointer`}>
-                        <span className="truncate">{game.name}</span>
-                        {game.type && (
-                          <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
-                            {game.type.toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                  {customGames.length > 5 && (
-                    <Link href="/games">
-                      <div className="flex items-center p-2 rounded-md mb-1 pl-10 text-gray-400 hover:bg-background-light hover:text-primary transition-colors cursor-pointer">
-                        <span className="text-sm">+{customGames.length - 5} more games</span>
-                      </div>
-                    </Link>
+      {/* Navigation */}
+      <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-2" : "px-3"}`}>
+
+        <SectionLabel label="Menu" isCollapsed={isCollapsed} />
+        <NavItem href="/" icon={<Home className="h-4 w-4" />} label={t("nav.home")} isCollapsed={isCollapsed} isActive={isActive("/") && !location.includes("/account") && !location.includes("/admin")} />
+        <NavItem href="/games" icon={<Activity className="h-4 w-4" />} label={t("nav.games")} isCollapsed={isCollapsed} isActive={isActive("/games")} />
+
+        <SectionLabel label="Games" isCollapsed={isCollapsed} />
+        <NavItem href="/slots" icon={<Gamepad2 className="h-4 w-4" />} label="Slots" isCollapsed={isCollapsed} isActive={isActive("/slots")} />
+        <NavItem href="/mines" icon={<Layers className="h-4 w-4" />} label="Mines" isCollapsed={isCollapsed} isActive={isActive("/mines")} />
+
+        {isAdmin && (
+          <>
+            <NavItem
+              href="/dice"
+              icon={<Dice5 className="h-4 w-4" />}
+              label="Dice"
+              isCollapsed={isCollapsed}
+              isActive={isActive("/dice")}
+              badge={
+                !isCollapsed ? (
+                  <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-1.5 py-0.5 rounded-full">Admin</span>
+                ) : undefined
+              }
+            />
+            <NavItem
+              href="/plinko_master"
+              icon={<TrendingUp className="h-4 w-4" />}
+              label="Plinko"
+              isCollapsed={isCollapsed}
+              isActive={isActive("/plinko_master")}
+              badge={
+                !isCollapsed ? (
+                  <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-1.5 py-0.5 rounded-full">Admin</span>
+                ) : undefined
+              }
+            />
+          </>
+        )}
+
+        {!isCollapsed && customGames.length > 0 && (
+          <>
+            <SectionLabel label="Custom Games" isCollapsed={isCollapsed} />
+            {customGames.slice(0, 5).map((game) => (
+              <Link key={game.id} href={`/html-game/${game.id}`}>
+                <div
+                  className={`
+                    flex items-center gap-3 px-3 py-2 rounded-xl mb-1 transition-all duration-200 cursor-pointer text-sm
+                    ${isActive(`/html-game/${game.id}`)
+                      ? "bg-violet-600/20 text-violet-300 border border-violet-500/30"
+                      : "text-gray-400 hover:text-gray-200 hover:bg-white/5 border border-transparent"}
+                  `}
+                >
+                  <span className="text-base flex-shrink-0">🎮</span>
+                  <span className="truncate">{game.name}</span>
+                  {game.type && (
+                    <span className="ml-auto text-[10px] bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                      {game.type.toUpperCase()}
+                    </span>
                   )}
-                </>
-              )}
+                </div>
+              </Link>
+            ))}
+            {customGames.length > 5 && (
+              <Link href="/games">
+                <div className="px-3 py-2 text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">
+                  +{customGames.length - 5} more games →
+                </div>
+              </Link>
+            )}
+          </>
+        )}
 
-              {loadingGames && (
-                <div className="flex items-center p-2 pl-10 text-gray-400">
-                  <span className="text-sm">Loading games...</span>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href="/leaderboard">
-              <div className={`flex items-center p-2 rounded-md mb-1 ${
-                isRouteActive("/leaderboard")
-                  ? "bg-background-light text-primary"
-                  : "text-gray-300 hover:bg-background-light hover:text-primary"
-              } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                <TrendingUp className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                {!isCollapsed && <span>{t('nav.leaderboard')}</span>}
-              </div>
-            </Link>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">
-              <p>{t('nav.leaderboard')}</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
-        
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href="/chat">
-              <div className={`flex items-center p-2 rounded-md mb-6 ${
-                isRouteActive("/chat")
-                  ? "bg-background-light text-primary"
-                  : "text-gray-300 hover:bg-background-light hover:text-primary"
-              } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                <MessageSquare className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                {!isCollapsed && <span>{t('nav.chat')}</span>}
-              </div>
-            </Link>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">
-              <p>{t('nav.chat')}</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
-        
-        <div className="border-t border-gray-800 pt-4 mb-6">
-          {!isCollapsed && <p className="text-xs text-gray-400 mb-2 px-2">{t('nav.currency').toUpperCase()}</p>}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/currency">
-                <div className={`flex items-center p-2 rounded-md mb-6 ${
-                  isRouteActive("/currency")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <DollarSign className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{t('nav.currency')}</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>Currency Switcher</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </div>
-        
-        <div className="border-t border-gray-800 pt-4">
-          {!isCollapsed && <p className="text-xs text-gray-400 mb-2 px-2">ACCOUNT</p>}
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/account/profile">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/account/profile")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <User className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>Profile</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>Profile</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/account/wallet">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/account/wallet")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <Wallet className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>Wallet</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>Wallet</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/account/history">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/account/history")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <ClipboardList className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>Transaction History</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>Transaction History</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/account/referrals">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/account/referrals")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <Users className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>Referral Program</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>Referral Program</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          
-          {isAuthorizedAdmin && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/admin">
-                  <div className={`flex items-center p-2 rounded-md mb-1 ${
-                    isRouteActive("/admin")
-                      ? "bg-background-light text-primary"
-                      : "text-gray-300 hover:bg-background-light hover:text-primary"
-                  } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                    <ShieldAlert className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                    {!isCollapsed && (
-                      <>
-                        <span>Admin Panel</span>
-                        <span className="ml-2 px-1.5 py-0.5 text-xs bg-red-500 text-white rounded">Super</span>
-                      </>
-                    )}
-                  </div>
-                </Link>
-              </TooltipTrigger>
-              {isCollapsed && (
-                <TooltipContent side="right">
-                  <p>Admin Panel</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          )}
-        </div>
-        <div className="border-t border-gray-800 pt-4 mt-4">
-          {!isCollapsed && <p className="text-xs text-gray-400 mb-2 px-2">APPEARANCE</p>}
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/themes">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/themes")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <Palette className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>{t('nav.themes')}</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>Themes</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/pin-demo">
-                <div className={`flex items-center p-2 rounded-md mb-1 ${
-                  isRouteActive("/pin-demo")
-                    ? "bg-background-light text-primary"
-                    : "text-gray-300 hover:bg-background-light hover:text-primary"
-                } transition-colors cursor-pointer ${isCollapsed ? "justify-center" : ""}`}>
-                  <Pin className={`h-5 w-5 ${!isCollapsed ? "mr-3" : ""}`} />
-                  {!isCollapsed && <span>3D Pin Demo</span>}
-                </div>
-              </Link>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                <p>3D Pin Demo</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </div>
+        <SectionLabel label="Explore" isCollapsed={isCollapsed} />
+        <NavItem href="/leaderboard" icon={<TrendingUp className="h-4 w-4" />} label={t("nav.leaderboard")} isCollapsed={isCollapsed} isActive={isActive("/leaderboard")} />
+        <NavItem href="/chat" icon={<MessageSquare className="h-4 w-4" />} label={t("nav.chat")} isCollapsed={isCollapsed} isActive={isActive("/chat")} />
+        <NavItem href="/currency" icon={<DollarSign className="h-4 w-4" />} label={t("nav.currency")} isCollapsed={isCollapsed} isActive={isActive("/currency")} />
+
+        <SectionLabel label="Account" isCollapsed={isCollapsed} />
+        <NavItem href="/account/profile" icon={<User className="h-4 w-4" />} label="Profile" isCollapsed={isCollapsed} isActive={isActive("/account/profile")} />
+        <NavItem href="/account/wallet" icon={<Wallet className="h-4 w-4" />} label="Wallet" isCollapsed={isCollapsed} isActive={isActive("/account/wallet")} />
+        <NavItem href="/account/history" icon={<ClipboardList className="h-4 w-4" />} label="History" isCollapsed={isCollapsed} isActive={isActive("/account/history")} />
+        <NavItem href="/account/referrals" icon={<Users className="h-4 w-4" />} label="Referrals" isCollapsed={isCollapsed} isActive={isActive("/account/referrals")} />
+
+        {isAuthorizedAdmin && (
+          <>
+            <SectionLabel label="Administration" isCollapsed={isCollapsed} />
+            <NavItem
+              href="/admin"
+              icon={<ShieldAlert className="h-4 w-4" />}
+              label="Admin Panel"
+              isCollapsed={isCollapsed}
+              isActive={isActive("/admin")}
+              badge={
+                !isCollapsed ? (
+                  <span className="ml-auto text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded-full">Super</span>
+                ) : undefined
+              }
+            />
+          </>
+        )}
+
+        <SectionLabel label="Appearance" isCollapsed={isCollapsed} />
+        <NavItem href="/themes" icon={<Palette className="h-4 w-4" />} label={t("nav.themes")} isCollapsed={isCollapsed} isActive={isActive("/themes")} />
       </nav>
+
+      {/* Footer */}
+      {!isCollapsed && (
+        <div className="p-4 border-t border-white/5">
+          <div className="text-xs text-gray-700 text-center">
+            © 2025 Project Shadow
+          </div>
+        </div>
+      )}
     </div>
   );
 }
