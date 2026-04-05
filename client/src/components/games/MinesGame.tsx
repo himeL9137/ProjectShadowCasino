@@ -22,6 +22,30 @@ interface TileState {
 
 type Phase = 'setup' | 'playing' | 'gameover' | 'cashout';
 
+function validateMinesReveal(data: any): void {
+  const required = ['hitMine', 'grid'] as const;
+  for (const field of required) {
+    if (data[field] === undefined || data[field] === null) {
+      console.error(`[Mines] reveal response missing field: ${field}`, data);
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+  if (!data.hitMine && data.multiplier === undefined) {
+    console.error('[Mines] reveal response missing multiplier on gem find', data);
+    throw new Error('Missing multiplier');
+  }
+}
+
+function validateMinesCashout(data: any): void {
+  const required = ['winAmount', 'multiplier', 'balance'] as const;
+  for (const field of required) {
+    if (data[field] === undefined || data[field] === null) {
+      console.error(`[Mines] cashout response missing field: ${field}`, data);
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+}
+
 // Particle explosion component
 function Explosion({ x, y }: { x: number; y: number }) {
   const particles = Array.from({ length: 8 }, (_, i) => ({
@@ -200,6 +224,7 @@ export function MinesGame() {
       return res.json();
     },
     onSuccess: (data) => {
+      validateMinesReveal(data);
       setGrid(data.grid);
       if (data.hitMine) {
         setExplodedPos(data.position);
@@ -224,6 +249,7 @@ export function MinesGame() {
       return res.json();
     },
     onSuccess: (data) => {
+      validateMinesCashout(data);
       setGrid(data.grid);
       setFinalWin(data.winAmount);
       setPhase('cashout');

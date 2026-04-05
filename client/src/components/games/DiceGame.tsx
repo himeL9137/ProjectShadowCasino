@@ -27,6 +27,21 @@ interface GameResult {
   };
 }
 
+function validateDiceResponse(data: any): data is GameResult {
+  const required = ['isWin', 'winAmount', 'gameData'] as const;
+  for (const field of required) {
+    if (data[field] === undefined || data[field] === null) {
+      console.error(`[Dice] API response missing field: ${field}`, data);
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+  if (data.gameData.roll === undefined || data.gameData.roll === null) {
+    console.error('[Dice] API response missing gameData.roll', data);
+    throw new Error('Missing gameData.roll');
+  }
+  return true;
+}
+
 function useCountUp(target: number | null, duration = 600) {
   const [display, setDisplay] = useState<number | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -90,6 +105,7 @@ export function DiceGame() {
       return res.json() as Promise<GameResult>;
     },
     onSuccess: (data) => {
+      validateDiceResponse(data);
       setTargetRoll(data.gameData.roll);
       setLastResult(data);
       applyServerBalance(data.balance, currentCurrency);
@@ -199,8 +215,8 @@ export function DiceGame() {
           </div>
           <div className="flex justify-between text-xs mt-1">
             <span className="text-red-400">Lose</span>
-            <span className={`font-bold ${rollOver ? 'text-green-400' : 'text-green-400'}`}>
-              {rollOver ? `> ${currentPrediction} to win` : `< ${currentPrediction} to win`}
+            <span className="font-bold text-green-400">
+              {rollOver ? `≥ ${currentPrediction} to win` : `≤ ${currentPrediction} to win`}
             </span>
             <span className="text-red-400">Lose</span>
           </div>

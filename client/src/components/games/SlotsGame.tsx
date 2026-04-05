@@ -14,10 +14,27 @@ import { applyOptimisticDebit, applyServerBalance } from "@/lib/balance";
 import { GameHistoryFeed } from "@/components/common/GameHistoryFeed";
 import { GameType } from "@shared/schema";
 
-const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣', '🎰'];
+// Symbols and multipliers must match the backend exactly (server/games.ts processSlotsGame)
+const SYMBOLS = ['🍒', '🍋', '🔔', '⭐', '💎', '👑', '🎰', '7️⃣', '💰', '🃏'];
 const SYMBOL_MULTIPLIERS: Record<string, number> = {
-  '7️⃣': 10, '🎰': 8, '💎': 5, '🍇': 3, '🍊': 2, '🍋': 1.5, '🍒': 1.2
+  '7️⃣': 10, '🎰': 8, '👑': 7, '💎': 5, '💰': 4, '⭐': 3, '🔔': 2, '🍒': 1.5, '🍋': 1.2, '🃏': 1.1
 };
+
+function validateSlotsResponse(data: any): data is GameResult {
+  const required = ['isWin', 'winAmount', 'multiplier', 'gameData'] as const;
+  for (const field of required) {
+    if (data[field] === undefined || data[field] === null) {
+      console.error(`[Slots] API response missing field: ${field}`, data);
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+  const gd = data.gameData;
+  if (!gd.reels || !gd.middleRow) {
+    console.error('[Slots] API response missing gameData.reels / gameData.middleRow', data);
+    throw new Error('Missing gameData.reels or gameData.middleRow');
+  }
+  return true;
+}
 
 interface GameResult {
   isWin: boolean;
@@ -101,6 +118,7 @@ export function SlotsGame() {
       return res.json() as Promise<GameResult>;
     },
     onSuccess: (data) => {
+      validateSlotsResponse(data);
       resultRef.current = data;
       setLastResult(data);
     },

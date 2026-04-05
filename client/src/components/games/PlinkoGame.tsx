@@ -34,7 +34,22 @@ interface GameResult {
   isWin: boolean;
   winAmount: number;
   multiplier: number;
-  gameData: { bucket: number; multiplier: number; };
+  gameData: { bucket: number; multiplier: number; bucketMultipliers?: number[]; rows?: number; };
+}
+
+function validatePlinkoResponse(data: any): data is GameResult {
+  const required = ['isWin', 'winAmount', 'multiplier', 'gameData'] as const;
+  for (const field of required) {
+    if (data[field] === undefined || data[field] === null) {
+      console.error(`[Plinko] API response missing field: ${field}`, data);
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+  if (data.gameData.bucket === undefined || data.gameData.bucket === null) {
+    console.error('[Plinko] API response missing gameData.bucket', data);
+    throw new Error('Missing gameData.bucket');
+  }
+  return true;
 }
 
 interface Ball {
@@ -61,6 +76,9 @@ export function PlinkoGame() {
   const [isDropping, setIsDropping] = useState(false);
   const [landedBucket, setLandedBucket] = useState<number | null>(null);
   const [history, setHistory] = useState<{ isWin: boolean; mult: number; amount: number }[]>([]);
+  // Authoritative multipliers: use a ref so the draw function always reads the latest
+  // value without needing to be recreated on every API response.
+  const activeBucketMultsRef = useRef<number[]>(BUCKET_MULTIPLIERS['medium']);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number | null>(null);
@@ -129,7 +147,7 @@ export function PlinkoGame() {
 
     const pins = getPinPositions();
     const buckets = getBucketPositions();
-    const mults = BUCKET_MULTIPLIERS[risk];
+    const mults = activeBucketMultsRef.current;
     const colors = BUCKET_COLORS[risk];
 
     // Draw buckets
@@ -251,6 +269,12 @@ export function PlinkoGame() {
       return res.json() as Promise<GameResult>;
     },
     onSuccess: (data) => {
+      validatePlinkoResponse(data);
+      // Use the server's authoritative multiplier table so the canvas labels
+      // always match the actual payout — never diverge from the backend.
+      if (data.gameData.bucketMultipliers) {
+        activeBucketMultsRef.current = data.gameData.bucketMultipliers;
+      }
       const targetBucket = data.gameData.bucket;
       const path = generatePath(targetBucket);
 
@@ -317,7 +341,7 @@ export function PlinkoGame() {
           {(['low', 'medium', 'high'] as Risk[]).map(r => (
             <button
               key={r}
-              onClick={() => { setRisk(r); setLandedBucket(null); landedBucketRef.current = null; }}
+              onClick={() => { setRisk(r); activeBucketMultsRef.current = BUCKET_MULTIPLIERS[r]; setLandedBucket(null); landedBucketRef.current = null; }}
               disabled={isDropping}
               className={`py-2 px-3 rounded-lg font-bold text-sm capitalize transition-all ${
                 risk === r

@@ -1,0 +1,174 @@
+Here's your SSS-tier prompt for the balance fix:
+
+🔧 CRITICAL BUG FIX — Balance Never Updates After Game Actions
+
+Problem:
+The balance displayed in the UI never changes after any game action (spin, roll, reveal, drop). The value stays frozen at the initial loaded amount regardless of wins or losses.
+
+Root Cause Investigation — Check ALL:
+[ ] API response balance field never being read/applied
+[ ] setState called but component not re-rendering (stale closure)
+[ ] Balance state lives in parent but setter never passed down correctly
+[ ] Optimistic deduction applied but win/loss never added back
+[ ] API call failing silently — catch block swallowing the error with no fallback
+[ ] Wrong field name — reading response.balance but API sends response.data.balance
+[ ] React context value updating but consumers not subscribed correctly
+[ ] Zustand/Redux store updating but component not selecting the state
+[ ] await missing on API call — promise resolved before data arrives
+[ ] Response arrives but triggers no re-render because ref updated, not state
+
+Fix 1 — Correct API Response Reading:
+js// WRONG — field name mismatch
+const { balance } = await api.spin();           // API actually sends response.user.balance
+
+// CORRECT — log raw response first, then destructure correctly
+const response = await api.spin(payload);
+console.log("RAW API RESPONSE:", response);     // find exact field path first
+
+// Then destructure exactly as the API sends it:
+const newBalance = response?.data?.balance      // adjust path to match your API
+                ?? response?.balance
+                ?? response?.user?.balance;
+
+if (newBalance === undefined) {
+  console.error("Balance field not found in response:", response);
+} else {
+  updateBalance(newBalance);
+}
+
+Fix 2 — State Never Updating (Stale Closure):
+js// WRONG — stale closure traps old value
+const [balance, setBalance] = useState(1000);
+
+async function spin() {
+  const res = await api.spin();
+  setBalance(res.balance);     // works once, breaks on rapid calls
+}
+
+// CORRECT — functional update + ref combo
+const balanceRef = useRef(balance);
+const [balance, setBalance] = useState(1000);
+
+function updateBalance(newValue) {
+  balanceRef.current = newValue;
+  setBalance(newValue);        // always triggers re-render
+}
+
+async function spin() {
+  const previous = balanceRef.current;
+  updateBalance(previous - betAmount);       // optimistic
+
+  try {
+    const res = await api.spin({ bet: betAmount });
+    const serverBalance = res?.balance ?? res?.data?.balance;
+    updateBalance(serverBalance);            // authoritative update
+  } catch (e) {
+    updateBalance(previous);               // rollback
+    console.error("Spin API failed:", e);
+  }
+}
+
+Fix 3 — Context Not Propagating:
+js// WRONG — mutating context value directly
+const WalletContext = createContext({ balance: 0 });
+// consumer never re-renders because object reference unchanged
+
+// CORRECT — always new object reference on update
+const [wallet, setWallet] = useState({ balance: 0 });
+
+function updateBalance(newBalance) {
+  setWallet(prev => ({ ...prev, balance: newBalance }));  // new ref = re-render
+}
+
+<WalletContext.Provider value={{ wallet, updateBalance }}>
+
+Fix 4 — Async Without Await (Silent Miss):
+js// WRONG — no await, balance never updates
+function handleSpin() {
+  api.spin().then(res => setBalance(res.balance));  // fire-and-forget, no error catch
+}
+
+// CORRECT — full async/await with error boundary
+async function handleSpin() {
+  try {
+    const res = await api.spin({ bet: currentBet });
+    updateBalance(res.balance);
+  } catch (err) {
+    console.error("API Error:", err);
+    rollbackBalance();
+  }
+}
+
+Fix 5 — Global Balance Sync (Zustand — Recommended):
+js// Install: npm install zustand
+import { create } from 'zustand';
+
+const useWallet = create((set, get) => ({
+  balance: 0,
+
+  fetchBalance: async () => {
+    const res = await api.getBalance();
+    set({ balance: res.balance });
+  },
+
+  deduct: (amount) => {
+    set(state => ({ balance: state.balance - amount }));  // optimistic
+  },
+
+  applyResult: (serverBalance) => {
+    set({ balance: serverBalance });                       // authoritative
+  },
+
+  rollback: (previousBalance) => {
+    set({ balance: previousBalance });
+  }
+}));
+
+// In any game component — always in sync, zero prop drilling
+const { balance, deduct, applyResult, rollback } = useWallet();
+
+Fix 6 — Full Game Action Template (All 4 Games):
+jsasync function executeGameAction(apiCall, payload) {
+  const previous = useWallet.getState().balance;
+
+  // Step 1: Optimistic deduct
+  useWallet.getState().deduct(currentBet);
+
+  try {
+    // Step 2: API call
+    const response = await apiCall(payload);
+
+    // Step 3: Log to debug field name
+    console.log("[GAME RESPONSE]", response);
+
+    // Step 4: Extract balance (covers common API shapes)
+    const newBalance =
+      response?.balance ??
+      response?.data?.balance ??
+      response?.result?.balance ??
+      response?.user?.balance;
+
+    if (typeof newBalance !== "number") {
+      throw new Error("Balance missing from API response");
+    }
+
+    // Step 5: Apply server balance
+    useWallet.getState().applyResult(newBalance);
+    return response;
+
+  } catch (err) {
+    // Step 6: Rollback
+    useWallet.getState().rollback(previous);
+    console.error("Game action failed:", err);
+    throw err;
+  }
+}
+
+Acceptance Criteria:
+✅ Balance deducts instantly on every bet (zero lag)
+✅ Balance updates correctly after every win or loss
+✅ Balance is never frozen or stuck at initial value
+✅ Rapid consecutive bets never produce stale/wrong balance
+✅ API failure triggers clean rollback to previous balance
+✅ All 4 games (Slots, Mines, Dice, Plinko) share same balance state
+✅ Console logs the raw API response for immediate field debugging
