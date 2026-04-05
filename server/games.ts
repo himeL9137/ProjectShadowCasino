@@ -281,80 +281,96 @@ export class GameController {
     return result;
   }
 
-  // Process regular plinko game with risk-level based 9-slot payout system (8 rows)
-  private static processPlinkoGame(isWin: boolean, betAmount: number, options?: { risk?: string }): GameResult {
-    const risk = options?.risk || 'medium';
-    const riskMultipliers: Record<string, number[]> = {
-      low:    [5.6,  2.1,  1.1,  1.0,  0.5,  1.0,  1.1,  2.1,  5.6],
-      medium: [13,   3,    1.3,  0.7,  0.4,  0.7,  1.3,  3,    13 ],
-      high:   [29,   4,    1.5,  0.3,  0.2,  0.3,  1.5,  4,    29 ],
-    };
-    const bucketMultipliers = riskMultipliers[risk] || riskMultipliers.medium;
+  // Plinko multiplier tables by risk and row count (rows 8-16)
+  private static readonly PLINKO_MULTIPLIERS: Record<string, Record<number, number[]>> = {
+    low: {
+      8:  [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+      9:  [5.6, 2.1, 1.4, 1.1, 0.7, 0.7, 1.1, 1.4, 2.1, 5.6],
+      10: [7,   3,   1.6, 1.1, 0.7, 0.5, 0.7, 1.1, 1.6, 3,   7],
+      11: [7,   3,   1.6, 1.1, 0.7, 0.5, 0.5, 0.7, 1.1, 1.6, 3,   7],
+      12: [9,   3.5, 1.7, 1.2, 0.9, 0.6, 0.4, 0.6, 0.9, 1.2, 1.7, 3.5, 9],
+      13: [9,   3.5, 1.7, 1.2, 0.9, 0.6, 0.4, 0.4, 0.6, 0.9, 1.2, 1.7, 3.5, 9],
+      14: [11,  4,   2,   1.5, 1.1, 0.7, 0.4, 0.3, 0.4, 0.7, 1.1, 1.5, 2,   4,   11],
+      15: [11,  4,   2,   1.5, 1.1, 0.7, 0.4, 0.3, 0.3, 0.4, 0.7, 1.1, 1.5, 2,   4,   11],
+      16: [16,  9,   2,   1.4, 1.4, 1.2, 1.1, 0.5, 0.3, 0.5, 1.1, 1.2, 1.4, 1.4, 2,   9,   16],
+    },
+    medium: {
+      8:  [13,  3,   1.3, 0.7, 0.4, 0.7, 1.3, 3,   13],
+      9:  [18,  4,   1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4,   18],
+      10: [22,  5,   2,   1.1, 0.6, 0.3, 0.6, 1.1, 2,   5,   22],
+      11: [24,  6,   2.4, 1.2, 0.7, 0.3, 0.3, 0.7, 1.2, 2.4, 6,   24],
+      12: [33,  11,  4,   2,   1.1, 0.6, 0.3, 0.6, 1.1, 2,   4,   11,  33],
+      13: [43,  13,  4,   2,   1.1, 0.5, 0.2, 0.2, 0.5, 1.1, 2,   4,   13,  43],
+      14: [58,  15,  7,   2.1, 1.2, 0.5, 0.2, 0.1, 0.2, 0.5, 1.2, 2.1, 7,   15,  58],
+      15: [83,  18,  7,   3,   1.3, 0.5, 0.2, 0.1, 0.1, 0.2, 0.5, 1.3, 3,   7,   18,  83],
+      16: [110, 41,  10,  5,   3,   1.5, 1,   0.5, 0.3, 0.5, 1,   1.5, 3,   5,   10,  41,  110],
+    },
+    high: {
+      8:  [29,  4,   1.5, 0.3, 0.2, 0.3, 1.5, 4,   29],
+      9:  [43,  7,   2,   0.5, 0.2, 0.2, 0.5, 2,   7,   43],
+      10: [76,  10,  3,   0.9, 0.3, 0.2, 0.3, 0.9, 3,   10,  76],
+      11: [120, 14,  3,   0.9, 0.3, 0.2, 0.2, 0.3, 0.9, 3,   14,  120],
+      12: [141, 22,  5,   2,   0.9, 0.4, 0.2, 0.4, 0.9, 2,   5,   22,  141],
+      13: [200, 30,  8,   2,   0.8, 0.3, 0.1, 0.1, 0.3, 0.8, 2,   8,   30,  200],
+      14: [500, 50,  10,  4,   1.5, 0.3, 0.2, 0.1, 0.2, 0.3, 1.5, 4,   10,  50,  500],
+      15: [700, 80,  20,  5,   2,   0.5, 0.2, 0.1, 0.1, 0.2, 0.5, 2,   5,   20,  80,  700],
+      16: [1000,130, 26,  9,   4,   2,   0.7, 0.2, 0.1, 0.2, 0.7, 2,   4,   9,   26,  130, 1000],
+    },
+  };
 
-    // Helper function to calculate precise payout
-    const calculatePayout = (bet: number, multiplier: number): number => {
-      return parseFloat((bet * multiplier).toFixed(2));
-    };
-
-    // Simulate which bucket the ball lands in
-    let bucket = Math.floor(Math.random() * bucketMultipliers.length);
-
-    // Apply rigging logic based on win/loss requirement
-    if (isWin) {
-      // Force to a winning bucket (multiplier >= 1.0)
-      const winningBuckets = [];
-      for (let i = 0; i < bucketMultipliers.length; i++) {
-        if (bucketMultipliers[i] >= 1.0) {
-          winningBuckets.push(i);
-        }
-      }
-      if (winningBuckets.length > 0) {
-        bucket = winningBuckets[Math.floor(Math.random() * winningBuckets.length)];
-      }
-    } else {
-      // Force to a losing bucket (multiplier < 1.0) 
-      const losingBuckets = [];
-      for (let i = 0; i < bucketMultipliers.length; i++) {
-        if (bucketMultipliers[i] < 1.0) {
-          losingBuckets.push(i);
-        }
-      }
-      if (losingBuckets.length > 0) {
-        bucket = losingBuckets[Math.floor(Math.random() * losingBuckets.length)];
+  private static generateBallPath(bucket: number, rows: number): boolean[] {
+    let rights = bucket;
+    let lefts = rows - bucket;
+    const path: boolean[] = [];
+    for (let i = 0; i < rows; i++) {
+      const total = rights + lefts;
+      if (total === 0) break;
+      const pRight = rights / total;
+      if (Math.random() < pRight) {
+        path.push(true); rights--;
+      } else {
+        path.push(false); lefts--;
       }
     }
+    return path;
+  }
 
-    // Get the multiplier for this bucket
-    const multiplier = bucketMultipliers[bucket];
+  // Process regular plinko game with risk-level based payout and variable row count
+  private static processPlinkoGame(isWin: boolean, betAmount: number, options?: { risk?: string; rows?: number }): GameResult {
+    const risk = options?.risk || 'medium';
+    const rows = Math.max(8, Math.min(16, options?.rows || 8));
+    const riskTable = this.PLINKO_MULTIPLIERS[risk] || this.PLINKO_MULTIPLIERS.medium;
+    const bucketMultipliers = riskTable[rows] || riskTable[8];
+    const bucketCount = bucketMultipliers.length; // = rows + 1
 
-    // Calculate precise payout using your logic: Payout = Bet Amount × Multiplier
-    const payout = calculatePayout(betAmount, multiplier);
+    const calculatePayout = (bet: number, multiplier: number): number =>
+      parseFloat((bet * multiplier).toFixed(2));
 
-    // Determine if this is actually a win
-    const actualIsWin = multiplier >= 1.0;
+    let bucket = Math.floor(Math.random() * bucketCount);
 
-    // Double-check rigging enforcement
-    if (isWin && !actualIsWin) {
-      // Force to a guaranteed winning bucket
-      const guaranteedWinBuckets = [0, 1, 2, 3, 4, 11, 12, 13, 14, 15]; // All >= 1.0x buckets
-      bucket = guaranteedWinBuckets[Math.floor(Math.random() * guaranteedWinBuckets.length)];
-    } else if (!isWin && actualIsWin) {
-      // Force to a guaranteed losing bucket
-      const guaranteedLoseBuckets = [5, 6, 7, 8]; // All < 1.0x buckets
-      bucket = guaranteedLoseBuckets[Math.floor(Math.random() * guaranteedLoseBuckets.length)];
+    const winningBuckets = bucketMultipliers.map((m, i) => m >= 1.0 ? i : -1).filter(i => i >= 0);
+    const losingBuckets  = bucketMultipliers.map((m, i) => m < 1.0  ? i : -1).filter(i => i >= 0);
+
+    if (isWin && winningBuckets.length > 0) {
+      bucket = winningBuckets[Math.floor(Math.random() * winningBuckets.length)];
+    } else if (!isWin && losingBuckets.length > 0) {
+      bucket = losingBuckets[Math.floor(Math.random() * losingBuckets.length)];
     }
 
     const finalMultiplier = bucketMultipliers[bucket];
     const finalPayout = calculatePayout(betAmount, finalMultiplier);
+    const path = this.generateBallPath(bucket, rows);
 
     return {
       isWin: finalMultiplier >= 1.0,
-      winAmount: finalPayout, // Always return the payout regardless of win/loss
+      winAmount: finalPayout,
       multiplier: finalMultiplier,
       gameData: {
         bucket,
+        rows,
         multiplier: finalMultiplier,
-        betAmount,
+        path,
+        bucketMultipliers,
         payout: finalPayout,
         profit: finalPayout - betAmount
       }
