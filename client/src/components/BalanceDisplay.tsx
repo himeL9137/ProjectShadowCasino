@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, memo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatCurrency, getCurrencySymbol } from "@/lib/currency-utils";
@@ -12,103 +12,112 @@ interface BalanceDisplayProps {
   className?: string;
 }
 
+function animateBalance(
+  from: number,
+  to: number,
+  duration: number,
+  onUpdate: (value: number) => void
+): () => void {
+  const start = performance.now();
+  let rafId: number;
+
+  function step(now: number) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = from + (to - from) * eased;
+    onUpdate(parseFloat(current.toFixed(8)));
+    if (progress < 1) {
+      rafId = requestAnimationFrame(step);
+    } else {
+      onUpdate(to);
+    }
+  }
+
+  rafId = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(rafId);
+}
+
 /**
- * Displays the user's balance with proper animation effects for changes
- * Automatically updates when the balance or currency changes
- * Optimized with React.memo to prevent unnecessary re-renders
+ * Displays the user's balance with smooth animated roll on change.
+ * Single source of truth: balance from CurrencyProvider only.
+ * No layout shake: tabular-nums, fixed min-width, GPU compositing.
  */
-export const BalanceDisplay = React.memo(function BalanceDisplay({ 
-  compact = false, 
+export const BalanceDisplay = memo(function BalanceDisplay({
+  compact = false,
   showCurrency = false,
-  className = ""
+  className = "",
 }: BalanceDisplayProps) {
   const { user } = useAuth();
-  const { 
-    currency, 
-    balance, 
+  const {
+    currency,
+    balance,
     isChangingCurrency,
-    isBalanceRefreshing 
+    isBalanceRefreshing,
   } = useCurrency();
-  
-  const [displayAmount, setDisplayAmount] = useState<string>(user?.balance || "0");
+
+  // Single source of truth: one ref (always-current), one display state
+  const balanceRef = useRef<number>(parseFloat(balance || "0"));
+  const [displayBalance, setDisplayBalance] = useState<number>(balanceRef.current);
+
   const [animationClass, setAnimationClass] = useState<string>("");
-  const previousBalance = useRef<string | null>(null);
-  const previousCurrency = useRef<string | null>(null);
-  const animationTimer = useRef<NodeJS.Timeout | null>(null);
-  
-  // Use nice spring animation when balance changes
+  const previousCurrency = useRef<string>(currency);
+  const animationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelAnimation = useRef<(() => void) | null>(null);
+  const pendingRequest = useRef<number>(0);
+
   useEffect(() => {
-    // Make sure we always have a valid balance to display
-    const safeBalance = balance || user?.balance || "0";
-    
-    // If it's the first time setting the balance, just set it without animation
-    if (previousBalance.current === null) {
-      previousBalance.current = safeBalance;
-      previousCurrency.current = currency;
-      setDisplayAmount(safeBalance);
-      return;
+    const incoming = parseFloat(balance || "0");
+    const isCurrencyChange = previousCurrency.current !== currency;
+
+    // Determine animation class
+    let animClass = "";
+    if (isCurrencyChange) {
+      animClass = "currency-change";
+    } else if (incoming > balanceRef.current) {
+      animClass = "balance-increase";
+    } else if (incoming < balanceRef.current) {
+      animClass = "balance-decrease";
     }
-    
-    // Skip animation if balance hasn't changed
-    if (previousBalance.current === safeBalance && previousCurrency.current === currency) {
-      return;
+
+    const from = balanceRef.current;
+    balanceRef.current = incoming;
+    previousCurrency.current = currency;
+
+    // Cancel any in-flight animation
+    if (cancelAnimation.current) {
+      cancelAnimation.current();
+      cancelAnimation.current = null;
     }
-    
-    try {
-      // Determine if balance increased or decreased
-      const oldBalance = parseFloat(previousBalance.current || "0");
-      const newBalance = parseFloat(safeBalance);
-      
-      let animClass = "";
-      
-      // Same currency, compare values
-      if (previousCurrency.current === currency) {
-        if (newBalance > oldBalance) {
-          animClass = "balance-increase";
-        } else if (newBalance < oldBalance) {
-          animClass = "balance-decrease";
-        }
-      } 
-      // Currency changed - always apply the currency-change animation
-      else {
-        animClass = "currency-change";
+
+    // Lock to latest request so stale async frames don't win
+    const reqId = ++pendingRequest.current;
+
+    if (animClass) {
+      if (animationTimer.current) clearTimeout(animationTimer.current);
+      setAnimationClass(animClass);
+      animationTimer.current = setTimeout(() => {
+        setAnimationClass("");
+        animationTimer.current = null;
+      }, 1500);
+    }
+
+    // Animate from old to new
+    cancelAnimation.current = animateBalance(from, incoming, 400, (val) => {
+      if (pendingRequest.current === reqId) {
+        setDisplayBalance(val);
       }
-      
-      if (animClass) {
-        // Clear any existing animation timer
-        if (animationTimer.current) {
-          clearTimeout(animationTimer.current);
-        }
-        
-        setAnimationClass(animClass);
-        
-        // Remove animation class after animation completes
-        animationTimer.current = setTimeout(() => {
-          setAnimationClass("");
-          animationTimer.current = null;
-        }, 1500);
-      }
-    } catch (error) {
-      console.error('Error updating balance display:', error);
-      // Don't apply animation if there's an error
-    } finally {
-      // Always update state for next comparison
-      previousBalance.current = safeBalance;
-      previousCurrency.current = currency;
-      setDisplayAmount(safeBalance);
-    }
-  }, [balance, currency, user]);
-  
-  // Clean up animation timer on unmount
+    });
+  }, [balance, currency]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (animationTimer.current) {
-        clearTimeout(animationTimer.current);
-      }
+      if (animationTimer.current) clearTimeout(animationTimer.current);
+      if (cancelAnimation.current) cancelAnimation.current();
     };
   }, []);
-  
-  // Handle initial loading state
+
   if (!user && !balance) {
     return (
       <div className="text-2xl font-bold text-muted-foreground">
@@ -116,33 +125,29 @@ export const BalanceDisplay = React.memo(function BalanceDisplay({
       </div>
     );
   }
-  
-  // Memoize expensive calculations to prevent unnecessary re-computations
+
   const formattedBalance = useMemo(() => {
     if (isBalanceRefreshing) return "Loading...";
-    return formatCurrency(displayAmount || "0", currency);
-  }, [displayAmount, currency, isBalanceRefreshing]);
+    return formatCurrency(displayBalance.toString(), currency);
+  }, [displayBalance, currency, isBalanceRefreshing]);
 
-  // Apply debug-aware styling - animations and effects are stripped in debug mode
   const baseClasses = cn(
     compact ? "text-base" : "text-2xl",
     "font-bold",
     className
   );
-  
+
   const fancyClasses = cn(
     animationClass,
-    "transition-all duration-300 ease-in-out",
-    "text-shadow-sm"
+    "balance-display-value"
   );
-  
+
   const displayClasses = useDebugClasses(baseClasses, fancyClasses);
 
   const showCurrencyText = useMemo(() => {
     return showCurrency && !formattedBalance.includes(currency) && ` (${currency})`;
   }, [showCurrency, formattedBalance, currency]);
-  
-  // Show currency loading state
+
   if (isChangingCurrency) {
     return (
       <div className="text-xl font-semibold flex items-center space-x-2">
@@ -151,7 +156,7 @@ export const BalanceDisplay = React.memo(function BalanceDisplay({
       </div>
     );
   }
-  
+
   return (
     <div className={displayClasses}>
       {formattedBalance}

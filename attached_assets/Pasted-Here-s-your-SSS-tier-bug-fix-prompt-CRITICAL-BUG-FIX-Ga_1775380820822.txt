@@ -1,0 +1,130 @@
+Here's your SSS-tier bug fix prompt:
+
+🔧 CRITICAL BUG FIX — Game Logic & Multiplier Display Accuracy (All 4 Games)
+
+Core Problem:
+Game outcomes received from the backend are being displayed incorrectly on the frontend. Example: Plinko ball lands on a 0.7x bucket but the UI renders 0.2x. This is a mapping/indexing bug — the display layer is not correctly matching backend outcome data to the correct UI element.
+
+Root Cause Investigation — Check ALL:
+[ ] Plinko: bucket index from backend is off-by-one — backend sends index 4, UI renders index 3's multiplier
+[ ] Plinko: multiplier array order doesn't match visual bucket order (left-to-right vs center-out)
+[ ] Plinko: row count changes the multiplier table but UI still reads from a hardcoded default array
+[ ] Plinko: risk level (Low/Med/High) changes multipliers but UI array not switching with it
+[ ] Slots: symbol-to-multiplier map has wrong values or wrong key names vs backend response
+[ ] Slots: win detection checking wrong reel index or wrong row
+[ ] Mines: multiplier formula frontend-side diverges from backend calculation
+[ ] Dice: win/loss condition inverted (Roll Over showing as loss when it's a win)
+[ ] Dice: result number display rounding differently than backend
+[ ] All games: backend response field names not exactly matched in frontend destructuring
+
+Fix — Plinko Bucket Mapping (Most Critical):
+js// WRONG — hardcoded flat array, breaks on row/risk change
+const multipliers = [0.2, 0.5, 0.7, 1.0, 3.0, 1.0, 0.7, 0.5, 0.2];
+
+// CORRECT — multiplier table keyed by rows + risk level
+const PLINKO_MULTIPLIERS = {
+  8: {
+    low:    [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+    medium: [13,  3.0, 1.3, 0.7, 0.4, 0.7, 1.3, 3.0, 13],
+    high:   [29,  4.0, 1.5, 0.3, 0.2, 0.3, 1.5, 4.0, 29],
+  },
+  12: {
+    low:    [10,  3.0, 1.6, 1.4, 1.1, 1.0, 0.5, 1.0, 1.1, 1.4, 1.6, 3.0, 10],
+    medium: [33,  11,  4.0, 2.0, 1.1, 0.6, 0.3, 0.6, 1.1, 2.0, 4.0, 11,  33],
+    high:   [141, 40,  10,  5.0, 3.0, 1.5, 0.2, 1.5, 3.0, 5.0, 10,  40,  141],
+  },
+  16: {
+    low:    [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1.0, 0.5, 1.0, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
+    medium: [110, 41, 10, 5, 3, 1.5, 1.0, 0.5, 0.3, 0.5, 1.0, 1.5, 3, 5, 10, 41, 110],
+    high:   [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
+  }
+};
+
+// On backend response, map bucket index to correct multiplier:
+function getBucketMultiplier(bucketIndex, rows, risk) {
+  const table = PLINKO_MULTIPLIERS[rows]?.[risk];
+  if (!table) throw new Error(`No multiplier table for rows=${rows} risk=${risk}`);
+  if (bucketIndex < 0 || bucketIndex >= table.length)
+    throw new Error(`Bucket index ${bucketIndex} out of range`);
+  return table[bucketIndex];  // exact match — no offset, no guessing
+}
+
+// When API responds:
+const { bucketIndex, rows, risk, newBalance } = apiResponse;
+const correctMultiplier = getBucketMultiplier(bucketIndex, rows, risk);
+highlightBucket(bucketIndex);         // light up the CORRECT bucket
+displayMultiplier(correctMultiplier); // show the CORRECT multiplier
+
+Fix — Slots Symbol→Multiplier Mismatch:
+js// CORRECT — backend sends exact symbol keys, frontend must match exactly
+const SLOT_MULTIPLIERS = {
+  "cherry":   2,
+  "lemon":    3,
+  "orange":   4,
+  "grape":    5,
+  "diamond":  10,
+  "seven":    15,
+  "jackpot":  50,
+};
+
+// On spin response, use backend symbol names — never assume emoji order
+function getSlotWinAmount(symbols, bet) {
+  if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+    return bet * (SLOT_MULTIPLIERS[symbols[0]] ?? 1);
+  }
+  return 0;
+}
+
+Fix — Dice Roll Over/Under Inversion:
+js// CORRECT win condition logic
+function didWin(rolledNumber, target, mode) {
+  if (mode === "over")  return rolledNumber > target;
+  if (mode === "under") return rolledNumber < target;
+  return false;
+}
+
+// Multiplier formula (house edge 1%)
+function calcMultiplier(winChance) {
+  return parseFloat(((99 / winChance)).toFixed(4));
+}
+
+// Win chance
+function calcWinChance(target, mode) {
+  if (mode === "over")  return parseFloat((100 - target).toFixed(2));
+  if (mode === "under") return parseFloat((target - 1).toFixed(2));
+}
+
+Fix — Mines Multiplier Sync:
+js// NEVER calculate multiplier frontend-side — always use what backend returns
+// WRONG:
+const multiplier = calculateMyOwnMultiplier(tilesRevealed, mineCount); // diverges from backend
+
+// CORRECT:
+const { safe, multiplier, newBalance } = await api.revealTile(tileIndex);
+setLiveMultiplier(multiplier);  // always backend-authoritative
+
+Fix — API Response Field Guard (All Games):
+js// Wrap every API response with a validator
+function validateResponse(response, requiredFields) {
+  for (const field of requiredFields) {
+    if (response[field] === undefined || response[field] === null) {
+      console.error(`API response missing field: ${field}`, response);
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+  return response;
+}
+
+// Usage:
+const data = validateResponse(await api.plinko(payload), [
+  "bucketIndex", "multiplier", "balance", "path"
+]);
+
+Acceptance Criteria:
+✅ Plinko: bucket that lights up always matches the multiplier shown
+✅ Plinko: multiplier values change correctly with rows AND risk level
+✅ Slots: win multiplier always matches the landed symbol combination
+✅ Dice: Roll Over / Roll Under win/loss never inverted
+✅ Mines: multiplier always matches backend value, never frontend-calculated
+✅ Zero cases of displayed value not matching backend response
+✅ Console errors thrown immediately if API response is missing any field

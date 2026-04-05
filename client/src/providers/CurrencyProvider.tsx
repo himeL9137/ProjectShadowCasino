@@ -57,6 +57,10 @@ export const CurrencyProvider = memo(function CurrencyProvider({ children }: { c
   const [balance, setBalance] = useState<string>(user?.balance || "0");
   const [isChangingCurrency, setIsChangingCurrency] = useState(false);
   const [isBalanceRefreshing, setIsBalanceRefreshing] = useState(false);
+
+  // Refs so event handlers always access latest values without stale closure
+  const currencyRef = useRef<Currency>(initialCurrency);
+  useEffect(() => { currencyRef.current = currency; }, [currency]);
   
   // Exchange rate state
   const [exchangeRates, setExchangeRates] = useState<ExchangeRate | null>(null);
@@ -76,47 +80,34 @@ export const CurrencyProvider = memo(function CurrencyProvider({ children }: { c
   }, [user]);
 
   // Listen for balance updates via WebSocket
+  // Uses currencyRef so the handler never has a stale closure and doesn't need
+  // to re-register every time balance or currency changes.
   useEffect(() => {
-    // Listen for balance_update events from WebSocket
     const handleBalanceEvent = (event: CustomEvent) => {
       const data = event.detail;
-      console.log("Balance event received:", data);
-      
-      // Update balance state if currency matches
-      if (data.currency === currency) {
-        // Store old balance for animation comparison
-        const oldBalance = balance;
-        
-        // Update with new balance
+      if (data.currency === currencyRef.current) {
         setBalance(data.balance);
-        
-        console.log(`Balance updated: ${oldBalance} -> ${data.balance}`);
       }
     };
-    
-    // Listen for currency_changed events
+
     const handleCurrencyEvent = (event: CustomEvent) => {
       const data = event.detail;
-      console.log("Currency changed event received:", data);
-      
-      // Update currency and balance
       if (data.newCurrency) {
         setCurrencyState(data.newCurrency as Currency);
-        
         if (data.newBalance) {
           setBalance(data.newBalance);
         }
       }
     };
-    
+
     window.addEventListener('balance_update', handleBalanceEvent as EventListener);
     window.addEventListener('currency_changed', handleCurrencyEvent as EventListener);
-    
+
     return () => {
       window.removeEventListener('balance_update', handleBalanceEvent as EventListener);
       window.removeEventListener('currency_changed', handleCurrencyEvent as EventListener);
     };
-  }, [balance, currency]);
+  }, []);
   
   // Format balance using Intl.NumberFormat
   const formattedBalance = formatCurrency(balance, currency);
