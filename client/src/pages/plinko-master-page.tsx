@@ -1,8 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { StakePlinko } from "@/components/games/StakePlinko";
+import { PlinkoGame } from "@/components/games/PlinkoGame";
 import { WinnersList } from "@/components/common/WinnersList";
 import { CurrencySelector } from "@/components/common/CurrencySelector";
-import { AdminRoute } from "@/components/guards/AdminRoute";
 import { motion } from "framer-motion";
 import { useTranslation } from '@/providers/LanguageProvider';
 
@@ -18,10 +17,10 @@ function PlinkoMasterPageContent() {
           transition={{ duration: 0.5 }}
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl lg:text-2xl font-bold font-heading">{t('nav.plinko')}</h2>
+            <h2 className="text-xl lg:text-2xl font-bold font-heading">🪂 Plinko</h2>
             <CurrencySelector />
           </div>
-          <StakePlinko />
+          <PlinkoGame />
         </motion.div>
       </div>
       
@@ -65,9 +64,5 @@ function PlinkoMasterPageContent() {
 }
 
 export default function PlinkoMasterPage() {
-  return (
-    <AdminRoute>
-      <PlinkoMasterPageContent />
-    </AdminRoute>
-  );
+  return <PlinkoMasterPageContent />;
 }

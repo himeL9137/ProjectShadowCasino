@@ -110,6 +110,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Use authenticateJWT middleware for protected routes
 
+  // ─── Mines Session Store ────────────────────────────────────────────────────
+  interface MinesSession {
+    sessionId: string;
+    userId: string;
+    betAmount: number;
+    currency: string;
+    minePositions: Set<number>;
+    mineCount: number;
+    revealedTiles: Set<number>;
+    gemsFound: number;
+    isActive: boolean;
+    createdAt: number;
+  }
+  const minesSessions = new Map<string, MinesSession>();
+
+  // Clean up old sessions (older than 30 min)
+  setInterval(() => {
+    const now = Date.now();
+    for (const [id, session] of minesSessions) {
+      if (now - session.createdAt > 30 * 60 * 1000) minesSessions.delete(id);
+    }
+  }, 5 * 60 * 1000);
+
+  function calcMinesMultiplier(mineCount: number, gemsFound: number): number {
+    if (gemsFound === 0) return 1.0;
+    const safeTiles = 25 - mineCount;
+    let multiplier = 1.0;
+    for (let i = 0; i < gemsFound; i++) {
+      const remainingSafe = safeTiles - i;
+      const remaining = 25 - i;
+      multiplier /= (remainingSafe / remaining);
+    }
+    multiplier *= 0.97;
+    return Math.round(multiplier * 100) / 100;
+  }
+
+  // Start a new mines game session
+  app.post("/api/games/mines/start", authenticateJWT, async (req, res) => {
+    try {
+      const { betAmount, currency, mineCount } = req.body;
+      const userId = String(req.user!.id);
+      const bet = parseFloat(betAmount);
+      const mines = Math.max(1, Math.min(24, parseInt(mineCount) || 3));
+
+      if (isNaN(bet) || bet <= 0) return res.status(400).json({ message: "Invalid bet amount" });
+
+      // Check balance
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      const balance = parseFloat(user.balance);
+      if (balance < bet) return res.status(400).json({ message: "Insufficient balance" });
+
+      // Cancel any existing active session for this user
+      for (const [id, s] of minesSessions) {
+        if (s.userId === userId && s.isActive) { s.isActive = false; minesSessions.delete(id); }
+      }
+
+      // Deduct bet
+      const newBalance = (balance - bet).toString();
+      await storage.updateUserBalance(userId, newBalance);
+      await storage.createTransaction({
+        userId, amount: bet.toString(), type: TransactionType.BET, currency,
+        metadata: { gameType: 'MINES', betAmount: bet }
+      });
+
+      // Generate mine positions
+      const minePositions = new Set<number>();
+      while (minePositions.size < mines) {
+        minePositions.add(Math.floor(Math.random() * 25));
+      }
+
+      const sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      const session: MinesSession = {
+        sessionId, userId, betAmount: bet, currency,
+        minePositions, mineCount: mines,
+        revealedTiles: new Set(), gemsFound: 0,
+        isActive: true, createdAt: Date.now()
+      };
+      minesSessions.set(sessionId, session);
+
+      // Build a hidden grid for client (no mine positions)
+      const grid = Array(25).fill(null).map((_, i) => ({
+        position: i, isRevealed: false, isMine: false, isGem: false
+      }));
+
+      res.json({
+        sessionId,
+        mineCount: mines,
+        grid,
+        balance: newBalance,
+        multiplier: 1.0
+      });
+    } catch (e: any) { res.status(400).json({ message: e.message }); }
+  });
+
+  // Reveal a tile in an active mines session
+  app.post("/api/games/mines/reveal", authenticateJWT, async (req, res) => {
+    try {
+      const { sessionId, position } = req.body;
+      const userId = String(req.user!.id);
+      const session = minesSessions.get(sessionId);
+
+      if (!session || !session.isActive) return res.status(400).json({ message: "No active game session" });
+      if (session.userId !== userId) return res.status(403).json({ message: "Not your session" });
+      if (position < 0 || position > 24) return res.status(400).json({ message: "Invalid position" });
+      if (session.revealedTiles.has(position)) return res.status(400).json({ message: "Tile already revealed" });
+
+      const isMine = session.minePositions.has(position);
+      session.revealedTiles.add(position);
+
+      if (isMine) {
+        // Game over - reveal all mines, don't credit anything
+        session.isActive = false;
+        const grid = Array(25).fill(null).map((_, i) => ({
+          position: i,
+          isRevealed: session.minePositions.has(i) || session.revealedTiles.has(i),
+          isMine: session.minePositions.has(i),
+          isGem: !session.minePositions.has(i)
+        }));
+        await storage.createGameHistory(
+          { gameType: GameType.MINES, betAmount: session.betAmount, currency: session.currency } as any,
+          userId, false, '0', 0, { hitMine: true, position, minePositions: Array.from(session.minePositions) }
+        );
+        minesSessions.delete(sessionId);
+        return res.json({ hitMine: true, position, grid, multiplier: 0, gemsFound: session.gemsFound });
+      }
+
+      // Found a gem
+      session.gemsFound++;
+      const multiplier = calcMinesMultiplier(session.mineCount, session.gemsFound);
+      const currentWin = parseFloat((session.betAmount * multiplier).toFixed(2));
+
+      const grid = Array(25).fill(null).map((_, i) => ({
+        position: i,
+        isRevealed: session.revealedTiles.has(i),
+        isMine: false, // Don't reveal mines yet
+        isGem: session.revealedTiles.has(i) && !session.minePositions.has(i)
+      }));
+
+      res.json({ hitMine: false, position, grid, multiplier, gemsFound: session.gemsFound, currentWin });
+    } catch (e: any) { res.status(400).json({ message: e.message }); }
+  });
+
+  // Cash out from active mines session
+  app.post("/api/games/mines/cashout", authenticateJWT, async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      const userId = String(req.user!.id);
+      const session = minesSessions.get(sessionId);
+
+      if (!session || !session.isActive) return res.status(400).json({ message: "No active game session" });
+      if (session.userId !== userId) return res.status(403).json({ message: "Not your session" });
+      if (session.gemsFound === 0) return res.status(400).json({ message: "Reveal at least one gem before cashing out" });
+
+      const multiplier = calcMinesMultiplier(session.mineCount, session.gemsFound);
+      const winAmount = parseFloat((session.betAmount * multiplier).toFixed(2));
+      session.isActive = false;
+
+      // Credit winnings
+      const user = await storage.getUser(userId);
+      const newBalance = (parseFloat(user!.balance) + winAmount).toString();
+      await storage.updateUserBalance(userId, newBalance);
+      await storage.createTransaction({
+        userId, amount: winAmount.toString(), type: TransactionType.WIN, currency: session.currency,
+        metadata: { gameType: 'MINES', betAmount: session.betAmount, winAmount, multiplier }
+      });
+      await storage.createGameHistory(
+        { gameType: GameType.MINES, betAmount: session.betAmount, currency: session.currency } as any,
+        userId, true, winAmount.toString(), multiplier,
+        { gemsFound: session.gemsFound, mineCount: session.mineCount }
+      );
+
+      const grid = Array(25).fill(null).map((_, i) => ({
+        position: i,
+        isRevealed: session.minePositions.has(i) || session.revealedTiles.has(i),
+        isMine: session.minePositions.has(i),
+        isGem: !session.minePositions.has(i)
+      }));
+
+      minesSessions.delete(sessionId);
+      res.json({ isWin: true, winAmount, multiplier, balance: newBalance, grid, gemsFound: session.gemsFound });
+    } catch (e: any) { res.status(400).json({ message: e.message }); }
+  });
+
   // Game routes
   app.post("/api/games/play", authenticateJWT, async (req, res) => {
     try {
@@ -118,14 +302,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!gameType || !betAmount || !currency) {
         return res.status(400).json({ message: "Missing required fields" });
-      }
-
-      // Check if user is trying to access admin-only games
-      const adminOnlyGames = ['dice', 'DICE', 'plinko', 'PLINKO', 'plinko_master', 'PLINKO_MASTER'];
-      if (adminOnlyGames.includes(gameType)) {
-        if (!req.user || req.user!.role !== 'admin') {
-          return res.status(403).json({ message: "Access denied. Admin privileges required for this game." });
-        }
       }
 
       const gamePlay = {

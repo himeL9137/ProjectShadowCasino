@@ -101,7 +101,7 @@ export class GameController {
         });
         break;
       case 'PLINKO':
-        result = GameController.processPlinkoGame(isWin, betAmount);
+        result = GameController.processPlinkoGame(isWin, betAmount, { risk: (gamePlay as any).risk });
         break;
       case 'PLINKO_MASTER':
         result = GameController.processPlinkoMasterGame(isWin, betAmount, {
@@ -164,38 +164,52 @@ export class GameController {
     };
   }
 
-  // Process slots game
+  // Process slots game - 3 reels × 3 rows, middle-row win detection with symbol multipliers
   private static processSlotsGame(isWin: boolean, betAmount: number): GameResult {
-    // Generate 5 reel positions (0-9 for each reel)
-    const reels = Array(5).fill(0).map(() => Math.floor(Math.random() * 10));
+    const symbols = ['🍒', '🍋', '🔔', '⭐', '💎', '👑', '🎰', '7️⃣', '💰', '🃏'];
+    const symbolMultipliers: Record<string, number> = {
+      '7️⃣': 10, '🎰': 8, '👑': 7, '💎': 5,
+      '💰': 4, '⭐': 3, '🔔': 2, '🍒': 1.5, '🍋': 1.2, '🃏': 1.1
+    };
 
-    // Define symbols based on position values
-    const symbols = ['🍒', '💎', '7️⃣', '🎰', '💰', '⭐', '🔔', '🍋', '👑', '🃏'];
-    const reelSymbols = reels.map(pos => symbols[pos]);
+    // Generate 3 reels, each with 3 rows [top, middle, bottom]
+    const reels: string[][] = Array(3).fill(null).map(() =>
+      Array(3).fill(null).map(() => symbols[Math.floor(Math.random() * symbols.length)])
+    );
 
-    // Fixed multiplier of 1.1x
-    const multiplier = this.WIN_MULTIPLIER;
+    let multiplier = 0;
+    let winAmount = 0;
 
-    // Determine win amount
-    const winAmount = isWin ? betAmount * multiplier : 0;
-
-    // Force matching symbols if it's a win
     if (isWin) {
-      // Pick a random symbol for the win line
-      const winSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-
-      // For simplicity, make 3 symbols match in the middle for a win
-      reelSymbols[1] = winSymbol;
-      reelSymbols[2] = winSymbol;
-      reelSymbols[3] = winSymbol;
+      // Pick a win symbol, weighted toward smaller multipliers for house edge
+      const winSymbolWeights = [
+        { sym: '🍒', weight: 30 }, { sym: '🍋', weight: 25 }, { sym: '🔔', weight: 18 },
+        { sym: '⭐', weight: 12 }, { sym: '💎', weight: 8 }, { sym: '👑', weight: 4 },
+        { sym: '🎰', weight: 2 }, { sym: '7️⃣', weight: 1 }
+      ];
+      const totalWeight = winSymbolWeights.reduce((s, w) => s + w.weight, 0);
+      let r = Math.random() * totalWeight;
+      let winSymbol = '🍒';
+      for (const { sym, weight } of winSymbolWeights) {
+        if (r < weight) { winSymbol = sym; break; }
+        r -= weight;
+      }
+      // Set middle row (index 1) of all 3 reels to the win symbol
+      reels[0][1] = winSymbol;
+      reels[1][1] = winSymbol;
+      reels[2][1] = winSymbol;
+      multiplier = symbolMultipliers[winSymbol] || 1.5;
+      winAmount = betAmount * multiplier;
     }
 
     return {
       isWin,
-      winAmount: isWin ? winAmount : 0,
-      multiplier: isWin ? multiplier : 0,
+      winAmount,
+      multiplier,
       gameData: {
-        reels: reelSymbols
+        reels, // [reel0[top,mid,bot], reel1[top,mid,bot], reel2[top,mid,bot]]
+        middleRow: [reels[0][1], reels[1][1], reels[2][1]],
+        isMatch: isWin,
       }
     };
   }
@@ -267,10 +281,15 @@ export class GameController {
     return result;
   }
 
-  // Process regular plinko game with comprehensive 16-slot payout system
-  private static processPlinkoGame(isWin: boolean, betAmount: number): GameResult {
-    // Comprehensive 16-slot multiplier system matching your specification
-    const bucketMultipliers = [2.0, 1.8, 1.6, 1.4, 1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0, 1.4, 1.6, 1.8, 2.0];
+  // Process regular plinko game with risk-level based 9-slot payout system (8 rows)
+  private static processPlinkoGame(isWin: boolean, betAmount: number, options?: { risk?: string }): GameResult {
+    const risk = options?.risk || 'medium';
+    const riskMultipliers: Record<string, number[]> = {
+      low:    [5.6,  2.1,  1.1,  1.0,  0.5,  1.0,  1.1,  2.1,  5.6],
+      medium: [13,   3,    1.3,  0.7,  0.4,  0.7,  1.3,  3,    13 ],
+      high:   [29,   4,    1.5,  0.3,  0.2,  0.3,  1.5,  4,    29 ],
+    };
+    const bucketMultipliers = riskMultipliers[risk] || riskMultipliers.medium;
 
     // Helper function to calculate precise payout
     const calculatePayout = (bet: number, multiplier: number): number => {

@@ -253,23 +253,30 @@ export function DiceGame() {
             <div className="inline-block">
               <div className="text-sm text-neutral-400 mb-2">Result</div>
               <motion.div
-                className="w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl border-4 border-white"
+                className={`w-36 h-36 rounded-2xl flex items-center justify-center shadow-xl border-4 transition-colors duration-500 ${
+                  isRolling
+                    ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-300'
+                    : lastRoll !== null && history[0]?.isWin
+                    ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-300 shadow-green-500/40'
+                    : lastRoll !== null
+                    ? 'bg-gradient-to-br from-red-500 to-rose-600 border-red-300 shadow-red-500/40'
+                    : 'bg-gradient-to-br from-gray-600 to-gray-700 border-gray-500'
+                }`}
                 animate={isRolling ? {
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 180, 360]
+                  scale: [1, 1.15, 0.95, 1.05, 1],
+                  rotate: [0, 90, 180, 270, 360],
+                } : lastRoll !== null ? {
+                  scale: [1.2, 1]
                 } : {}}
-                transition={{
-                  duration: 1.5,
-                  ease: "easeInOut"
-                }}
+                transition={{ duration: isRolling ? 1.5 : 0.3, ease: "easeInOut" }}
               >
                 <div className="text-center">
-                  <div className="text-white text-4xl font-bold">
-                    {isRolling ? "?" : (lastRoll !== null ? lastRoll : "0")}
+                  <div className="text-white text-5xl font-black">
+                    {isRolling ? "?" : (lastRoll !== null ? lastRoll : "—")}
                   </div>
                   {lastRoll !== null && !isRolling && (
-                    <div className="text-white text-xs opacity-80 mt-1">
-                      {history[0]?.isWin ? "YOU WIN" : "YOU LOST"}
+                    <div className={`text-xs font-bold mt-1 ${history[0]?.isWin ? 'text-green-200' : 'text-red-200'}`}>
+                      {history[0]?.isWin ? '✓ WIN' : '✗ LOSS'}
                     </div>
                   )}
                 </div>

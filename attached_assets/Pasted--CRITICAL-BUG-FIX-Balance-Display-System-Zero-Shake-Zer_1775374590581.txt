@@ -1,0 +1,117 @@
+🔧 CRITICAL BUG FIX — Balance Display System: Zero-Shake, Zero-Lag, Real-Time Update Architecture
+
+Context:
+A browser-based casino game suite (Slots, Mines, Dice, Plinko) has a balance display component that:
+
+Shakes/jitters visually when the balance value updates
+Fails to reflect the correct balance after API responses — the update either doesn't apply or reverts
+
+This must be fixed to production-grade, Stake.com-level polish. Zero shake. Zero lag. Zero missed updates.
+
+Root Cause Investigation Checklist — Check ALL of these:
+[ ] CSS layout shift caused by number width change (e.g. $99.99 → $100.00 changes element width)
+[ ] Font not using tabular/monospace numbers (proportional fonts shift on digit change)
+[ ] React state race condition — multiple setState calls fighting each other
+[ ] Optimistic UI value being overwritten by stale API response
+[ ] No transition/animation lock during update — value flickers between old and new
+[ ] Balance stored in multiple places (local state + context + prop) going out of sync
+[ ] API response arrives after a second re-render, causing a visible snap-back
+[ ] useEffect dependency array causing unnecessary re-renders
+[ ] Missing useMemo / useCallback causing child re-renders that reset animation
+[ ] CSS `width: auto` or `min-width` not set — container resizes with number length
+
+The Fix — Implement ALL of the following:
+1. — Lock Element Width (Stops Layout Shake)
+css.balance-display {
+  font-variant-numeric: tabular-nums;   /* monospace digits, no width shift */
+  font-feature-settings: "tnum";        /* fallback for older browsers */
+  min-width: 120px;                     /* never resize container on digit change */
+  text-align: right;                    /* right-align so digits don't jump left */
+  white-space: nowrap;                  /* never wrap mid-update */
+  will-change: contents;               /* GPU hint — browser pre-composites this layer */
+}
+
+2. — Single Source of Truth for Balance (Stops Missed Updates)
+js// WRONG — balance split across multiple states
+const [balance, setBalance] = useState(0);        // local
+const { balance } = useContext(WalletContext);     // context
+// These fight each other and cause snap-back
+
+// CORRECT — one ref, one state, one owner
+const balanceRef = useRef(initialBalance);         // always holds latest value
+const [displayBalance, setDisplayBalance] = useState(initialBalance);
+
+function updateBalance(newValue) {
+  balanceRef.current = newValue;                   // instant, sync, no re-render
+  setDisplayBalance(newValue);                     // triggers smooth display update
+}
+
+3. — Optimistic UI with Reconciliation (Zero Lag + Correction)
+jsasync function placeBet(betAmount) {
+  const previousBalance = balanceRef.current;
+  
+  // Step 1: Deduct immediately — zero lag
+  updateBalance(previousBalance - betAmount);
+
+  try {
+    const response = await api.spin({ bet: betAmount });
+
+    // Step 2: Reconcile with server truth
+    if (response.balance !== balanceRef.current) {
+      updateBalance(response.balance);  // smooth correction, no snap
+    }
+
+  } catch (err) {
+    // Step 3: Rollback cleanly on failure
+    updateBalance(previousBalance);
+  }
+}
+
+4. — Animated Number Roll (No Visual Jump)
+jsfunction animateBalance(from, to, duration = 400) {
+  const start = performance.now();
+
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);          // ease-out cubic
+    const current = from + (to - from) * eased;
+
+    setDisplayBalance(parseFloat(current.toFixed(2)));     // smooth roll
+
+    if (progress < 1) requestAnimationFrame(step);
+    else setDisplayBalance(to);                            // lock final value
+  }
+
+  requestAnimationFrame(step);
+}
+
+5. — Prevent Stale Closure / Race Condition
+jsconst pendingUpdate = useRef(null);
+
+async function handleBet() {
+  const reqId = Date.now();
+  pendingUpdate.current = reqId;
+
+  const result = await api.bet();
+
+  // Only apply if this is still the latest request
+  if (pendingUpdate.current === reqId) {
+    animateBalance(balanceRef.current, result.balance);
+  }
+}
+
+6. — CSS: Disable Inherited Transitions That Cause Shake
+css.balance-display {
+  transition: none !important;      /* kill any inherited shake-causing transitions */
+  transform: translateZ(0);         /* force GPU compositing layer */
+  backface-visibility: hidden;      /* eliminates sub-pixel jitter */
+}
+
+References to study and implement from:
+
+https://web.dev/animations-guide/ — GPU compositing and jank elimination
+https://github.com/streamich/react-use → useCounter hook — battle-tested counter state
+https://github.com/pmndrs/zustand — single-source-of-truth state for balance (no context race conditions)
+https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-numeric — tabular-nums spec
+https://css-tricks.com/animating-number-counters/ — smooth counter animation patterns
