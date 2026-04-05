@@ -1,0 +1,463 @@
+
+
+# 🧱 1. INSTALL DEPENDENCIES
+
+```bash
+npm install @nestjs/common @nestjs/core @nestjs/config reflect-metadata rxjs
+npm install class-validator class-transformer decimal.js
+npm install --save-dev jest ts-jest @types/jest supertest
+```
+
+---
+
+# 📁 2. CORE STRUCTURE (KEY FILES)
+
+---
+
+## ✅ `main.ts`
+
+```typescript
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+---
+
+## ✅ `app.module.ts`
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { GameModule } from './game/game.module';
+import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
+import { CurrencyModule } from './currency/currency.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ExchangeRateModule,
+    CurrencyModule,
+    GameModule,
+  ],
+})
+export class AppModule {}
+```
+
+---
+
+# ⚙️ 3. CONFIG
+
+## `config/game.config.ts`
+
+```typescript
+export default () => ({
+  USD_THRESHOLD: '150',
+  WIN_PROBABILITY: '0.5',
+});
+```
+
+---
+
+# 🔢 4. ENUMS
+
+```typescript
+export enum CurrencyCodeEnum {
+  USD = 'USD',
+  BDT = 'BDT',
+  EUR = 'EUR',
+  INR = 'INR',
+  PKR = 'PKR',
+  GBP = 'GBP',
+  JPY = 'JPY',
+  AED = 'AED',
+  CAD = 'CAD',
+  AUD = 'AUD',
+}
+
+export enum GameTypeEnum {
+  COIN_FLIP = 'COIN_FLIP',
+  DICE_ROLL = 'DICE_ROLL',
+  CARD_DRAW = 'CARD_DRAW',
+}
+
+export enum GameResultEnum {
+  WIN = 'WIN',
+  LOSE = 'LOSE',
+}
+
+export enum RuleModeEnum {
+  UNDER_THRESHOLD = 'UNDER_THRESHOLD',
+  FORCED_LOSS = 'FORCED_LOSS',
+}
+```
+
+---
+
+# 💰 5. DECIMAL UTILITY
+
+```typescript
+import Decimal from 'decimal.js';
+
+export const toDecimal = (val: string | number | Decimal): Decimal => {
+  return new Decimal(val);
+};
+```
+
+---
+
+# 🌍 6. EXCHANGE RATE MODULE
+
+## `static-exchange-rate.provider.ts`
+
+```typescript
+import Decimal from 'decimal.js';
+
+export class StaticExchangeRateProvider {
+  private rates = {
+    USD: '1',
+    BDT: '122.4267',
+    EUR: '0.92',
+    INR: '83.5',
+    PKR: '278.1',
+    GBP: '0.79',
+    JPY: '151.2',
+    AED: '3.6725',
+    CAD: '1.36',
+    AUD: '1.52',
+  };
+
+  getRate(currency: string): Decimal {
+    if (!this.rates[currency]) {
+      throw new Error(`Unsupported currency: ${currency}`);
+    }
+    return new Decimal(this.rates[currency]);
+  }
+}
+```
+
+---
+
+## `exchange-rate.service.ts`
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import Decimal from 'decimal.js';
+import { StaticExchangeRateProvider } from './providers/static-exchange-rate.provider';
+
+@Injectable()
+export class ExchangeRateService {
+  constructor(private provider: StaticExchangeRateProvider) {}
+
+  getRate(currency: string): Decimal {
+    return this.provider.getRate(currency);
+  }
+}
+```
+
+---
+
+# 💱 7. CURRENCY SERVICES
+
+## `currency-threshold.service.ts`
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import Decimal from 'decimal.js';
+import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
+
+@Injectable()
+export class CurrencyThresholdService {
+  private USD_THRESHOLD = new Decimal(150);
+
+  constructor(private exchange: ExchangeRateService) {}
+
+  getLocalThreshold(currency: string): Decimal {
+    const rate = this.exchange.getRate(currency);
+    return this.USD_THRESHOLD.mul(rate);
+  }
+
+  getBalanceInUsd(balance: Decimal, currency: string): Decimal {
+    const rate = this.exchange.getRate(currency);
+    return balance.div(rate);
+  }
+}
+```
+
+---
+
+## `balance-rule-evaluator.service.ts`
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import Decimal from 'decimal.js';
+import { CurrencyThresholdService } from './currency-threshold.service';
+import { RuleModeEnum } from '../common/enums';
+
+@Injectable()
+export class BalanceRuleEvaluator {
+  constructor(private threshold: CurrencyThresholdService) {}
+
+  evaluate(balance: Decimal, currency: string) {
+    const localThreshold = this.threshold.getLocalThreshold(currency);
+    const balanceUsd = this.threshold.getBalanceInUsd(balance, currency);
+
+    const mode =
+      balance.greaterThanOrEqualTo(localThreshold)
+        ? RuleModeEnum.FORCED_LOSS
+        : RuleModeEnum.UNDER_THRESHOLD;
+
+    return {
+      localThreshold,
+      balanceUsd,
+      ruleMode: mode,
+      winProbability: mode === RuleModeEnum.UNDER_THRESHOLD ? 0.5 : 0,
+    };
+  }
+}
+```
+
+---
+
+# 🎲 8. RANDOMIZATION SERVICE
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { GameResultEnum } from '../common/enums';
+
+@Injectable()
+export class RandomizationService {
+  next(): number {
+    return Math.random();
+  }
+
+  resolve(winProb: number): GameResultEnum {
+    return this.next() < winProb
+      ? GameResultEnum.WIN
+      : GameResultEnum.LOSE;
+  }
+}
+```
+
+---
+
+# 🎮 9. GAME SERVICES
+
+## Coin Flip
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { GameResultEnum } from '../../common/enums';
+
+@Injectable()
+export class CoinFlipService {
+  build(choice: string, result: GameResultEnum) {
+    const opposite = choice === 'HEADS' ? 'TAILS' : 'HEADS';
+
+    return {
+      playerChoice: choice,
+      coinResult: result === 'WIN' ? choice : opposite,
+    };
+  }
+}
+```
+
+---
+
+## Dice Roll
+
+```typescript
+@Injectable()
+export class DiceRollService {
+  build(result: GameResultEnum) {
+    let player, system;
+
+    do {
+      player = Math.floor(Math.random() * 6) + 1;
+      system = Math.floor(Math.random() * 6) + 1;
+    } while (player === system);
+
+    if (result === 'WIN' && player < system) {
+      [player, system] = [system, player];
+    }
+
+    if (result === 'LOSE' && player > system) {
+      [player, system] = [system, player];
+    }
+
+    return { playerRoll: player, systemRoll: system };
+  }
+}
+```
+
+---
+
+## Card Draw
+
+```typescript
+@Injectable()
+export class CardDrawService {
+  private ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+
+  build(result: GameResultEnum) {
+    let p, s;
+
+    do {
+      p = Math.floor(Math.random() * 13);
+      s = Math.floor(Math.random() * 13);
+    } while (p === s);
+
+    if (result === 'WIN' && p < s) [p, s] = [s, p];
+    if (result === 'LOSE' && p > s) [p, s] = [s, p];
+
+    return {
+      playerCard: this.ranks[p],
+      systemCard: this.ranks[s],
+    };
+  }
+}
+```
+
+---
+
+# 🧠 10. GAME OUTCOME ENGINE
+
+```typescript
+@Injectable()
+export class GameOutcomeEngine {
+  constructor(
+    private evaluator: BalanceRuleEvaluator,
+    private random: RandomizationService,
+    private coin: CoinFlipService,
+    private dice: DiceRollService,
+    private card: CardDrawService,
+    private exchange: ExchangeRateService,
+  ) {}
+
+  play(dto: any) {
+    const balance = new Decimal(dto.balance);
+    const wager = new Decimal(dto.wagerAmount);
+
+    if (balance.lessThan(wager)) {
+      throw new Error('Insufficient balance');
+    }
+
+    const evalResult = this.evaluator.evaluate(
+      balance,
+      dto.currencyCode,
+    );
+
+    const result =
+      evalResult.ruleMode === 'FORCED_LOSS'
+        ? 'LOSE'
+        : this.random.resolve(0.5);
+
+    let presentation;
+
+    if (dto.gameType === 'COIN_FLIP') {
+      presentation = this.coin.build(dto.playerChoice, result);
+    } else if (dto.gameType === 'DICE_ROLL') {
+      presentation = this.dice.build(result);
+    } else {
+      presentation = this.card.build(result);
+    }
+
+    const delta =
+      result === 'WIN' ? wager : wager.neg();
+
+    const updated = balance.plus(delta);
+
+    return {
+      playerId: dto.playerId,
+      gameType: dto.gameType,
+      currencyCode: dto.currencyCode,
+      balance: balance.toString(),
+      exchangeRate: this.exchange
+        .getRate(dto.currencyCode)
+        .toString(),
+      usdThreshold: '150',
+      localThreshold: evalResult.localThreshold.toString(),
+      balanceInUsd: evalResult.balanceUsd.toString(),
+      ruleMode: evalResult.ruleMode,
+      probabilityRule: {
+        win: evalResult.ruleMode === 'FORCED_LOSS' ? 0 : 0.5,
+        loss: evalResult.ruleMode === 'FORCED_LOSS' ? 1 : 0.5,
+      },
+      result,
+      payoutDelta: delta.toString(),
+      updatedBalance: updated.toString(),
+      presentation,
+    };
+  }
+}
+```
+
+---
+
+# 🌐 11. CONTROLLER
+
+```typescript
+import { Body, Controller, Post } from '@nestjs/common';
+import { GameOutcomeEngine } from './game-outcome.engine';
+
+@Controller('games')
+export class GameController {
+  constructor(private engine: GameOutcomeEngine) {}
+
+  @Post('play')
+  play(@Body() dto: any) {
+    return this.engine.play(dto);
+  }
+}
+```
+
+---
+
+# 🧪 12. SAMPLE TEST (CRITICAL RULE)
+
+```typescript
+import { BalanceRuleEvaluator } from '../currency/balance-rule-evaluator.service';
+import Decimal from 'decimal.js';
+
+test('FORCED LOSS when equal threshold', () => {
+  const evaluator = new BalanceRuleEvaluator(mockService);
+
+  const result = evaluator.evaluate(
+    new Decimal('150'),
+    'USD',
+  );
+
+  expect(result.ruleMode).toBe('FORCED_LOSS');
+});
+```
+
+---
+
+# 🔥 13. GUARANTEES THIS IMPLEMENTATION PROVIDES
+
+✔ Decimal-safe financial logic
+✔ Zero floating-point risk
+✔ Strict threshold enforcement
+✔ Centralized rule engine
+✔ Currency-agnostic system
+✔ Deterministic forced-loss mode
+✔ Extensible architecture (add games easily)
+✔ Testable services (DI-based)
+✔ Clean separation of concerns
+
+
