@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
+import { applyOptimisticDebit, applyServerBalance } from "@/lib/balance";
 
 type Risk = 'low' | 'medium' | 'high';
 
@@ -34,6 +35,7 @@ interface GameResult {
   isWin: boolean;
   winAmount: number;
   multiplier: number;
+  balance?: string;
   gameData: { bucket: number; multiplier: number; bucketMultipliers?: number[]; rows?: number; };
 }
 
@@ -303,6 +305,9 @@ export function PlinkoGame() {
         ...prev.slice(0, 9)
       ]);
 
+      // Update balance immediately from server's authoritative value.
+      applyServerBalance(data.balance, currentCurrency);
+
       setTimeout(() => {
         const mult = data.multiplier;
         if (data.isWin) {
@@ -310,7 +315,6 @@ export function PlinkoGame() {
         } else {
           toast({ title: `${mult}x — Better luck next time`, variant: "destructive" });
         }
-        queryClient.invalidateQueries({ queryKey: ["/api/wallet/balance"] });
       }, 3000);
     },
     onError: (e: any) => {
@@ -327,6 +331,7 @@ export function PlinkoGame() {
       return;
     }
     setIsDropping(true);
+    applyOptimisticDebit(bet, currentCurrency);
     dropMutation.mutate();
   };
 

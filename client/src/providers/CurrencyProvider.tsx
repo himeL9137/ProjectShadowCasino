@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef, memo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useWebSocket } from "./WebSocketProvider";
 import { Currency } from "@shared/schema";
 import { 
@@ -66,16 +66,24 @@ export const CurrencyProvider = memo(function CurrencyProvider({ children }: { c
   const [exchangeRates, setExchangeRates] = useState<ExchangeRate | null>(null);
   const [isLoadingRates, setIsLoadingRates] = useState<boolean>(false);
   
-  // Initialize currency from user data or saved preference
+  // Initialize currency from user data or saved preference.
+  // Also seeds the TanStack Query cache so getQueryBalance() returns the real
+  // starting balance on the first game action instead of 0.
   useEffect(() => {
     if (user?.currency) {
       setCurrencyState(user.currency as Currency);
     } else if (savedCurrency) {
       setCurrencyState(savedCurrency);
     }
-    
+
     if (user?.balance) {
       setBalance(user.balance);
+      // Keep the query cache in sync so balance.ts helpers can read it
+      queryClient.setQueryData(["/api/wallet/balance"], (old: any) => ({
+        ...(old || {}),
+        balance: user.balance,
+        currency: user.currency,
+      }));
     }
   }, [user]);
 
@@ -85,8 +93,15 @@ export const CurrencyProvider = memo(function CurrencyProvider({ children }: { c
   useEffect(() => {
     const handleBalanceEvent = (event: CustomEvent) => {
       const data = event.detail;
-      if (data.currency === currencyRef.current) {
-        setBalance(data.balance);
+      if (data.balance === undefined) return;
+      // Always apply the balance update – game components always pass the user's
+      // current currency, and balance_update events are only emitted by our own
+      // balance.ts helpers (not from external sources).
+      setBalance(data.balance);
+      // If the event also signals a currency change, update that too.
+      if (data.currency && data.currency !== currencyRef.current) {
+        setCurrencyState(data.currency as Currency);
+        currencyRef.current = data.currency as Currency;
       }
     };
 
