@@ -1,0 +1,964 @@
+You are a senior software engineer tasked with designing and implementing a production-grade, currency-aware mini-game backend in NestJS + TypeScript.
+
+Your implementation must reflect enterprise-level engineering standards: clean architecture, strong typing, modular design, reusable domain services, deterministic business-rule enforcement, precise money handling, robust validation, and comprehensive automated testing.
+
+Build a backend system that supports 3 simple games:
+1. Coin Flip
+2. Dice Roll
+3. Card Draw
+
+All games must use the same centralized balance-threshold rule engine.
+
+======================================================================
+1. BUSINESS OBJECTIVE
+======================================================================
+
+Implement a reusable game outcome engine that applies the following global rule before every game round:
+
+- Define a global threshold of 150 USD.
+- The player's balance may exist in any currency.
+- The system must dynamically convert the threshold to the player's active currency using an exchange rate provider.
+
+Outcome logic:
+- If player balance is BELOW the equivalent of 150 USD:
+  - result must be resolved with 50% WIN / 50% LOSE probability
+- If player balance is EQUAL TO or ABOVE the equivalent of 150 USD:
+  - result must always be LOSE
+  - winning becomes impossible
+
+This rule applies to every game round and every supported currency.
+
+Example:
+- If 1 USD = 122.4267 BDT
+- Then 150 USD = 18,364.005 BDT
+- If player balance < 18,364.005 BDT => 50/50 mode
+- If player balance >= 18,364.005 BDT => forced-loss mode
+
+Do not hardcode thresholds per currency.
+
+======================================================================
+2. TECH STACK REQUIREMENTS
+======================================================================
+
+Implement using:
+- NestJS
+- TypeScript
+- class-validator
+- class-transformer
+- Decimal-safe money handling library:
+  - preferred: decimal.js
+  - acceptable: big.js
+- Jest for unit and integration tests
+- Optional: @nestjs/config for environment configuration
+
+Avoid using raw floating-point arithmetic for financial comparisons.
+
+======================================================================
+3. HIGH-LEVEL ARCHITECTURE
+======================================================================
+
+Use a layered, modular architecture.
+
+Recommended modules:
+- AppModule
+- ConfigModule
+- ExchangeRateModule
+- CurrencyModule
+- GameModule
+- PlayerModule (if needed)
+- CommonModule
+
+Recommended domain services:
+- ExchangeRateService
+- CurrencyThresholdService
+- BalanceRuleEvaluator
+- RandomizationService
+- GameOutcomeEngine
+- CoinFlipService
+- DiceRollService
+- CardDrawService
+
+Recommended support components:
+- DTOs
+- Controllers
+- Guards or interceptors if needed
+- Exception filters if needed
+- Shared enums
+- Shared interfaces
+- Shared utility helpers
+
+======================================================================
+4. FOLDER STRUCTURE
+======================================================================
+
+Use a clean, scalable folder structure similar to:
+
+src/
+  main.ts
+  app.module.ts
+
+  config/
+    app.config.ts
+    game.config.ts
+    validation.ts
+
+  common/
+    constants/
+      currency.constants.ts
+      game.constants.ts
+    enums/
+      currency-code.enum.ts
+      game-type.enum.ts
+      game-result.enum.ts
+      rule-mode.enum.ts
+    exceptions/
+      exchange-rate-not-found.exception.ts
+      unsupported-currency.exception.ts
+      invalid-game-input.exception.ts
+    interfaces/
+      exchange-rate-provider.interface.ts
+      game-service.interface.ts
+      money-value.interface.ts
+    utils/
+      decimal.util.ts
+      probability.util.ts
+
+  exchange-rate/
+    exchange-rate.module.ts
+    exchange-rate.service.ts
+    providers/
+      static-exchange-rate.provider.ts
+      exchange-rate.provider.interface.ts
+    dto/
+      get-rate.dto.ts
+
+  currency/
+    currency.module.ts
+    currency-threshold.service.ts
+    balance-rule-evaluator.service.ts
+    dto/
+      threshold-evaluation.dto.ts
+      threshold-evaluation-response.dto.ts
+
+  game/
+    game.module.ts
+    game.controller.ts
+    game-outcome.engine.ts
+    dto/
+      play-game.dto.ts
+      game-round-response.dto.ts
+      probability-rule.dto.ts
+    services/
+      coin-flip.service.ts
+      dice-roll.service.ts
+      card-draw.service.ts
+    presenters/
+      coin-flip.presenter.ts
+      dice-roll.presenter.ts
+      card-draw.presenter.ts
+
+  player/
+    player.module.ts
+    dto/
+      player-balance.dto.ts
+
+  tests/
+    unit/
+    integration/
+
+======================================================================
+5. DOMAIN MODEL
+======================================================================
+
+Define the following key domain concepts.
+
+5.1 Currency Threshold
+Represents the local-currency equivalent of 150 USD.
+
+Fields:
+- usdThreshold: Decimal
+- currencyCode: string
+- exchangeRate: Decimal
+- localThreshold: Decimal
+
+5.2 Balance Evaluation Result
+Represents whether the player is under threshold or in forced-loss mode.
+
+Fields:
+- balance: Decimal
+- currencyCode: string
+- exchangeRate: Decimal
+- usdThreshold: Decimal
+- localThreshold: Decimal
+- balanceInUsd: Decimal
+- ruleMode: UNDER_THRESHOLD | FORCED_LOSS
+- winProbability: Decimal
+- lossProbability: Decimal
+
+5.3 Game Round Result
+Represents the final result of a game round.
+
+Fields:
+- playerId: string
+- gameType: GameType
+- currencyCode: string
+- balance: string
+- exchangeRate: string
+- usdThreshold: string
+- localThreshold: string
+- balanceInUsd: string
+- ruleMode: RuleMode
+- probabilityRule: { win: number; loss: number }
+- result: WIN | LOSE
+- payoutDelta: string
+- updatedBalance: string
+- presentation: object
+
+======================================================================
+6. ENUMS
+======================================================================
+
+Implement enums:
+
+- CurrencyCodeEnum
+  - Keep generic support, but at minimum include:
+    USD, BDT, EUR, INR, PKR, GBP, JPY, AED, CAD, AUD
+
+- GameTypeEnum
+  - COIN_FLIP
+  - DICE_ROLL
+  - CARD_DRAW
+
+- GameResultEnum
+  - WIN
+  - LOSE
+
+- RuleModeEnum
+  - UNDER_THRESHOLD
+  - FORCED_LOSS
+
+======================================================================
+7. CONFIGURATION
+======================================================================
+
+Use environment-backed or configuration-backed constants.
+
+Required config:
+- USD_THRESHOLD = 150
+- UNDER_THRESHOLD_WIN_PROBABILITY = 0.5
+- UNDER_THRESHOLD_LOSS_PROBABILITY = 0.5
+- SUPPORTED_CURRENCIES = [USD, BDT, EUR, INR, PKR, GBP, JPY, AED, CAD, AUD]
+
+Optional config:
+- EXCHANGE_RATE_SOURCE = static | api
+- DECIMAL_SCALE_DISPLAY = 2
+- LOG_LEVEL
+- RANDOM_SEED strategy for testability
+
+Expose these through a GameConfigService or equivalent configuration provider.
+
+======================================================================
+8. EXCHANGE RATE DESIGN
+======================================================================
+
+8.1 ExchangeRateProvider Interface
+Create an interface:
+
+- getRate(currencyCode: string): Promise<Decimal>
+
+Interpretation:
+- returns localCurrencyPerUsd
+- Example for BDT:
+  -```text
+  - if 1 USD = 122.4267 BDT
+  - then getRate('BDT') returns Decimal('122.4267')
+
+For USD:
+- getRate('USD') should return Decimal('1')
+
+8.2 ExchangeRateService
+Create a service responsible for:
+- validating supported currency codes
+- delegating to the configured provider
+- returning decimal-safe exchange rates
+- throwing a structured exception if the rate is unavailable
+
+Methods:
+- getRate(currencyCode: string): Promise<Decimal>
+- isSupportedCurrency(currencyCode: string): boolean
+
+8.3 Exchange Rate Provider Implementations
+Implement at least one provider:
+
+A. StaticExchangeRateProvider
+- uses in-memory rates for development/testing
+- rates configurable in a constant or config file
+
+Optional:
+B. ApiExchangeRateProvider
+- fetches live exchange rates from a remote API
+- includes timeout/error handling
+- caches responses with TTL
+- falls back safely if the API fails
+
+8.4 Error Handling
+If exchange rate cannot be found:
+- throw ExchangeRateNotFoundException
+
+If currency is unsupported:
+- throw UnsupportedCurrencyException
+
+======================================================================
+9. CURRENCY THRESHOLD DESIGN
+======================================================================
+
+9.1 CurrencyThresholdService
+This service converts the global USD threshold into the player's local currency.
+
+Methods:
+- getUsdThreshold(): Decimal
+- getLocalThreshold(currencyCode: string): Promise<Decimal>
+- getBalanceInUsd(balance: Decimal, currencyCode: string): Promise<Decimal>
+
+Rules:
+- localThreshold = usdThreshold * exchangeRate
+- balanceInUsd = balance / exchangeRate
+
+Examples:
+- usdThreshold = 150
+- BDT rate = 122.4267
+- localThreshold = 150 * 122.4267 = 18364.005
+
+9.2 Precision Rules
+- All calculations must use Decimal
+- Comparisons must use unrounded values
+- Only convert to fixed decimal strings for response serialization
+
+======================================================================
+10. BALANCE RULE EVALUATION
+======================================================================
+
+10.1 BalanceRuleEvaluator
+Create a dedicated service that determines whether the player is:
+- UNDER_THRESHOLD
+- FORCED_LOSS
+
+Methods:
+- evaluate(balance: Decimal, currencyCode: string): Promise<BalanceEvaluationResult>
+
+Evaluation logic:
+1. fetch exchange rate
+2. compute localThreshold
+3. compute balanceInUsd
+4. compare:
+   - if balance < localThreshold => UNDER_THRESHOLD
+   - if balance >= localThreshold => FORCED_LOSS
+
+Probability rules:
+- UNDER_THRESHOLD:
+  - winProbability = 0.5
+  - lossProbability = 0.5
+- FORCED_LOSS:
+  - winProbability = 0
+  - lossProbability = 1
+
+Important:
+- equality must be treated as forced loss
+
+======================================================================
+11. RANDOMIZATION DESIGN
+======================================================================
+
+11.1 RandomizationService
+Create a service responsible for probability-based resolution.
+
+Methods:
+- next(): number
+  - returns number in [0, 1)
+
+- resolveByProbability(winProbability: Decimal): GameResultEnum
+  - if next() < winProbability => WIN
+  - else => LOSE
+
+Requirements:
+- must be mockable in tests
+- must allow deterministic testing through dependency injection or stubbing
+
+======================================================================
+12. GAME OUTCOME ENGINE
+======================================================================
+
+12.1 Responsibility
+Create a centralized GameOutcomeEngine that:
+- evaluates the balance rule
+- determines final result
+- delegates to the appropriate game service for presentation generation
+- returns a unified response DTO
+
+Methods:
+- playRound(dto: PlayGameDto): Promise<GameRoundResponseDto>
+
+12.2 Flow
+For each request:
+1. validate incoming DTO
+2. normalize currency code and game type
+3. parse balance and wager values to Decimal
+4. evaluate balance rule using BalanceRuleEvaluator
+5. determine result:
+   - if ruleMode == FORCED_LOSS => result = LOSE
+   - if ruleMode == UNDER_THRESHOLD => result resolved by RandomizationService using 0.5 win probability
+6. delegate to selected game service to create presentation payload consistent with final result
+7. compute payout delta / balance delta
+8. compute updated balance
+9. serialize response
+
+12.3 Important Rule
+Game-specific randomness must never override centralized business outcome.
+The engine decides WIN or LOSE first.
+The individual game service only builds game data consistent with that outcome.
+
+======================================================================
+13. GAME SERVICE CONTRACT
+======================================================================
+
+13.1 Interface
+Define a shared interface for game services:
+
+GameServiceInterface
+- supports(gameType: GameTypeEnum): boolean
+- buildPresentation(input: PlayGameDto, enforcedResult: GameResultEnum): Record<string, unknown>
+
+13.2 Rule
+Every game service must receive the already-resolved final result and generate matching output.
+
+======================================================================
+14. GAME IMPLEMENTATIONS
+======================================================================
+
+14.1 CoinFlipService
+Input:
+- playerChoice: 'HEADS' | 'TAILS'
+
+Behavior:
+- if enforcedResult == WIN:
+  - coin result must match playerChoice
+- if enforcedResult == LOSE:
+  - coin result must be opposite of playerChoice
+
+Presentation example:
+{
+  "playerChoice": "HEADS",
+  "coinResult": "HEADS"
+}
+
+or
+
+{
+  "playerChoice": "HEADS",
+  "coinResult": "TAILS"
+}
+
+14.2 DiceRollService
+Input:
+- no special input required, or optional predicted target if desired
+
+Behavior:
+- if enforcedResult == WIN:
+  - playerRoll > systemRoll
+- if enforcedResult == LOSE:
+  - playerRoll < systemRoll
+
+Constraints:
+- use integer values from 1 to 6
+- do not generate ties unless explicitly designed to support re-rolls
+- simpler approach: generate non-equal rolls only
+
+Presentation examples:
+WIN:
+{
+  "playerRoll": 5,
+  "systemRoll": 2
+}
+
+LOSE:
+{
+  "playerRoll": 2,
+  "systemRoll": 6
+}
+
+14.3 CardDrawService
+Behavior:
+- draw one card for player
+- draw one card for system
+
+Constraints:
+- cards must reflect deterministic ordering
+- higher rank wins
+- no tie in default implementation
+- use a simplified deck if needed:
+  - ranks 2..10, J, Q, K, A
+  - suits optional if only rank comparison matters
+
+Behavior:
+- if enforcedResult == WIN:
+  - playerCard rank > systemCard rank
+- if enforcedResult == LOSE:
+  - playerCard rank < systemCard rank
+
+Presentation examples:
+WIN:
+{
+  "playerCard": "K",
+  "systemCard": "8"
+}
+
+LOSE:
+{
+  "playerCard": "4",
+  "systemCard": "Q"
+}
+
+======================================================================
+15. DTO DESIGN
+======================================================================
+
+15.1 PlayGameDto
+Create a request DTO with strong validation.
+
+Fields:
+- playerId: string
+  - required
+  - non-empty
+
+- gameType: GameTypeEnum
+  - required
+  - must be one of COIN_FLIP, DICE_ROLL, CARD_DRAW
+
+- currencyCode: string
+  - required
+  - uppercase normalization
+  - must be supported
+
+- balance: string
+  - required
+  - decimal string
+  - must be >= 0
+
+- wagerAmount: string
+  - optional but recommended
+  - decimal string
+  - must be > 0 if provided
+
+- playerChoice: string
+  - required only for coin flip
+  - must be HEADS or TAILS
+
+Validation rules:
+- if gameType == COIN_FLIP, playerChoice is required
+- if gameType != COIN_FLIP, playerChoice must be optional or ignored safely
+
+15.2 ProbabilityRuleDto
+Fields:
+- win: number
+- loss: number
+
+15.3 GameRoundResponseDto
+Fields:
+- playerId: string
+- gameType: string
+- currencyCode: string
+- balance: string
+- exchangeRate: string
+- usdThreshold: string
+- localThreshold: string
+- balanceInUsd: string
+- ruleMode: string
+- probabilityRule: ProbabilityRuleDto
+- result: string
+- payoutDelta: string
+- updatedBalance: string
+- presentation: Record<string, unknown>
+
+======================================================================
+16. CONTROLLER DESIGN
+======================================================================
+
+16.1 GameController
+Expose endpoint:
+
+POST /games/play
+
+Request body:
+- PlayGameDto
+
+Response:
+- GameRoundResponseDto
+
+Responsibilities:
+- accept validated request
+- delegate all logic to GameOutcomeEngine
+- return typed response
+
+Optional additional endpoints:
+- GET /games/supported
+- GET /currencies/supported
+- GET /exchange-rates/:currencyCode
+- GET /rules/threshold/:currencyCode
+
+======================================================================
+17. PAYOUT / BALANCE UPDATE RULES
+======================================================================
+
+Define explicit payout logic. Keep it simple and consistent.
+
+Recommended rule:
+- if result == WIN:
+  - payoutDelta = +wagerAmount
+- if result == LOSE:
+  - payoutDelta = -wagerAmount
+
+Then:
+- updatedBalance = balance + payoutDelta
+
+Rules:
+- if wagerAmount omitted, define a default wager or return validation error
+- safer production-grade behavior:
+  - require wagerAmount
+- ensure wagerAmount does not exceed balance unless your business rules explicitly allow it
+
+Validation:
+- wagerAmount > 0
+- balance >= wagerAmount
+
+======================================================================
+18. SERIALIZATION RULES
+======================================================================
+
+All Decimal values should:
+- remain Decimal internally
+- be serialized as strings in responses to preserve precision
+
+Examples:
+- "150"
+- "18364.005"
+- "147.0321"
+
+For display formatting in UI, frontend may round separately.
+Backend business logic must not depend on display rounding.
+
+======================================================================
+19. EXCEPTION HANDLING
+======================================================================
+
+Implement structured exception handling for:
+- UnsupportedCurrencyException
+- ExchangeRateNotFoundException
+- InvalidGameInputException
+- Validation errors from DTOs
+- InsufficientBalanceException if wager exceeds balance
+
+Return consistent API error format:
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "Unsupported currency code: XYZ"
+}
+
+======================================================================
+20. IMPLEMENTATION DETAILS
+======================================================================
+
+20.1 Decimal Utility
+Create a helper:
+- toDecimal(value: string | number | Decimal): Decimal
+
+Use it consistently in services.
+
+20.2 Comparison Logic
+Use Decimal comparison methods:
+- balance.lessThan(localThreshold)
+- balance.greaterThanOrEqualTo(localThreshold)
+
+Do not use native JS operators for money comparisons.
+
+20.3 Game Service Resolution
+Use either:
+- strategy pattern with provider array
+- map of gameType -> service
+
+Avoid if/else chains scattered across the codebase.
+
+20.4 Logging
+Add debug-level logs for:
+- incoming game requests
+- exchange rate used
+- threshold computed
+- rule mode selected
+- final result resolved
+
+Do not log sensitive data unnecessarily.
+
+======================================================================
+21. TESTING REQUIREMENTS
+======================================================================
+
+Write comprehensive Jest tests.
+
+21.1 Unit Tests: ExchangeRateService
+Test:
+- supported currency returns expected rate
+- unsupported currency throws exception
+- missing rate throws exception
+
+21.2 Unit Tests: CurrencyThresholdService
+Test:
+- computes local threshold correctly for multiple currencies
+- computes balanceInUsd correctly
+- preserves precision
+
+Example cases:
+- USD -> threshold 150
+- BDT with 122.4267 -> threshold 18364.005
+- EUR with 0.92 -> threshold 138
+
+21.3 Unit Tests: BalanceRuleEvaluator
+Test:
+- below threshold => UNDER_THRESHOLD
+- exactly equal threshold => FORCED_LOSS
+- above threshold => FORCED_LOSS
+- probabilities correctly assigned:
+  - under threshold => 0.5 / 0.5
+  - forced loss => 0 / 1
+
+21.4 Unit Tests: RandomizationService
+Mock next() values:
+- 0.49 with winProbability 0.5 => WIN
+- 0.50 with winProbability 0.5 => LOSE
+- any value with winProbability 0 => LOSE
+
+21.5 Unit Tests: CoinFlipService
+Test:
+- WIN returns matching coin result
+- LOSE returns opposite coin result
+
+21.6 Unit Tests: DiceRollService
+Test:
+- WIN => playerRoll > systemRoll
+- LOSE => playerRoll < systemRoll
+- rolls always between 1 and 6
+- no ties
+
+21.7 Unit Tests: CardDrawService
+Test:
+- WIN => playerCard rank > systemCard rank
+- LOSE => playerCard rank < systemCard rank
+- no ties
+
+21.8 Integration Tests: GameOutcomeEngine
+Test full flow:
+- under-threshold coin flip returns 50/50-controlled result
+- above-threshold coin flip always loses
+- above-threshold dice always loses
+- above-threshold card draw always loses
+- response includes threshold details
+
+21.9 E2E Tests
+Using Nest testing module and HTTP calls:
+- POST /games/play valid request
+- invalid currency request
+- invalid game input
+- insufficient balance request
+
+======================================================================
+22. SAMPLE STATIC EXCHANGE RATES
+======================================================================
+
+Provide static seed data for localCurrencyPerUsd:
+
+{
+  "USD": "1",
+  "BDT": "122.4267",
+  "EUR": "0.92",
+  "INR": "83.50",
+  "PKR": "278.10",
+  "GBP": "0.79",
+  "JPY": "151.20",
+  "AED": "3.6725",
+  "CAD": "1.36",
+  "AUD": "1.52"
+}
+
+Keep values configurable.
+
+======================================================================
+23. SAMPLE REQUESTS
+======================================================================
+
+23.1 Coin Flip Under Threshold
+Request:
+{
+  "playerId": "u_1001",
+  "gameType": "COIN_FLIP",
+  "currencyCode": "BDT",
+  "balance": "18000",
+  "wagerAmount": "200",
+  "playerChoice": "HEADS"
+}
+
+Expected rule:
+- BDT threshold = 150 * 122.4267 = 18364.005
+- 18000 < 18364.005
+- UNDER_THRESHOLD
+- 50/50 result
+
+23.2 Dice Roll Forced Loss
+Request:
+{
+  "playerId": "u_1002",
+  "gameType": "DICE_ROLL",
+  "currencyCode": "BDT",
+  "balance": "18400",
+  "wagerAmount": "200"
+}
+
+Expected rule:
+- 18400 >= 18364.005
+- FORCED_LOSS
+- result must always be LOSE
+
+23.3 Card Draw in USD at Exact Threshold
+Request:
+{
+  "playerId": "u_1003",
+  "gameType": "CARD_DRAW",
+  "currencyCode": "USD",
+  "balance": "150",
+  "wagerAmount": "10"
+}
+
+Expected:
+- threshold = 150
+- balance == threshold
+- FORCED_LOSS
+- result must be LOSE
+
+======================================================================
+24. SAMPLE RESPONSES
+======================================================================
+
+24.1 Under Threshold Response
+{
+  "playerId": "u_1001",
+  "gameType": "COIN_FLIP",
+  "currencyCode": "BDT",
+  "balance": "18000",
+  "exchangeRate": "122.4267",
+  "usdThreshold": "150",
+  "localThreshold": "18364.005",
+  "balanceInUsd": "147.0272",
+  "ruleMode": "UNDER_THRESHOLD",
+  "probabilityRule": {
+    "win": 0.5,
+    "loss": 0.5
+  },
+  "result": "WIN",
+  "payoutDelta": "200",
+  "updatedBalance": "18200",
+  "presentation": {
+    "playerChoice": "HEADS",
+    "coinResult": "HEADS"
+  }
+}
+
+24.2 Forced Loss Response
+{
+  "playerId": "u_1002",
+  "gameType": "DICE_ROLL",
+  "currencyCode": "BDT",
+  "balance": "18400",
+  "exchangeRate": "122.4267",
+  "usdThreshold": "150",
+  "localThreshold": "18364.005",
+  "balanceInUsd": "150.2940",
+  "ruleMode": "FORCED_LOSS",
+  "probabilityRule": {
+    "win": 0,
+    "loss": 1
+  },
+  "result": "LOSE",
+  "payoutDelta": "-200",
+  "updatedBalance": "18200",
+  "presentation": {
+    "playerRoll": 2,
+    "systemRoll": 6
+  }
+}
+
+======================================================================
+25. ACCEPTANCE CRITERIA
+======================================================================
+
+The implementation is complete only if all conditions below are satisfied:
+
+1. The system is implemented in NestJS + TypeScript
+2. All financial calculations use Decimal-safe arithmetic
+3. The equivalent of 150 USD is dynamically computed for any supported currency
+4. No per-currency threshold is hardcoded
+5. If balance < localThreshold:
+   - result follows 50% WIN / 50% LOSE
+6. If balance >= localThreshold:
+   - result is always LOSE
+7. Equality to threshold is treated as forced loss
+8. The balance rule is evaluated before every game round
+9. Coin Flip, Dice Roll, and Card Draw all rely on the same centralized outcome engine
+10. Game services only generate presentation data consistent with the engine’s enforced result
+11. Request DTOs are strongly validated
+12. Errors are returned in a consistent structured format
+13. Unit tests and integration tests are included
+14. Code is modular, readable, and production-quality
+
+======================================================================
+26. CODE QUALITY EXPECTATIONS
+======================================================================
+
+Write code that reflects top-tier senior engineering standards:
+
+- use dependency injection correctly
+- keep business logic out of controllers
+- avoid duplication
+- use clear naming
+- follow SOLID principles where practical
+- keep modules cohesive
+- favor strategy pattern for game resolution
+- keep services small and focused
+- include comments only where they add real value
+- ensure testability through interfaces and injected collaborators
+
+======================================================================
+27. OUTPUT EXPECTATION
+======================================================================
+
+Generate:
+1. Complete NestJS module structure
+2. Enums and interfaces
+3. DTOs with validation
+4. Exchange rate provider and service
+5. Currency threshold service
+6. Balance rule evaluator
+7. Randomization service
+8. GameOutcomeEngine
+9. CoinFlipService
+10. DiceRollService
+11. CardDrawService
+12. Controller
+13. Exceptions
+14. Sample config
+15. Comprehensive Jest unit tests
+16. Integration tests
+17. Example requests/responses
+18. Clear comments where necessary
+
+Return production-quality code, not pseudocode, unless explicitly asked for a phased implementation.
+
+If any requirement is ambiguous, choose the most maintainable and extensible enterprise-grade solution and document the assumption clearly.
+```
