@@ -1,0 +1,4 @@
+export enum RuleModeEnum {
+  UNDER_THRESHOLD = 'UNDER_THRESHOLD',
+  FORCED_LOSS = 'FORCED_LOSS',
+}
