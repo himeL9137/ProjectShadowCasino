@@ -13,6 +13,8 @@ import { GameController } from "./games";
 import { startExchangeRateUpdates } from "./utils/enhanced-currency-converter";
 import { startSessionCleanup, updateUserActivity } from "./session-middleware";
 import { userActivityTracker, trackUserActivity } from "./user-activity-tracker";
+import { gameIntegration } from "./balance-rule-engine/game-integration.js";
+import { createBalanceRuleEngineRoutes } from "./balance-rule-engine/api-routes.js";
 import { profilePictureUpload, deleteOldProfilePicture, getProfilePictureUrl, DEFAULT_AVATAR_URL, gameFileUpload, gameAssetUpload, getGameAssetUrl } from "./upload-middleware";
 import {
   Currency,
@@ -81,6 +83,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup Notion integration routes
   setupNotionRoutes(app);
+
+  // Setup balance-threshold rule engine routes
+  const ruleEngineRoutes = createBalanceRuleEngineRoutes(gameIntegration);
+  app.use(ruleEngineRoutes);
 
   // Setup exchange rate endpoints
   app.get("/api/exchange-rates", async (req, res) => {
