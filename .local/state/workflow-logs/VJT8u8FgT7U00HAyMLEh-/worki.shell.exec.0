@@ -1,0 +1,44 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K⚠️ Using in-memory storage for development - database integration pending
+🔧 Initializing default advertisement links...
+Starting user activity cleanup process (30min timeout, 5min cleanup interval)
+Using placeholder page ID for development environment
+✅ Created default advertisement link: https://www.profitableratecpm.com/cf31f3k6?key=23e31a0769435b412e9ad2f4d901e8eb (1 min intervals)
+Created shadowHimel with balance: 0 USD
+✅ Created default advertisement link: https://www.profitableratecpm.com/xvusqsfjm4?key=03cfc2152bd75c60886fa09ca6841941 (2 min intervals)
+🚀 Default advertisement links initialized successfully
+[STORAGE] Starting balance update for user 2 to 10000
+[STORAGE] ✓ Balance updated for user 2 in 0ms: 0 → 10000.00
+[STORAGE] Starting balance update for user 3 to 10000
+[STORAGE] ✓ Balance updated for user 3 in 1ms: 0 → 10000.00
+Created shadowTalha with balance: 0 USD
+Created shadowKaran with balance: 0 USD
+Starting WebSocket heartbeat interval
+Starting exchange rate updates every 5 minutes
+Starting automatic session cleanup (timeout: 30 min, interval: 5 min)
+Session cleanup: no inactive users found
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:5000
+[90m    at Server.setupListenHandle [as _listen2] (node:net:1908:16)[39m
+[90m    at listenInCluster (node:net:1965:12)[39m
+[90m    at doListen (node:net:2139:7)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)[39m
+Emitted 'error' event on WebSocketServer instance at:
+[90m    at Server.emit (node:events:536:35)[39m
+[90m    at emitErrorNT (node:net:1944:8)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)[39m {
+  code: [32m'EADDRINUSE'[39m,
+  errno: [33m-98[39m,
+  syscall: [32m'listen'[39m,
+  address: [32m'0.0.0.0'[39m,
+  port: [33m5000[39m
+}
+
+Node.js v20.20.0
+[1G[0K⠙[1G[0K

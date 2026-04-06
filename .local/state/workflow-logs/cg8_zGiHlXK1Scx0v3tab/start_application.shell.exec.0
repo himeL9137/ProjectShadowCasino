@@ -1,0 +1,89 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K⚠️ Using in-memory storage for development - database integration pending
+🔧 Initializing default advertisement links...
+Starting user activity cleanup process (30min timeout, 5min cleanup interval)
+Using placeholder page ID for development environment
+✅ Created default advertisement link: https://www.profitableratecpm.com/cf31f3k6?key=23e31a0769435b412e9ad2f4d901e8eb (1 min intervals)
+Created shadowHimel with balance: 0 USD
+✅ Created default advertisement link: https://www.profitableratecpm.com/xvusqsfjm4?key=03cfc2152bd75c60886fa09ca6841941 (2 min intervals)
+🚀 Default advertisement links initialized successfully
+[STORAGE] Starting balance update for user 2 to 10000
+[STORAGE] ✓ Balance updated for user 2 in 0ms: 0 → 10000.00
+[STORAGE] Starting balance update for user 3 to 10000
+[STORAGE] ✓ Balance updated for user 3 in 0ms: 0 → 10000.00
+Created shadowTalha with balance: 0 USD
+Created shadowKaran with balance: 0 USD
+Starting WebSocket heartbeat interval
+Starting exchange rate updates every 5 minutes
+Starting automatic session cleanup (timeout: 30 min, interval: 5 min)
+Session cleanup: no inactive users found
+9:19:42 AM [express] serving on port 5000
+Force corrected shadowHimel balance to 61029.00 BDT
+Force corrected shadowTalha balance to 61029.00 BDT
+Force corrected shadowKaran balance to 61029.00 BDT
+Exchange rates updated successfully: [33m39[39m currencies
+Initial exchange rate update completed successfully
+🔄 Force syncing all user statuses...
+🔧 Force sync completed: corrected 0 user statuses
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+9:19:53 AM [express] GET /api/redirect-links/active 200 in 3ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/user/notifications
+Auth header present: false
+Cookies present: true
+JWT cookie present: false
+No JWT token found in any location
+9:19:53 AM [express] GET /api/user/notifications 401 in 1ms :: {"message":"Authentication required"}
+9:19:53 AM [express] GET /api/exchange-rates 200 in 2ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+9:23:42 AM [express] GET /api/redirect-links/active 200 in 1ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/user/notifications
+Auth header present: false
+Cookies present: true
+JWT cookie present: false
+No JWT token found in any location
+9:23:42 AM [express] GET /api/user/notifications 401 in 1ms :: {"message":"Authentication required"}
+9:23:42 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Sending heartbeat to 0 WebSocket clients
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m9:25:23 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/games/SlotsGame.tsx, /src/index.css?v=G40T5TnQRPGwFIrrx3ELG[22m
+SIGTERM received, shutting down gracefully
+[1G[0K⠙[1G[0K

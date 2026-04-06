@@ -1,0 +1,3481 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K⚠️ Using in-memory storage for development - database integration pending
+🔧 Initializing default advertisement links...
+Starting user activity cleanup process (30min timeout, 5min cleanup interval)
+Using placeholder page ID for development environment
+✅ Created default advertisement link: https://www.profitableratecpm.com/cf31f3k6?key=23e31a0769435b412e9ad2f4d901e8eb (1 min intervals)
+Created shadowHimel with balance: 0 USD
+✅ Created default advertisement link: https://www.profitableratecpm.com/xvusqsfjm4?key=03cfc2152bd75c60886fa09ca6841941 (2 min intervals)
+🚀 Default advertisement links initialized successfully
+[STORAGE] Starting balance update for user 2 to 10000
+[STORAGE] ✓ Balance updated for user 2 in 0ms: 0 → 10000.00
+[STORAGE] Starting balance update for user 3 to 10000
+[STORAGE] ✓ Balance updated for user 3 in 0ms: 0 → 10000.00
+Created shadowTalha with balance: 0 USD
+Created shadowKaran with balance: 0 USD
+Starting WebSocket heartbeat interval
+Starting exchange rate updates every 5 minutes
+Starting automatic session cleanup (timeout: 30 min, interval: 5 min)
+Session cleanup: no inactive users found
+9:33:51 AM [express] serving on port 5000
+Force corrected shadowHimel balance to 61029.00 BDT
+Force corrected shadowTalha balance to 61029.00 BDT
+Force corrected shadowKaran balance to 61029.00 BDT
+Exchange rates updated successfully: [33m39[39m currencies
+Initial exchange rate update completed successfully
+🔄 Force syncing all user statuses...
+🔧 Force sync completed: corrected 0 user statuses
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m9:34:02 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/games/PlinkoGame.tsx, /src/index.css?v=pyCnAsiuw8Glx4WWlD0m3[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m9:34:16 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/games/PlinkoGame.tsx, /src/index.css?v=pyCnAsiuw8Glx4WWlD0m3[22m [33m(x2)[39m
+Sending heartbeat to 0 WebSocket clients
+Authenticating request to: /api/user/notifications
+Auth header present: false
+Cookies present: true
+JWT cookie present: false
+No JWT token found in any location
+9:34:35 AM [express] GET /api/user/notifications 401 in 3ms :: {"message":"Authentication required"}
+9:34:35 AM [express] GET /api/exchange-rates 200 in 2ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+9:34:35 AM [express] GET /api/redirect-links/active 200 in 0ms :: [{"id":2,"url":"https://www.profit…
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+9:35:37 AM [express] GET /api/redirect-links/active 304 in 1ms :: [{"id":2,"url":"https://www.profit…
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+9:36:38 AM [express] GET /api/redirect-links/active 304 in 1ms :: [{"id":2,"url":"https://www.profit…
+Sending heartbeat to 0 WebSocket clients
+Sending heartbeat to 0 WebSocket clients
+Login attempt for user: shadowHimel from IP: 103.84.253.106
+User found: shadowHimel (ID: 1, Role: user)
+Admin authentication with legacy password
+Successfully updated shadowHimel to admin role
+User shadowHimel marked as ACTIVE
+User shadowHimel marked as ACTIVE during login with enhanced tracking
+JWT token set in cookie: eyJhbGciOiJIUzI...
+Login successful for user: shadowHimel 
+9:37:23 AM [express] POST /api/login 200 in 5ms :: {"user":{"id":"1","username":"shadowHimel","email…
+9:37:29 AM [express] GET /api/advertisements/default 200 in 1ms :: {"isDefault":true,"content":"","i…
+9:37:29 AM [express] GET /api/games/winners 200 in 1ms :: []
+9:37:29 AM [express] GET /api/games/custom 200 in 0ms :: []
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61029.00 BDT
+9:37:29 AM [express] GET /api/wallet/balance 200 in 10ms :: {"balance":"61029.00","currency":"BDT"}
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:37:29 AM [express] GET /api/profile/picture-url 200 in 7ms :: {"profilePictureUrl":"/assets/defaul…
+WebSocket connection attempt - allowing all connections
+Client connected to WebSocket
+WebSocket connection without user data, using default user for development
+User shadowHimel marked as ACTIVE
+User shadowHimel marked as online on WebSocket connect (ID: 1)
+9:37:29 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/wallet/balance
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61029.00 BDT
+9:37:29 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"61029.00","currency":"BDT"}
+Authenticating request to: /api/wallet/balance
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61029.00 BDT
+9:37:30 AM [express] GET /api/wallet/balance 304 in 5ms :: {"balance":"61029.00","currency":"BDT"}
+9:37:35 AM [express] GET /api/games/winners 200 in 1ms :: []
+9:37:35 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:37:35 AM [express] GET /api/profile/picture-url 304 in 4ms :: {"profilePictureUrl":"/assets/defaul…
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61029.00 BDT
+9:37:35 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"61029.00","currency":"BDT"}
+9:37:38 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'slots'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [90mundefined[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61028
+[STORAGE] ✓ Balance updated for user 1 in 1ms: 61029.00 → 61028.00
+Game play: userId=1, bet=1, isWin=false, balance=61029, balanceInBDT=61029
+9:37:39 AM [express] POST /api/games/play 200 in 4ms :: {"isWin":false,"winAmount":0,"multiplier":0,…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'slots'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [90mundefined[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61027
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61028.00 → 61027.00
+Game play: userId=1, bet=1, isWin=false, balance=61028, balanceInBDT=61028
+9:37:44 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0,"multiplier":0,…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'slots'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [90mundefined[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61026
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61027.00 → 61026.00
+Game play: userId=1, bet=1, isWin=false, balance=61027, balanceInBDT=61027
+9:37:49 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0,"multiplier":0,…
+Sending heartbeat to 1 WebSocket clients
+9:37:53 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:37:53 AM [express] GET /api/profile/picture-url 304 in 6ms :: {"profilePictureUrl":"/assets/defaul…
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61026.00 BDT
+9:37:53 AM [express] GET /api/wallet/balance 200 in 5ms :: {"balance":"61026.00","currency":"BDT"}
+9:37:55 AM [express] GET /api/games/custom 304 in 0ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:37:55 AM [express] GET /api/profile/picture-url 304 in 3ms :: {"profilePictureUrl":"/assets/defaul…
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61026.00 BDT
+9:37:55 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"61026.00","currency":"BDT"}
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61025
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61026.00 → 61025.00
+Game play: userId=1, bet=1, isWin=false, balance=61026, balanceInBDT=61026
+[STORAGE] Starting balance update for user 1 to 61025.4
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61025.00 → 61025.40
+9:37:58 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0.4,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61024.4
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61025.40 → 61024.40
+Game play: userId=1, bet=1, isWin=false, balance=61025.4, balanceInBDT=61025.4
+[STORAGE] Starting balance update for user 1 to 61024.8
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61024.40 → 61024.80
+9:38:02 AM [express] POST /api/games/play 200 in 2ms :: {"isWin":false,"winAmount":0.4,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61023.8
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61024.80 → 61023.80
+Game play: userId=1, bet=1, isWin=false, balance=61024.8, balanceInBDT=61024.8
+[STORAGE] Starting balance update for user 1 to 61024.5
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61023.80 → 61024.50
+9:38:04 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0.7,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61023.5
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61024.50 → 61023.50
+Game play: userId=1, bet=1, isWin=false, balance=61024.5, balanceInBDT=61024.5
+[STORAGE] Starting balance update for user 1 to 61023.9
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61023.50 → 61023.90
+9:38:07 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0.4,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61022.9
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61023.90 → 61022.90
+Game play: userId=1, bet=1, isWin=false, balance=61023.9, balanceInBDT=61023.9
+[STORAGE] Starting balance update for user 1 to 61023.6
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61022.90 → 61023.60
+9:38:09 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0.7,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61022.6
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61023.60 → 61022.60
+Game play: userId=1, bet=1, isWin=false, balance=61023.6, balanceInBDT=61023.6
+[STORAGE] Starting balance update for user 1 to 61022.9
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61022.60 → 61022.90
+9:38:18 AM [express] POST /api/games/play 200 in 2ms :: {"isWin":false,"winAmount":0.3,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61021.9
+[STORAGE] ✓ Balance updated for user 1 in 1ms: 61022.90 → 61021.90
+Game play: userId=1, bet=1, isWin=false, balance=61022.9, balanceInBDT=61022.9
+[STORAGE] Starting balance update for user 1 to 61022.200000000004
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61021.90 → 61022.20
+9:38:21 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0.3,"multiplier":…
+Sending heartbeat to 1 WebSocket clients
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61021.2
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61022.20 → 61021.20
+Game play: userId=1, bet=1, isWin=false, balance=61022.2, balanceInBDT=61022.2
+[STORAGE] Starting balance update for user 1 to 61021.5
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61021.20 → 61021.50
+9:38:23 AM [express] POST /api/games/play 200 in 4ms :: {"isWin":false,"winAmount":0.3,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 61020.5
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61021.50 → 61020.50
+Game play: userId=1, bet=1, isWin=false, balance=61021.5, balanceInBDT=61021.5
+[STORAGE] Starting balance update for user 1 to 61020.8
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61020.50 → 61020.80
+9:38:25 AM [express] POST /api/games/play 200 in 5ms :: {"isWin":false,"winAmount":0.3,"multiplier":…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 61020.80 BDT
+9:38:25 AM [express] GET /api/wallet/balance 200 in 3ms :: {"balance":"61020.80","currency":"BDT"}
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m128[39m,
+  currency: [32m'BDT'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 60892.8
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 61020.80 → 60892.80
+Game play: userId=1, bet=128, isWin=false, balance=61020.8, balanceInBDT=61020.8
+[STORAGE] Starting balance update for user 1 to 60918.4
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 60892.80 → 60918.40
+9:38:29 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":25.6,"multiplier"…
+Authenticating request to: /api/wallet/change-currency
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Currency change requested: BDT -> USD
+Converting 60918.4 from BDT to USD
+Conversion result: 60918.4 BDT = 496.24 USD
+Updating user 1 currency to USD
+Updating user 1 balance to 496.24
+[STORAGE] Starting balance update for user 1 to 496.24
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 496.24 → 496.24
+Sending balance update via WebSocket for user 1 after currency change
+Sending balance update to user 1 (1 connected clients)
+Balance update sent for user 1: 60918.40 BDT -> 496.24 USD
+Sending currency_changed event for user 1: BDT -> USD
+Currency change details for user 1: {
+  from: [32m'BDT'[39m,
+  to: [32m'USD'[39m,
+  oldBalance: [32m'60918.40'[39m,
+  newBalance: [32m'496.24'[39m
+}
+Currency change successful for user 1
+Final balance data from DB: 496.24 USD
+9:38:32 AM [express] POST /api/wallet/change-currency 200 in 12ms :: {"message":"Currency changed su…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m128[39m,
+  currency: [32m'USD'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 368.24
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 496.24 → 368.24
+Game play: userId=1, bet=128, isWin=false, balance=496.24, balanceInBDT=60541.28
+[STORAGE] Starting balance update for user 1 to 406.64
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 368.24 → 406.64
+9:38:34 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":38.4,"multiplier"…
+9:38:38 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m128[39m,
+  currency: [32m'USD'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 278.64
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 406.64 → 278.64
+Game play: userId=1, bet=128, isWin=false, balance=406.64, balanceInBDT=49610.08
+[STORAGE] Starting balance update for user 1 to 317.03999999999996
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 278.64 → 317.04
+9:38:42 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":38.4,"multiplier"…
+Sending heartbeat to 1 WebSocket clients
+Session cleanup: no inactive users found
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m128[39m,
+  currency: [32m'USD'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'high'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 189.04000000000002
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 317.04 → 189.04
+Game play: userId=1, bet=128, isWin=false, balance=317.04, balanceInBDT=38678.880000000005
+[STORAGE] Starting balance update for user 1 to 227.44000000000003
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 189.04 → 227.44
+9:38:55 AM [express] POST /api/games/play 200 in 9ms :: {"isWin":false,"winAmount":38.4,"multiplier"…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 227.44 USD
+9:38:55 AM [express] GET /api/wallet/balance 200 in 4ms :: {"balance":"227.44","currency":"USD"}
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+9:39:04 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:39:04 AM [express] GET /api/profile/picture-url 304 in 3ms :: {"profilePictureUrl":"/assets/defaul…
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 227.44 USD
+9:39:04 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"227.44","currency":"USD"}
+Authenticating request to: /api/user/notifications
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:39:24 AM [express] GET /api/user/notifications 200 in 2ms :: []
+9:39:24 AM [express] GET /api/redirect-links/active 200 in 1ms :: [{"id":2,"url":"https://www.profit…
+9:39:24 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/user
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+User authenticated: shadowHimel
+9:39:24 AM [express] GET /api/user 200 in 2ms :: {"id":"1","username":"shadowHimel","email":"shadow@…
+Sending heartbeat to 1 WebSocket clients
+9:39:24 AM [express] GET /api/games/custom 200 in 0ms :: []
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 227.44 USD
+9:39:24 AM [express] GET /api/wallet/balance 200 in 2ms :: {"balance":"227.44","currency":"USD"}
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:39:24 AM [express] GET /api/profile/picture-url 200 in 2ms :: {"profilePictureUrl":"/assets/defaul…
+9:39:24 AM [express] GET /api/games/winners 200 in 0ms :: []
+9:39:24 AM [express] GET /api/advertisements/default 200 in 0ms :: {"isDefault":true,"content":"","i…
+Authenticating request to: /api/wallet/balance
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 227.44 USD
+9:39:24 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"227.44","currency":"USD"}
+WebSocket connection attempt - allowing all connections
+Client connected to WebSocket
+WebSocket connection without user data, using default user for development
+User shadowHimel marked as ACTIVE
+User shadowHimel marked as online on WebSocket connect (ID: 1)
+Authenticating request to: /api/wallet/balance
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 227.44 USD
+9:39:26 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"227.44","currency":"USD"}
+9:39:34 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:39:34 AM [express] GET /api/profile/picture-url 304 in 4ms :: {"profilePictureUrl":"/assets/defaul…
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 227.44 USD
+9:39:34 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"227.44","currency":"USD"}
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m1[39m,
+  currency: [32m'USD'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 226.44
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 227.44 → 226.44
+Game play: userId=1, bet=1, isWin=false, balance=227.44, balanceInBDT=27747.68
+[STORAGE] Starting balance update for user 1 to 227.14
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 226.44 → 227.14
+9:39:36 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":0.7,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m8[39m,
+  currency: [32m'USD'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 219.14
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 227.14 → 219.14
+Game play: userId=1, bet=8, isWin=false, balance=227.14, balanceInBDT=27711.079999999998
+[STORAGE] Starting balance update for user 1 to 222.33999999999997
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 219.14 → 222.34
+9:39:41 AM [express] POST /api/games/play 200 in 3ms :: {"isWin":false,"winAmount":3.2,"multiplier":…
+Authenticating request to: /api/games/play
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Game play request: {
+  gameType: [32m'PLINKO'[39m,
+  betAmount: [33m8[39m,
+  currency: [32m'USD'[39m,
+  prediction: [90mundefined[39m,
+  rollOver: [90mundefined[39m,
+  mineCount: [90mundefined[39m,
+  selectedTiles: [90mundefined[39m,
+  action: [90mundefined[39m,
+  risk: [32m'medium'[39m,
+  rows: [90mundefined[39m,
+  gameTypeType: [32m'string'[39m
+}
+[STORAGE] Starting balance update for user 1 to 214.34
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 222.34 → 214.34
+Game play: userId=1, bet=8, isWin=false, balance=222.34, balanceInBDT=27125.48
+[STORAGE] Starting balance update for user 1 to 217.54
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 214.34 → 217.54
+9:39:49 AM [express] POST /api/games/play 200 in 2ms :: {"isWin":false,"winAmount":3.2,"multiplier":…
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:39:56 AM [express] GET /api/wallet/balance 200 in 3ms :: {"balance":"217.54","currency":"USD"}
+9:39:56 AM [express] GET /api/redirect-links/active 304 in 1ms :: [{"id":2,"url":"https://www.profit…
+9:39:57 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:40:04 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:40:05 AM [express] GET /api/wallet/balance 200 in 3ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:40:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:41:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:41:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:42:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:42:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+9:42:42 AM [express] GET /api/redirect-links/active 304 in 1ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:42:42 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:43:51 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Sending heartbeat to 2 WebSocket clients
+9:44:25 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:44:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:45:50 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:46:50 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:47:50 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:48:29 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+9:48:46 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:48:47 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:48:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:49:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+9:49:25 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+9:49:36 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:49:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:49:50 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:50:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:50:50 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:51:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:51:50 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:52:04 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:52:04 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:52:34 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:52:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+9:52:43 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:53:04 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:53:34 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+9:53:43 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:53:47 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:54:04 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+9:54:25 AM [express] GET /api/exchange-rates 200 in 2ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:54:34 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+9:54:35 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+9:54:43 AM [express] GET /api/redirect-links/active 304 in 1ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:54:47 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:55:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:55:35 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:56:11 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:56:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:57:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:57:36 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:57:59 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:58:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:58:18 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"217.54","currency":"USD"}
+9:58:19 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:19 AM [express] GET /api/profile/picture-url 304 in 2ms :: {"profilePictureUrl":"/assets/defaul…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+9:58:21 AM [express] GET /api/games/custom 304 in 1ms :: []
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 217.54 USD
+9:58:21 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"217.54","currency":"USD"}
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:21 AM [express] GET /api/profile/picture-url 304 in 1ms :: {"profilePictureUrl":"/assets/defaul…
+Sending heartbeat to 2 WebSocket clients
+9:58:24 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/games/mines/start
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+[STORAGE] Starting balance update for user 1 to 213.54
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 217.54 → 213.54
+9:58:32 AM [express] POST /api/games/mines/start 200 in 3ms :: {"sessionId":"urqisn6i1vmnll9ko5","mi…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:34 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":12,"grid…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:39 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":16,"grid…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:41 AM [express] POST /api/games/mines/reveal 200 in 1ms :: {"hitMine":false,"position":6,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:42 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":9,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:43 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":2,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:45 AM [express] POST /api/games/mines/reveal 200 in 3ms :: {"hitMine":false,"position":22,"grid…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 213.54 USD
+9:58:50 AM [express] GET /api/wallet/balance 200 in 1ms :: {"balance":"213.54","currency":"USD"}
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:50 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":21,"grid…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:51 AM [express] POST /api/games/mines/reveal 200 in 3ms :: {"hitMine":false,"position":20,"grid…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 213.54 USD
+9:58:52 AM [express] GET /api/wallet/balance 200 in 1ms :: {"balance":"213.54","currency":"USD"}
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:53 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":10,"grid…
+Sending heartbeat to 2 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:55 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":19,"grid…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:58:56 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":true,"position":24,"grid"…
+Authenticating request to: /api/games/mines/start
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+[STORAGE] Starting balance update for user 1 to 209.54
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 213.54 → 209.54
+9:59:03 AM [express] POST /api/games/mines/start 200 in 3ms :: {"sessionId":"fb1vfuah8zmnlla967","mi…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:05 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":0,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:05 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":1,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:06 AM [express] POST /api/games/mines/reveal 200 in 1ms :: {"hitMine":false,"position":2,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:06 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":3,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:06 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":4,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:07 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":6,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:07 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":true,"position":11,"grid"…
+Authenticating request to: /api/games/mines/start
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+[STORAGE] Starting balance update for user 1 to 205.54
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 209.54 → 205.54
+9:59:18 AM [express] POST /api/games/mines/start 200 in 2ms :: {"sessionId":"gb41a25yhmnllakae","min…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:19 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":7,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:19 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":8,"grid"…
+Authenticating request to: /api/games/mines/reveal
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:20 AM [express] POST /api/games/mines/reveal 200 in 2ms :: {"hitMine":false,"position":9,"grid"…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 205.54 USD
+9:59:21 AM [express] GET /api/wallet/balance 200 in 2ms :: {"balance":"205.54","currency":"USD"}
+9:59:24 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/games/mines/cashout
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+[STORAGE] Starting balance update for user 1 to 209.94
+[STORAGE] ✓ Balance updated for user 1 in 0ms: 205.54 → 209.94
+9:59:24 AM [express] POST /api/games/mines/cashout 200 in 3ms :: {"isWin":true,"winAmount":4.4,"mult…
+Sending heartbeat to 2 WebSocket clients
+9:59:24 AM [express] GET /api/redirect-links/active 304 in 1ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/wallet/transactions
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:30 AM [express] GET /api/wallet/transactions 200 in 4ms :: [{"userId":"1","amount":"4.4","type"…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+9:59:30 AM [express] GET /api/games/custom 304 in 1ms :: []
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+9:59:30 AM [express] GET /api/wallet/balance 200 in 4ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+9:59:31 AM [express] GET /api/profile/picture-url 304 in 4ms :: {"profilePictureUrl":"/assets/defaul…
+9:59:36 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+9:59:50 AM [express] GET /api/wallet/balance 200 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:00:02 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:00:31 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:00:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:01:01 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:01:31 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:01:50 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:02:01 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:02:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:02:31 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:02:34 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+10:02:43 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:03:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:03:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:03:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:04:04 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+10:04:25 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:04:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+10:04:36 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:04:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:05:05 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:05:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:05:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:06:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:06:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:07:18 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:07:34 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+10:07:43 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:07:50 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:08:04 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:08:15 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:08:23 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/admin/users
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+Admin request to fetch users received from: shadowHimel
+✓ Enhanced admin users data with accurate activity tracking:
+  - Total users: 5
+  - Actually active: 1
+  - Active users: shadowHimel
+10:08:23 AM [express] GET /api/admin/users 200 in 3ms :: [{"id":"1","username":"shadowHimel","email":…
+10:08:23 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+10:08:23 AM [express] GET /api/profile/picture-url 304 in 5ms :: {"profilePictureUrl":"/assets/defaul…
+Sending heartbeat to 2 WebSocket clients
+10:08:24 AM [express] GET /api/redirect-links/active 304 in 0ms :: [{"id":2,"url":"https://www.profit…
+Authenticating request to: /api/admin/users
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+Admin request to fetch users received from: shadowHimel
+✓ Enhanced admin users data with accurate activity tracking:
+  - Total users: 5
+  - Actually active: 1
+  - Active users: shadowHimel
+10:08:27 AM [express] GET /api/admin/users 200 in 3ms :: [{"id":"1","username":"shadowHimel","email":…
+10:08:27 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/admin/transactions
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+10:08:27 AM [express] GET /api/admin/transactions 200 in 2ms :: [{"userId":"1","amount":"4.4","type":…
+Authenticating request to: /api/admin/users
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+Admin request to fetch users received from: shadowHimel
+✓ Enhanced admin users data with accurate activity tracking:
+  - Total users: 5
+  - Actually active: 1
+  - Active users: shadowHimel
+10:08:28 AM [express] GET /api/admin/users 200 in 3ms :: [{"id":"1","username":"shadowHimel","email":…
+10:08:29 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/admin/users
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+Admin request to fetch users received from: shadowHimel
+✓ Enhanced admin users data with accurate activity tracking:
+  - Total users: 5
+  - Actually active: 1
+  - Active users: shadowHimel
+10:08:29 AM [express] GET /api/admin/users 200 in 2ms :: [{"id":"1","username":"shadowHimel","email":…
+Authenticating request to: /api/admin/transactions
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+10:08:29 AM [express] GET /api/admin/transactions 304 in 1ms :: [{"userId":"1","amount":"4.4","type":…
+Authenticating request to: /api/admin/users
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+isAdmin middleware called for user: shadowHimel
+User found: shadowHimel with role: admin
+Admin access granted for user: shadowHimel
+Admin request to fetch users received from: shadowHimel
+✓ Enhanced admin users data with accurate activity tracking:
+  - Total users: 5
+  - Actually active: 1
+  - Active users: shadowHimel
+10:08:29 AM [express] GET /api/admin/users 200 in 3ms :: [{"id":"1","username":"shadowHimel","email":…
+10:08:30 AM [express] GET /api/games/custom 304 in 1ms :: []
+Authenticating request to: /api/profile/picture-url
+Auth header present: true
+Cookies present: true
+JWT cookie present: true
+Auth header format: Bearer eyJ...
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+10:08:30 AM [express] GET /api/profile/picture-url 304 in 3ms :: {"profilePictureUrl":"/assets/defaul…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+10:08:30 AM [express] GET /api/games/winners 200 in 0ms :: [{"id":22,"userId":"1","gameType":"mines",…
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:08:30 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+10:08:30 AM [express] GET /api/games/custom 304 in 0ms :: []
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:08:34 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:09:03 AM [express] GET /api/wallet/balance 304 in 1ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:09:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+10:09:25 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:09:31 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:09:35 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+10:09:36 AM [express] GET /api/exchange-rates 200 in 1ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:10:01 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:10:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:10:31 AM [express] GET /api/wallet/balance 304 in 15ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:10:35 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:11:01 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:11:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:11:32 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"209.94","currency":"USD"}
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:11:35 AM [express] GET /api/wallet/balance 304 in 3ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 2 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:12:05 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+User shadowHimel marked as INACTIVE (reason: websocket_disconnect)
+User shadowHimel marked as offline on disconnect (ID: 1)
+Client disconnected from WebSocket
+Sending heartbeat to 1 WebSocket clients
+Sending heartbeat to 1 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:13:02 AM [express] GET /api/wallet/balance 304 in 67ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 1 WebSocket clients
+Sending heartbeat to 1 WebSocket clients
+Session cleanup: no inactive users found
+Exchange rates updated successfully: [33m39[39m currencies
+Periodic exchange rate update completed: 39 currencies available
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:14:18 AM [express] GET /api/wallet/balance 200 in 3ms :: {"balance":"209.94","currency":"USD"}
+10:14:26 AM [express] GET /api/exchange-rates 200 in 2ms :: {"base":"USD","rates":{"USD":1,"BDT":122.…
+Sending heartbeat to 1 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:14:31 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
+Sending heartbeat to 1 WebSocket clients
+Authenticating request to: /api/wallet/balance
+Auth header present: false
+Cookies present: true
+JWT cookie present: true
+Found token in jwt cookie
+Token found (first 10 chars): eyJhbGciOi...
+Attempting to verify JWT token with secret length: 28
+Token format check - starts with eyJ: true
+JWT decoded successfully for user: shadowHimel
+Token validation for shadowHimel: stored IP undefined, current IP 103.84.253.106
+Token validation successful for user shadowHimel
+JWT token verified for user: shadowHimel with role: admin
+User shadowHimel marked as ACTIVE
+User shadowHimel activity tracked (IP: 103.84.253.106)
+Fetching current balance for user 1, DB value: 209.94 USD
+10:15:08 AM [express] GET /api/wallet/balance 304 in 2ms :: {"balance":"209.94","currency":"USD"}
